@@ -41,13 +41,16 @@ D:/projetos/briefy/
 | `logo-dark.svg` | Logo completo — versão para fundo escuro | SVG vetorial | Transparente |
 | `logo-icon.svg` | Só o símbolo/ícone, sem texto — versão clara | SVG vetorial | Transparente |
 | `logo-icon-dark.svg` | Só o símbolo/ícone, sem texto — versão escura | SVG vetorial | Transparente |
-| `chatbot-icon.svg` | Ícone do assistente de IA flutuante | SVG vetorial | Transparente |
+| `chatbot-icon-light.svg` | Ícone do assistente IA — versão para modo claro | SVG vetorial | Transparente |
+| `chatbot-icon-dark.svg` | Ícone do assistente IA — versão para modo escuro | SVG vetorial | Transparente |
 
 > **Onde é usado:**
-> - `logo.svg` → Sidebar (desktop), tela de login/registro
+> - `logo.svg` → Sidebar (desktop), tela de login/registro (modo claro)
 > - `logo-dark.svg` → Sidebar no dark mode, telas com fundo escuro
-> - `logo-icon.svg` → Favicon fallback, sidebar colapsada (mobile)
-> - `chatbot-icon.svg` → Botão flutuante no canto inferior direito de todas as telas
+> - `logo-icon.svg` → Favicon fallback, sidebar colapsada (mobile, modo claro)
+> - `logo-icon-dark.svg` → Favicon fallback modo escuro, sidebar colapsada dark
+> - `chatbot-icon-light.svg` → Botão flutuante no modo claro
+> - `chatbot-icon-dark.svg` → Botão flutuante no modo escuro
 
 ---
 
@@ -114,7 +117,8 @@ resources/js/assets/
   logo-dark.svg        → SVG, fundo transparente (para fundo escuro)
   logo-icon.svg        → SVG, só símbolo, fundo transparente
   logo-icon-dark.svg   → SVG, só símbolo, versão escura
-  chatbot-icon.svg     → SVG, ícone do assistente IA
+  chatbot-icon-light.svg → SVG, ícone do assistente IA (modo claro)
+  chatbot-icon-dark.svg  → SVG, ícone do assistente IA (modo escuro)
   bg-light.png         → 1920x1080px PNG
   bg-dark.png          → 1920x1080px PNG
   empty-state-light.svg → SVG ilustração
