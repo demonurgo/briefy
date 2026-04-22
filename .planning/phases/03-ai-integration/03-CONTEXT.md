@@ -1,6 +1,7 @@
 # Phase 3: AI Integration - Context
 
 **Gathered:** 2026-04-22
+**Last updated:** 2026-04-22 — added BYOK + AGPL open source (D-29 a D-34) and "Conheça o Cliente" Managed Agent (D-35 a D-40) for hackathon eligibility + Managed Agents prize track.
 **Status:** Ready for planning
 
 <domain>
@@ -12,8 +13,10 @@ Phase 3 delivers AI capabilities integrated into the existing demand and client 
 3. **Client AI memory** — Automatically extracted and stored per interaction, feeding future AI calls
 4. **Monthly planning** — Client-level AI generation of a full month's content plan, with review/convert workflow
 5. **Client plan configuration** — `monthly_posts`, `monthly_plan_notes`, and `planning_day` fields added to clients
+6. **"Conheça o Cliente" — Client Research Managed Agent** — long-running (20–40 min) background agent that crawls a client's public site + social profiles, analyzes 20–30 content pieces, and populates `client_ai_memory` with categorized insights at onboarding. Uses Claude Managed Agents beta.
+7. **BYOK + Open Source** — Briefy ships under AGPL-3.0; each organization brings its own Anthropic API key (stored encrypted). No centralized billing.
 
-Out of scope for Phase 3: real-time collaboration, notifications, dashboard charts, onboarding.
+Out of scope for Phase 3: real-time collaboration, notifications, dashboard charts, onboarding checklist (first-time user guide).
 
 </domain>
 
@@ -72,6 +75,24 @@ Out of scope for Phase 3: real-time collaboration, notifications, dashboard char
 - **D-27:** **Widget de lembrete no dashboard** (implementação mínima em Phase 3): quando `planning_day` do cliente está configurado, mostrar card de aviso no dashboard no **dia anterior (planning_day - 1)**. Clicar vai para `/planejamento?client_id=X`. Card é **descartável** (X para ignorar) e some automaticamente no `planning_day + 2` se não agido.
 - **D-28:** Botão "Redesenhar" chama API que envia o item atual + feedback do usuário para Claude, recebe novo título/description, e atualiza o card in-place (sem recarregar a página).
 
+### BYOK & Open Source (AGPL-3.0)
+
+- **D-29:** Briefy é publicada como **open source sob AGPL-3.0** — arquivo `LICENSE` na raiz do repo, README em EN explicando setup + BYOK, notice de copyright em cada arquivo fonte (via comment header curto). Escolha da AGPL é deliberada: protege contra SaaS-forks que rodem como serviço sem contribuir de volta.
+- **D-30:** **BYOK (Bring Your Own Key)** — cada organização cola sua própria chave Anthropic. Sem billing centralizado pela Briefy. Sem fallback "default key" do time. Sem chave = sem recursos AI (degradação graciosa, não crash).
+- **D-31:** Chave armazenada em `organizations.anthropic_api_key_encrypted` (nova coluna text encrypted via Laravel `encrypted` cast + chave `APP_KEY`). **Nunca logada**, **nunca retornada pelo JSON API**, exibida mascarada como `sk-ant-...XXXX` (4 últimos chars) após salvar. Trocar chave = novo input completo.
+- **D-32:** Tela `/settings/ai` (nova rota, visível apenas para owner/admin da organização): input password-type para chave + botão "Testar chave" (faz 1 call mínima à Anthropic para validar formato e saldo) + badge de status "configurada ✓ / inválida ✗ / não configurada ○". Histórico de alterações não é guardado (privacidade).
+- **D-33:** Sem chave configurada válida: todos os botões AI (Gerar Brief, Chat IA, Gerar Planejamento, Conhecer Cliente) ficam **desabilitados** com tooltip "Configure sua chave Anthropic em Configurações → IA" + link direto. Menus, abas e modais continuam navegáveis (não escondemos UI, apenas bloqueamos a ação).
+- **D-34:** Guardrails de custo (AI-SPEC Section 6) mudam de "bloquear" para "avisar com confirmação" — o usuário paga sua própria API; a Briefy avisa "Essa operação custará aproximadamente $X. Continuar?" em operações caras (ex: gerar planejamento 50+ posts, rodar Managed Agent). Operações baratas (<$0.05) não perguntam.
+
+### "Conheça o Cliente" — Managed Agent de Onboarding
+
+- **D-35:** No `ClientForm` (criação ou edição) existe um botão opcional **"🤖 Conhecer este cliente com IA"** após os campos básicos, exigindo preenchimento de pelo menos `website` OU um handle social (novo campo `social_handles` JSON na tabela `clients`). Clicar dispara um **Managed Agent** via Claude Managed Agents API (beta header `managed-agents-2026-04-01`).
+- **D-36:** O Managed Agent faz crawl do site público do cliente + Instagram + LinkedIn (via web search/fetch built-in tools) durante 20–40 min, analisa 20–30 peças de conteúdo textual e popula `client_ai_memory` com 10–15 insights categorizados (tom, padrões, preferências, o-que-evitar, terminologia) + `confidence` score calibrado pelo próprio agente. Tudo via tool-use `record_insights` (mesma estrutura D-14).
+- **D-37:** **Estado visível durante o research:** uma nova tabela `client_research_sessions` guarda `client_id`, `managed_agent_session_id`, `status` (queued/running/completed/failed), `started_at`, `completed_at`, `events_url` (stream SSE do MA), `progress_summary` (string curta atualizada pelo backend a cada N eventos). O card do cliente na lista (`Clients/Index`) mostra badge **"🔍 Pesquisando — ~XX min restantes"** enquanto `status=running`. Clicar no badge abre modal com timeline da sessão (eventos resumidos do MA).
+- **D-38:** Ao concluir: toast "Pesquisa concluída — N insights adicionados ao cliente X" + inserção real dos entries em `client_ai_memory` com `source='managed_agent_onboarding'`. Usuário pode abrir a aba de memória do cliente e revisar/editar cada insight. Se `confidence < 0.6`, insight entra como "sugestão" (flag visual) e pede confirmação manual.
+- **D-39:** Sem chave Anthropic válida (D-33), botão aparece desabilitado como outros. Se o usuário não quiser rodar o MA, pode preencher `client_ai_memory` manualmente depois via chat (fluxo D-14 existente continua válido) — MA é opt-in, nunca obrigatório.
+- **D-40:** **Observabilidade:** todas as sessões MA trackadas via OTEL → Arize Phoenix (mesma infra do AI-SPEC Section 7) com tags `capability=client_research`, `client_id`, `organization_id`, `session_duration_sec`, `pieces_analyzed`, `insights_generated`, `cost_usd`. Evento `session.failed` dispara notificação in-app para o usuário ("Pesquisa falhou — ver detalhes" + CTA para retry ou preenchimento manual).
+
 ### Claude's Discretion
 
 - Prompt engineering exato para geração de brief e planejamento (estrutura de seções, tom padrão)
@@ -80,6 +101,11 @@ Out of scope for Phase 3: real-time collaboration, notifications, dashboard char
 - Biblioteca de markdown rendering (react-markdown ou similar leve)
 - Estrutura interna do SSE (Server-Sent Events) e error handling de stream
 - Formatação exata das datas no cabeçalho do brief e nos cards de planejamento
+- System prompt exato do Managed Agent "Conheça o Cliente" (quais seções ele deve popular, critérios de confidence, limite de páginas crawleadas)
+- Algoritmo de dedupe do crawl (bloom filter em URLs visitadas, hash de conteúdo para descartar duplicatas)
+- Exato set de built-in tools do MA (bash necessário? ou só web_search + web_fetch + file ops?)
+- Estrutura visual da timeline de eventos da sessão MA (fica com UI-SPEC follow-up se necessário)
+- Crypto adapter Laravel para a coluna `anthropic_api_key_encrypted` (nativo `encrypted` cast vs. biblioteca dedicada)
 
 </decisions>
 
@@ -134,13 +160,19 @@ Out of scope for Phase 3: real-time collaboration, notifications, dashboard char
 
 ### Integration Points
 - DemandDetailModal: adicionar abas Brief e Chat IA no painel direito.
-- ClientForm + ClientsCreate/Edit: adicionar seção "Plano de Conteúdo Mensal" com 3 novos campos.
-- Clients/Index.tsx: adicionar badge "X posts/mês" nos cards.
+- ClientForm + ClientsCreate/Edit: adicionar seção "Plano de Conteúdo Mensal" com 3 novos campos + botão "🤖 Conhecer este cliente com IA" (D-35) + novo campo opcional `social_handles` (JSON).
+- Clients/Index.tsx: adicionar badge "X posts/mês" nos cards + badge "🔍 Pesquisando — ~XX min restantes" durante sessão MA ativa (D-37).
 - Sidebar.tsx: adicionar item "Planejamento" com ícone e rota `/planejamento`.
 - Nova página: `resources/js/pages/Planejamento/Index.tsx` com filtro + lista + cards de itens.
-- Nova migration: `add_monthly_plan_to_clients_table` com 3 colunas.
-- Novos controllers: `AiBriefController`, `AiChatController`, `MonthlyPlanningController`.
+- Nova página: `resources/js/pages/Settings/Ai.tsx` — tela de configuração BYOK (D-32).
+- Nova migration: `add_monthly_plan_to_clients_table` com 3 colunas + `social_handles` (JSON, nullable).
+- Nova migration: `add_anthropic_api_key_to_organizations` com coluna text encrypted (D-31).
+- Nova migration: `create_client_research_sessions_table` (id, client_id, managed_agent_session_id, status enum, started_at, completed_at, events_url, progress_summary) (D-37).
+- Novos controllers: `AiBriefController`, `AiChatController`, `MonthlyPlanningController`, `Settings\AiController`, `ClientResearchController`.
 - Novas rotas SSE: `GET /demands/{demand}/brief/generate` e `GET /demands/{demand}/chat/stream`.
+- Novas rotas Managed Agents: `POST /clients/{client}/research` (inicia sessão MA), `GET /clients/{client}/research/{session}/events` (proxy SSE dos eventos do MA), `GET /clients/{client}/research/{session}` (status JSON).
+- Nova service class: `app/Services/Ai/ClientResearchAgent.php` — wrapper do Managed Agents SDK; define Agent + Environment + Session.
+- `LICENSE` na raiz (AGPL-3.0) + atualização do README com setup + BYOK (D-29).
 
 </code_context>
 
@@ -153,6 +185,10 @@ Out of scope for Phase 3: real-time collaboration, notifications, dashboard char
 - **Redesenhar**: textarea inline no card (sem modal). Feedback → Claude → atualiza title/description in-place.
 - **Widget dashboard**: dia-1 aparece, dia+2 auto-descarta. Descartável com X. Clicar vai para /planejamento filtrado.
 - **planning_day**: campo numérico 1-31 na seção "Plano Mensal" do ClientForm.
+- **BYOK Settings**: tela `/settings/ai` com input password-type + botão "Testar chave" + badge de status. Acesso restrito a owner/admin.
+- **"Conhecer cliente" opt-in**: botão dispara Managed Agent com duração 20–40 min. UI sinaliza pesquisa em andamento no card do cliente. Sem bloqueio de outras ações na Briefy durante a sessão.
+- **Confidence flag**: insights com `confidence < 0.6` entram como sugestão para revisão manual (não auto-aplicados).
+- **AGPL notice headers**: curtos, no topo de cada arquivo fonte PHP/TS: `// (c) 2026 Briefy contributors - AGPL-3.0`.
 
 </specifics>
 

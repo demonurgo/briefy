@@ -12,10 +12,12 @@
 
 ## 1. System Classification
 
-**System Type:** Hybrid — Content Generation + Conversational Assistant
+**System Type:** Hybrid — Content Generation + Conversational Assistant + **Autonomous Research Agent (Managed Agents)**
 
 **Description:**
-Briefy's Phase 3 AI system accelerates agency work on creative demands by (a) generating structured content briefs from demand metadata, (b) providing a contextual chat assistant per demand that streams responses and remembers client patterns via `client_ai_memory`, and (c) generating full monthly content plans from client quota configuration. Users are marketing-agency team members (planners, account leads, content creators). "Good" means: the brief captures the demand's intent in the client's established tone within ~10 seconds; the chat answers questions grounded in the demand/client context without the user re-explaining; and the monthly plan fills the exact `monthly_posts` quota with realistic, channel-appropriate suggestions matching `monthly_plan_notes`.
+Briefy's Phase 3 AI system accelerates agency work on creative demands by (a) generating structured content briefs from demand metadata, (b) providing a contextual chat assistant per demand that streams responses and remembers client patterns via `client_ai_memory`, (c) generating full monthly content plans from client quota configuration, and (d) running long-background **"Conheça o Cliente" Managed Agent** sessions (20–40 min) that crawl and analyze a client's public presence at onboarding to seed `client_ai_memory` with high-quality insights. Users are marketing-agency team members (planners, account leads, content creators). "Good" means: the brief captures the demand's intent in the client's established tone within ~10 seconds; the chat answers questions grounded in the demand/client context without the user re-explaining; the monthly plan fills the exact `monthly_posts` quota with realistic, channel-appropriate suggestions matching `monthly_plan_notes`; and the Managed Agent session returns 10–15 calibrated insights (confidence ≥ 0.6 for majority) within 40 min without violating `robots.txt` or crawling non-public surfaces.
+
+**Deployment model (new, D-29/D-30):** Briefy ships as **open source under AGPL-3.0** with **BYOK (Bring Your Own Key)** — each organization configures its own Anthropic API key, stored encrypted in `organizations.anthropic_api_key_encrypted`. No centralized billing. All AI capabilities degrade gracefully (disabled with tooltip) when no valid key is configured.
 
 **Critical Failure Modes:**
 1. **Brand-voice drift** — Brief or chat output violates the client's established tone (stored in `client_ai_memory`), producing content the agency would not send to the client.
@@ -23,6 +25,9 @@ Briefy's Phase 3 AI system accelerates agency work on creative demands by (a) ge
 3. **Quota violation** — Monthly plan returns fewer or more items than `monthly_posts`, or distributes channels incorrectly when `monthly_plan_notes` specifies a breakdown.
 4. **Streaming failure** — SSE stream terminates mid-response, leaves UI in loading state, or concatenates chunks out of order, resulting in broken/truncated output saved to DB.
 5. **Memory poisoning** — Auto-extracted insights written to `client_ai_memory` with wrong client scope or low-confidence noise that degrades future generations (cross-client contamination).
+6. **Crawl ethics violation (MA-specific)** — Managed Agent crawls pages disallowed by `robots.txt`, authenticated surfaces, or sensitive pages (legal, privacy, careers), exposing Briefy to legal/reputational risk.
+7. **API key exposure (BYOK-specific)** — User's Anthropic API key leaks via logs, error messages, JSON API responses, or MA session events sent to the client.
+8. **Runaway MA cost (BYOK-specific)** — A Managed Agent session loops or over-fetches, burning through the user's API credit without producing commensurate insights (unbounded tool-use loop, pagination without stop condition).
 
 ---
 
@@ -158,6 +163,32 @@ The backend stack is PHP 8.4 + Laravel 13 + Inertia.js — every Python/TypeScri
 | Direct HTTP (Guzzle/Http facade, no SDK) | Loses SDK-provided SSE event parsing, retry logic, and schema validation for request/response shapes. Net time saved by SDK > cost of the dependency. |
 
 **Vendor Lock-In Accepted:** Yes — full Anthropic/Claude lock-in. Deliberate trade-off per CONTEXT.md: single-provider keeps streaming reliability and prompt tuning simple. If multi-provider support becomes required in a later milestone (v1.2+), Prism PHP is already in `composer.json` and can replace direct SDK calls with minimal refactoring.
+
+### Secondary Framework — Claude Managed Agents (for capability 6 only)
+
+**Selected:** Claude Managed Agents (beta, header `managed-agents-2026-04-01`) — for the "Conheça o Cliente" client research background agent ONLY.
+
+**Rationale:**
+Capability 6 (D-35..D-40) is a fundamentally different workload from 1–5: it runs for **20–40 minutes**, uses **web browsing + iterative reasoning over heterogeneous pages**, needs **session persistence across disconnections**, and benefits from **managed tool execution** (web search, web fetch, file ops) without us building a sandboxed container ourselves. These are the exact workload characteristics the Anthropic docs flag as "when to use Managed Agents": long-running execution, cloud infrastructure, minimal infrastructure, stateful sessions. Implementing this via the direct Messages API would require us to build our own agent loop (tool-use dispatch, retry, checkpoint), tool execution sandbox, and persistence layer — weeks of infra work for a single capability.
+
+**How it integrates:**
+- PHP backend (`app/Services/Ai/ClientResearchAgent.php`) calls the Managed Agents HTTP API directly via Laravel's `Http::withHeaders([...])->post(...)` — no dedicated PHP SDK exists (the SDK docs mention beta header auto-set in first-party SDKs, which are Python/TS only; PHP uses raw HTTP).
+- **Agent** created once per organization (not per session) with: model `claude-opus-4-7`, system prompt defining the research rubric, tools `web_search` + `web_fetch` + built-in file ops, skills none.
+- **Environment** minimal template: no bash need; network whitelist limited to public HTTP/HTTPS; no mounted files.
+- **Session** created per client research request, tied to `client_research_sessions.id`. Events streamed back via SSE and proxied to the React UI through our own `GET /clients/{client}/research/{session}/events` endpoint (we never expose the user's API key or the raw Managed Agents session URL to the browser).
+- **User's API key** (BYOK) is what authenticates the Managed Agents call — same key stored in `organizations.anthropic_api_key_encrypted`. Cost is on the user's bill.
+
+**Alternatives Considered:**
+
+| Approach | Ruled Out Because |
+|----------|------------------|
+| Build our own agent loop using Messages API + Guzzle + Laravel queue workers | 2–3 weeks of infra (sandbox, tool dispatch, retry/resume, session checkpoint). Hackathon timeline (4 days) impossible. |
+| Skip capability 6 entirely, keep Phase 3 to capabilities 1–5 | Forgoes the "Best use of Claude Managed Agents" $5k prize and the highest-impact onboarding UX the product can offer. |
+| Run research as a one-shot 200k-input Messages API call | Too expensive and less accurate — the model cannot browse live pages; we'd need a separate scraper service feeding the prompt. Parallel problem, worse DX. |
+
+**Vendor Lock-In Accepted (MA-specific):** Yes — Managed Agents is Anthropic-proprietary. Consistent with our single-provider posture. Since capability 6 is opt-in (user decides to run the agent), if MA availability changes later, capability 6 can degrade to manual memory entry without affecting the core product.
+
+**Beta header (mandatory on every MA call):** `anthropic-beta: managed-agents-2026-04-01` — set at the HTTP client level so every service-class call inherits it.
 
 ---
 
@@ -430,24 +461,44 @@ Three tiers, explicitly matched to the cognitive complexity of each capability. 
 | Item redesign (non-streaming, low-stakes) | `claude-haiku-4-5` | 512 | 0.7 | Single-item rewrite with short feedback. Haiku's $1/$5 per MTok vs. Sonnet's $3/$15 is a 3× saving on the high-volume UX-latency-critical path. |
 | Memory extraction (non-streaming, background job) | `claude-haiku-4-5` | 1024 | 0.2 | Narrow structured extraction with tool-use schema validation. Runs off the hot path in a queue worker. |
 | Conversation compaction (background job) | `claude-haiku-4-5` | 800 | 0.3 | Summarisation is Haiku's sweet spot; triggered when `messages.count() > 30`. |
+| **Client Research Managed Agent (long-running, D-35..D-40)** | **`claude-opus-4-7`** (inside MA session) | N/A (agent-controlled) | 0.3 | **Autonomous research agent over heterogeneous web content** — must reason about brand voice across 20–30 scraped pages, decide which are relevant, deduplicate, categorize insights. Opus 4.7's long-horizon reasoning is worth the cost; MA session runs once per client onboarding (not a hot path). Ran via Managed Agents beta, not direct Messages API. |
 
-Constants, not magic strings — declare in `config/services.php`:
+**BYOK-aware client resolution (D-29..D-34):** Each organization configures its own Anthropic API key. **Do NOT** hardcode `ANTHROPIC_API_KEY` in `config/services.php` as the source of truth — it stays only as a dev/test fallback. The real client is resolved per-request from the authenticated organization.
 
 ```php
+// config/services.php — only defaults, models, beta headers
 'anthropic' => [
-    'key'            => env('ANTHROPIC_API_KEY'),
-    // Opus 4.7 — complex reasoning (monthly plan generation)
-    'model_complex'  => env('ANTHROPIC_MODEL_COMPLEX', 'claude-opus-4-7'),
-    // Sonnet 4.6 — default production tier (brief, chat)
-    'model_chat'     => env('ANTHROPIC_MODEL_CHAT',    'claude-sonnet-4-6'),
-    // Haiku 4.5 — narrow auxiliary tasks (redesign, memory, compaction)
-    'model_cheap'    => env('ANTHROPIC_MODEL_CHEAP',   'claude-haiku-4-5'),
+    'api_key_fallback' => env('ANTHROPIC_API_KEY'),            // dev/test only — not used in prod
+    'beta_ma'          => 'managed-agents-2026-04-01',         // MA beta header, always set on MA calls
+    'model_complex'    => env('ANTHROPIC_MODEL_COMPLEX', 'claude-opus-4-7'),
+    'model_chat'       => env('ANTHROPIC_MODEL_CHAT',    'claude-sonnet-4-6'),
+    'model_cheap'      => env('ANTHROPIC_MODEL_CHEAP',   'claude-haiku-4-5'),
 ],
 ```
 
-Consume the right tier explicitly per service class:
+```php
+// app/Services/Ai/AnthropicClientFactory.php — per-request, BYOK-aware
+final class AnthropicClientFactory
+{
+    public function forOrganization(Organization $org): Client
+    {
+        $key = $org->anthropic_api_key;  // decrypted via Laravel `encrypted` cast on the model
+        abort_if(empty($key), 402, 'No Anthropic API key configured for this organization.');
+
+        return new Client(
+            apiKey: $key,
+            requestOptions: RequestOptions::with(maxRetries: 2, timeout: 120),
+        );
+    }
+}
+```
+
+Consume the right tier explicitly per service class, resolving the client from the current organization:
 
 ```php
+// Every service class receives the Anthropic Client via constructor injection,
+// resolved by AnthropicClientFactory::forOrganization(auth()->user()->organization).
+
 // app/Services/Ai/MonthlyPlanGenerator.php
 model: config('services.anthropic.model_complex'),   // Opus 4.7
 
@@ -456,7 +507,23 @@ model: config('services.anthropic.model_chat'),      // Sonnet 4.6
 
 // app/Services/Ai/ItemRedesigner.php, ClientMemoryExtractor.php, ConversationCompactor.php
 model: config('services.anthropic.model_cheap'),     // Haiku 4.5
+
+// app/Services/Ai/ClientResearchAgent.php — raw HTTP to Managed Agents API
+// (Anthropic PHP SDK does not yet wrap MA; use Http facade with org's key + beta header).
+$response = Http::withToken($org->anthropic_api_key)
+    ->withHeaders([
+        'anthropic-beta'    => config('services.anthropic.beta_ma'),
+        'anthropic-version' => '2023-06-01',
+    ])
+    ->post('https://api.anthropic.com/v1/agents', [
+        'name'         => "Client Research — {$client->name}",
+        'model'        => config('services.anthropic.model_complex'),
+        'system'       => $this->prompts->clientResearchSystem($client),
+        'tools'        => [['type' => 'web_search'], ['type' => 'web_fetch'], ['type' => 'file_ops']],
+    ]);
 ```
+
+**Key-missing graceful degradation (D-33):** Every AI-gated controller method checks `auth()->user()->organization->hasAnthropicKey()` first. If false, return `back()->with('ai_disabled', true)` instead of 402. The React side reads `auth.organization.has_anthropic_key` (already in Inertia shared props) to disable buttons and render tooltips — no crash, no surprise network error.
 
 **Core Pattern:**
 
