@@ -4,8 +4,9 @@
 > Locks framework selection, implementation guidance, and evaluation strategy before planning begins.
 
 **Generated:** 2026-04-22
+**Last updated:** 2026-04-22 — model routing adjusted (Opus 4.7 for monthly plan; Sonnet 4.6 default; Haiku 4.5 auxiliary) + prompt caching guidance reinforced with 4,096-token minimum warning.
 **Phase Directory:** `.planning/phases/03-ai-integration/`
-**Status:** In progress — framework selected, research pending
+**Status:** Complete — ready for `/gsd-plan-phase 3`
 
 ---
 
@@ -419,22 +420,42 @@ config/
 
 **Model Configuration:**
 
-| Use Case | Model | `max_tokens` | `temperature` | Why |
-|----------|-------|--------------|--------------|-----|
-| Brief generation (streaming) | `claude-sonnet-4-6` | 2048 | 0.7 | Balanced quality/cost; brand-voice-sensitive output. Sonnet is 5× cheaper than Opus for similar quality on structured content. |
-| Chat (streaming, multi-turn) | `claude-sonnet-4-6` | 2048 | 0.7 | Needs grounded reasoning over demand + files + memory; Sonnet handles the 10–30k-token cached prefix comfortably. |
-| Monthly plan (non-streaming) | `claude-sonnet-4-6` | 4096 | 0.5 | Structured JSON output of N items — lower temperature to reduce schema drift; higher max_tokens to avoid truncation at large `monthly_posts`. |
-| Item redesign (non-streaming, low-stakes) | `claude-haiku-4-5` | 512 | 0.7 | Single-item rewrite with short feedback — Haiku's $1/$5 per MTok vs. Sonnet's $3/$15 is a 3× saving on high-volume UX-latency-critical path. |
-| Memory extraction (non-streaming, background job) | `claude-haiku-4-5` | 1024 | 0.2 | Structured extraction of insights from chat transcript; low temperature for schema compliance. Runs off the hot path in a queue worker. |
+Three tiers, explicitly matched to the cognitive complexity of each capability. The rule: **Opus 4.7 on tasks that require reasoning over many constraints at once; Sonnet 4.6 on structured generation with a clear template; Haiku 4.5 on narrow extraction/summarisation.**
+
+| Use Case | Model | `max_tokens` | `temperature` | Why this tier |
+|----------|-------|--------------|--------------|---------------|
+| **Monthly plan (non-streaming)** | **`claude-opus-4-7`** | 4096 | 0.4 | **Complex reasoning task** — the model must (1) distribute exactly `monthly_posts` items, (2) respect `monthly_plan_notes` channel breakdown, (3) enforce thematic diversity (no pillar monoculture), (4) stay on brand voice per `client_ai_memory`, (5) spread items realistically across the month. This is the AI capability where quality failures are most expensive (a bad plan drives a month of wrong production). Worth the ~5× input / ~5× output cost over Sonnet — 10 plans/month is a trivial volume line item. |
+| Brief generation (streaming) | `claude-sonnet-4-6` | 2048 | 0.7 | Single-turn structured content with a clear template (objective, tone, channel, CTA). Sonnet handles brand-voice-sensitive output well; Opus is overkill here and would double TTFT. |
+| Chat (streaming, multi-turn) | `claude-sonnet-4-6` | 2048 | 0.7 | Grounded reasoning over demand + files + memory. Sonnet handles the 10–30k-token cached prefix comfortably. **Future (v1.2):** optional router that escalates to Opus when the user asks explicitly for strategic/planning help inside the chat. Out of scope for Phase 3. |
+| Item redesign (non-streaming, low-stakes) | `claude-haiku-4-5` | 512 | 0.7 | Single-item rewrite with short feedback. Haiku's $1/$5 per MTok vs. Sonnet's $3/$15 is a 3× saving on the high-volume UX-latency-critical path. |
+| Memory extraction (non-streaming, background job) | `claude-haiku-4-5` | 1024 | 0.2 | Narrow structured extraction with tool-use schema validation. Runs off the hot path in a queue worker. |
+| Conversation compaction (background job) | `claude-haiku-4-5` | 800 | 0.3 | Summarisation is Haiku's sweet spot; triggered when `messages.count() > 30`. |
 
 Constants, not magic strings — declare in `config/services.php`:
 
 ```php
 'anthropic' => [
-    'key'          => env('ANTHROPIC_API_KEY'),
-    'model_chat'   => env('ANTHROPIC_MODEL_CHAT',  'claude-sonnet-4-6'),
-    'model_cheap'  => env('ANTHROPIC_MODEL_CHEAP', 'claude-haiku-4-5'),
+    'key'            => env('ANTHROPIC_API_KEY'),
+    // Opus 4.7 — complex reasoning (monthly plan generation)
+    'model_complex'  => env('ANTHROPIC_MODEL_COMPLEX', 'claude-opus-4-7'),
+    // Sonnet 4.6 — default production tier (brief, chat)
+    'model_chat'     => env('ANTHROPIC_MODEL_CHAT',    'claude-sonnet-4-6'),
+    // Haiku 4.5 — narrow auxiliary tasks (redesign, memory, compaction)
+    'model_cheap'    => env('ANTHROPIC_MODEL_CHEAP',   'claude-haiku-4-5'),
 ],
+```
+
+Consume the right tier explicitly per service class:
+
+```php
+// app/Services/Ai/MonthlyPlanGenerator.php
+model: config('services.anthropic.model_complex'),   // Opus 4.7
+
+// app/Services/Ai/BriefStreamer.php  and  ChatStreamer.php
+model: config('services.anthropic.model_chat'),      // Sonnet 4.6
+
+// app/Services/Ai/ItemRedesigner.php, ClientMemoryExtractor.php, ConversationCompactor.php
+model: config('services.anthropic.model_cheap'),     // Haiku 4.5
 ```
 
 **Core Pattern:**
@@ -638,7 +659,9 @@ public function generate(Client $client, int $year, int $month): array
             $response = $this->anthropic->messages->create(
                 maxTokens: 4096,
                 messages: $this->buildMessages($client, $year, $month, $lastError),
-                model: config('services.anthropic.model_chat'),
+                // Opus 4.7 — monthly planning is the complex-reasoning capability.
+                // See Section 4 "Model Configuration" for the routing policy.
+                model: config('services.anthropic.model_complex'),
                 system: $this->prompts->planSystem($client),
                 tools: [[
                     'name' => 'submit_plan',
@@ -646,7 +669,7 @@ public function generate(Client $client, int $year, int $month): array
                     'input_schema' => MonthlyPlanSchema::toolSchema($client->monthly_posts),
                 ]],
                 toolChoice: ['type' => 'tool', 'name' => 'submit_plan'],
-                temperature: 0.5,
+                temperature: 0.4,
             );
 
             $toolUse = collect($response->content)->firstWhere('type', 'tool_use');
@@ -756,33 +779,59 @@ System type is **Hybrid — conversational + content generation**. The relevant 
 
 **Prompt cache (cross-cutting):**
 - Every multi-turn capability (chat only, in Phase 3) uses `cache_control: {type: 'ephemeral'}` on the system prefix.
-- 5-minute TTL matches typical agency working patterns — a user usually iterates 5–15 turns in one sitting.
+- 5-minute TTL matches typical agency working patterns — a user usually iterates 5–15 turns in one sitting. Use 1-hour TTL (`{type: 'ephemeral', ttl: '1h'}`, 2× write cost) only if metrics show users pausing >5 min between turns.
 - On the **first** call of a session, expect `usage.cache_creation_input_tokens > 0` (125% cost). On turns 2..N, expect `usage.cache_read_input_tokens > 0` (10% cost). Assert this in tests.
+- **Minimum cacheable block size (enforced silently by the API):** Opus 4.7 = **4,096 tokens**; Haiku 4.5 = **4,096 tokens**; Sonnet 4.6 = 1,024–2,048 tokens. Sub-threshold prompts return 0 for both `cache_creation_input_tokens` and `cache_read_input_tokens` — no error is raised. Monitor these counters in tests and in Phoenix traces; a silently-uncached prompt is a cost regression waiting to happen.
+- **Manual vs. automatic caching.** We use **manual** per-block `cache_control` on the stable system prefix (line-aligned with volatile tails outside the cache). The SDK also supports automatic caching (`cache_control: {type: 'ephemeral'}` at top level), where the breakpoint auto-advances across conversation turns. Manual gives us finer control (we know exactly which block is cached); automatic is cheaper to integrate but harder to reason about when we add a second cache block later. **Start manual; revisit automatic in Phase 4 if chat history management becomes complex.**
+- **Breakpoint budget:** Anthropic allows at most **4 `cache_control` breakpoints per request**. Phase 3 uses 1 (stable system prefix). Combining manual + automatic would consume 2. Keep the budget in mind before adding more.
 
 ### Cost and Latency Budget
 
-**Assumptions for estimates:** Claude Sonnet 4.6 pricing ($3/MTok input, $15/MTok output, $0.30/MTok cached read, $3.75/MTok cached write). Claude Haiku 4.5 pricing ($1/MTok input, $5/MTok output, $0.10/MTok cached read, $1.25/MTok cached write). Source: https://platform.claude.com/docs/en/build-with-claude/prompt-caching.
+**Assumptions for estimates** (source: https://platform.claude.com/docs/en/build-with-claude/prompt-caching + Claude pricing page — all multipliers are relative to base input/output; validate exact $/MTok at implementation time as Anthropic pricing may shift):
+
+| Model | Input | Output | Cache read (0.1×) | Cache write 5m (1.25×) | Min tokens to cache |
+|-------|-------|--------|------------------|-----------------------|---------------------|
+| Claude Opus 4.7 | ~$15/MTok | ~$75/MTok | ~$1.50/MTok | ~$18.75/MTok | **4,096** |
+| Claude Sonnet 4.6 | $3/MTok | $15/MTok | $0.30/MTok | $3.75/MTok | 1,024–2,048 |
+| Claude Haiku 4.5 | $1/MTok | $5/MTok | $0.10/MTok | $1.25/MTok | **4,096** |
+
+> **Caching gotcha for Opus 4.7 and Haiku 4.5:** both require a **minimum of 4,096 tokens** in the block being cached. Prompts below the threshold are silently NOT cached (no error; both `cache_creation_input_tokens` and `cache_read_input_tokens` return 0). The chat system prefix (client memory + demand + files) easily clears 4k tokens; the planning system prefix may or may not — verify in a dev log and, if short, inline extra context (recent plans, past briefs for the client) to cross 4k deliberately rather than let caching silently fail. Sonnet 4.6 is more forgiving (1–2k min).
 
 **Per-call cost estimates:**
 
-| Call | Input (cached) | Input (uncached) | Output | Cost per call | Cost at 1k calls/mo |
-|------|---------------|-----------------|--------|--------------|----------------------|
-| Brief generation | — | ~3k | ~1.5k | ~$0.032 | ~$32 |
-| Chat turn 1 (cache miss) | — | ~15k (write) | ~1k | ~$0.071 | — |
-| Chat turn 2..N (cache hit) | ~15k read | ~500 | ~1k | ~$0.021 | — |
-| Chat session (10 turns, mix of hit/miss) | — | — | — | ~$0.26 | ~$260 |
-| Monthly plan (20 items) | — | ~5k | ~3k | ~$0.060 | — |
-| Plan (Haiku redesign of 1 item) | — | ~1k | ~0.3k | ~$0.0025 | — |
-| Memory extraction (Haiku, post-chat) | — | ~2k | ~0.5k | ~$0.0045 | ~$4.50 |
+| Call | Model | Input (cached) | Input (uncached) | Output | Cost per call | Cost at 1k calls/mo |
+|------|-------|---------------|-----------------|--------|--------------|----------------------|
+| Brief generation | Sonnet 4.6 | — | ~3k | ~1.5k | ~$0.032 | ~$32 |
+| Chat turn 1 (cache miss) | Sonnet 4.6 | — | ~15k (write) | ~1k | ~$0.071 | — |
+| Chat turn 2..N (cache hit) | Sonnet 4.6 | ~15k read | ~500 | ~1k | ~$0.021 | — |
+| Chat session (10 turns, mix of hit/miss) | Sonnet 4.6 | — | — | — | ~$0.26 | ~$260 |
+| **Monthly plan (20 items) — Opus 4.7** | **Opus 4.7** | — | ~5k (first call, written) | ~3k | **~$0.30** | ~$300 |
+| Plan (Haiku redesign of 1 item) | Haiku 4.5 | — | ~1k | ~0.3k | ~$0.0025 | — |
+| Memory extraction (post-chat) | Haiku 4.5 | — | ~2k | ~0.5k | ~$0.0045 | ~$4.50 |
+| Conversation compaction (triggered) | Haiku 4.5 | — | ~20k | ~0.4k | ~$0.022 | — |
 
 **Total estimate at realistic Phase 3 volume** (10 active clients × 50 briefs/month + 200 chat sessions/month + 10 plans/month):
-- 500 briefs × $0.032 = **$16**
-- 200 chat sessions × $0.26 = **$52**
-- 10 plans × $0.06 + ~50 redesigns × $0.0025 = **$0.73**
-- 200 memory extractions × $0.0045 = **$0.90**
-- **≈ $70/month** in API costs at v1.1 launch volume.
+- 500 briefs (Sonnet) × $0.032 = **$16**
+- 200 chat sessions (Sonnet, with caching) × $0.26 = **$52**
+- 10 plans (Opus 4.7) × $0.30 + ~50 redesigns (Haiku) × $0.0025 = **~$3.13**
+- 200 memory extractions (Haiku) × $0.0045 = **$0.90**
+- **≈ $72/month** in API costs at v1.1 launch volume.
 
-**Caching impact:** without `cache_control`, chat sessions would cost ~5× more. Every chat session with >2 turns saves ~$0.20. At 200 sessions/month that's **$40/month saved** — worth the 15-min integration work. Validate in production via the `cache_read_input_tokens` metric.
+**Cost delta vs. all-Sonnet:** using Opus for planning adds **~$2.40/month** (from ~$0.60 to ~$3.00 on the 10 plans). In exchange: better quota compliance, better channel mix distribution, better thematic diversity. This is the cheapest quality uplift in the entire Phase 3 budget.
+
+**Caching impact:** without `cache_control`, chat sessions would cost ~5× more. Every chat session with >2 turns saves ~$0.20. At 200 sessions/month that's **$40/month saved** — far larger than the Opus-on-planning delta. Validate in production via the `cache_read_input_tokens` metric.
+
+**Caching tactics per capability:**
+
+| Capability | Caching mode | Rationale |
+|------------|-------------|-----------|
+| Chat (multi-turn) | **Manual `cache_control` on the stable system prefix** (client memory + demand + files). Comments tail outside the cache. Also consider the SDK's automatic-caching option (`cache_control: {type: "ephemeral"}` at top level) which auto-advances the breakpoint across turns. | 5-min TTL, high hit rate expected within a sitting. |
+| Brief regeneration | `cache_control` on demand-metadata prefix. If user clicks Regenerate within 5 min (common), the cache hit is close to free. | Same TTL; regeneration latency drops from ~8s to ~5s. |
+| Monthly plan (Opus) | **Verify prefix ≥ 4,096 tokens** before applying `cache_control`. If short, inline last 2 plans or last 10 briefs for the client to cross the threshold deliberately. | Plans within the same month often re-use the same client context; 1-hour TTL (`ttl: "1h"`, 2× write) is worth evaluating if user generates multiple months in one sitting. |
+| Redesign (Haiku) | Skip explicit `cache_control` unless the per-item prefix crosses 4,096 tokens. At ~1k input, caching is silently inactive. | Don't waste a breakpoint on an uncacheable block. |
+| Memory extraction / compaction | Skip caching — one-shot inputs. | Not reused. |
+
+> **Max 4 `cache_control` breakpoints per request.** We use at most 1 (the stable system prefix). Automatic caching, if enabled, consumes another slot — plan for 2 used, 2 free for future extensions.
 
 **Latency budget (p95 targets):**
 - Time-to-first-token (brief, chat): **< 1.5 s**
@@ -792,13 +841,15 @@ System type is **Hybrid — conversational + content generation**. The relevant 
 
 If p95 exceeds these, inspect in order: (1) cache hit rate — missing cache doubles input processing time; (2) `max_tokens` — if set too high Claude over-generates; (3) network — we are PHP-to-api.anthropic.com synchronous.
 
-**Sub-task model routing — explicit policy:**
-| Capability | Model | Reason |
-|------------|-------|--------|
-| Brief, chat, plan | Sonnet 4.6 | Brand voice + reasoning quality matter. Failure here is visible to agency clients. |
-| Redesign single item | Haiku 4.5 | Low-stakes rewrite; 3× cheaper; latency gain is UX-critical (inline card update). |
-| Memory extraction | Haiku 4.5 | Tool-use schema validation does the quality enforcement; cheap extraction is fine. |
-| Conversation compaction | Haiku 4.5 | Summarisation is Haiku's sweet spot; running on the hot path cost matters. |
+**Sub-task model routing — explicit policy (three tiers):**
+
+| Tier | Model | Capabilities | Reason |
+|------|-------|-------------|--------|
+| **Complex reasoning** | **Opus 4.7** | Monthly plan generation | Must juggle many constraints simultaneously (quota, channel mix, thematic diversity, brand voice, seasonal fit). Quality failures here drive a month of wrong production. Low volume (~10 plans/month) makes the cost premium trivial. |
+| **Production default** | Sonnet 4.6 | Brief generation, Chat (multi-turn) | Structured single-turn generation with clear template (brief) and grounded multi-turn reasoning over a large cached prefix (chat). Opus would be overkill and would hurt TTFT. |
+| **Auxiliary** | Haiku 4.5 | Redesign single item, Memory extraction, Conversation compaction | Narrow, well-defined tasks with schema gates. 3× cheaper than Sonnet; UX-critical latency on redesign; background for the other two. |
+
+**Escalation hook (future, not Phase 3):** for a specific chat turn, if the controller detects an explicit strategy/planning ask (heuristic: keywords "planejar", "estratégia", "como devo estruturar", or the user is asking for a monthly plan inside chat), route that single turn to Opus 4.7 rather than the session default. Out of scope now; capture in backlog.
 
 **Exact-match caching (HTTP-level, application layer):** optional Phase 4 enhancement. For brief generation specifically, hash `(demand.updated_at, client.ai_memory_updated_at)` as a cache key in Redis; if the user clicks "Regenerate" twice without changes, serve the stored `ai_analysis.brief` directly. Not in Phase 3 scope — noted here for the backlog.
 
