@@ -1,25 +1,26 @@
+import './lib/i18n';
 import '../css/app.css';
 import './bootstrap';
-
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+import i18n from './lib/i18n';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) =>
-        resolvePageComponent(
-            `./Pages/${name}.tsx`,
-            import.meta.glob('./Pages/**/*.tsx'),
-        ),
-    setup({ el, App, props }) {
-        const root = createRoot(el);
+  title: (title) => `${title} - Briefy`,
+  resolve: (name) =>
+    resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
+  setup({ el, App, props }) {
+    const pageProps = props.initialPage.props as Record<string, unknown>;
+    const locale = (pageProps.locale as string) ?? 'pt-BR';
+    i18n.changeLanguage(locale);
 
-        root.render(<App {...props} />);
-    },
-    progress: {
-        color: '#4B5563',
-    },
+    const prefs = (pageProps.auth as Record<string, unknown>)?.user as Record<string, unknown> | undefined;
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
+    const theme = savedTheme ?? (prefs?.preferences as Record<string, string>)?.theme ?? 'light';
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+
+    createRoot(el).render(<App {...props} />);
+  },
+  progress: { color: '#7c3aed' },
 });

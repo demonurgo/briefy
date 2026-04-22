@@ -1,0 +1,9 @@
+{
+  "nav": { "dashboard": "Painel", "clients": "Clientes", "demands": "Demandas", "planning": "Planejamento", "settings": "Configurações", "more": "Mais" },
+  "common": { "save": "Salvar", "cancel": "Cancelar", "delete": "Excluir", "create": "Criar", "edit": "Editar", "loading": "Carregando...", "confirm": "Confirmar", "search": "Buscar", "noResults": "Nenhum resultado encontrado", "actions": "Ações" },
+  "demand": {
+    "statuses": { "todo": "A fazer", "in_progress": "Em andamento", "awaiting_feedback": "Aguardando feedback", "in_review": "Em revisão", "approved": "Aprovado" },
+    "types": { "demand": "Demanda", "planning": "Planejamento" }
+  },
+  "auth": { "login": "Entrar", "logout": "Sair", "register": "Criar conta", "email": "E-mail", "password": "Senha", "name": "Nome" }
+}
