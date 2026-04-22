@@ -1,7 +1,7 @@
 <?php
-
 namespace Tests\Feature\Auth;
-
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,14 +9,12 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_screen_can_be_rendered(): void
+    public function test_registration_screen_renders(): void
     {
-        $response = $this->get('/register');
-
-        $response->assertStatus(200);
+        $this->get('/register')->assertStatus(200);
     }
 
-    public function test_new_users_can_register(): void
+    public function test_new_users_can_register_and_organization_is_created(): void
     {
         $response = $this->post('/register', [
             'name' => 'Test User',
@@ -24,8 +22,41 @@ class RegistrationTest extends TestCase
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
-
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('dashboard'));
+        $user = User::where('email', 'test@example.com')->first();
+        $this->assertNotNull($user->organization_id);
+        $this->assertSame('admin', $user->role);
+        $org = Organization::find($user->organization_id);
+        $this->assertArrayHasKey('auto_analyze_deliverable', $org->settings);
+    }
+
+    public function test_registration_fails_with_duplicate_email(): void
+    {
+        User::factory()->create(['email' => 'taken@example.com']);
+        $this->post('/register', ['name' => 'Another', 'email' => 'taken@example.com', 'password' => 'password', 'password_confirmation' => 'password'])
+            ->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
+
+    public function test_registration_fails_with_mismatched_passwords(): void
+    {
+        $this->post('/register', ['name' => 'Test', 'email' => 'test@example.com', 'password' => 'password', 'password_confirmation' => 'different'])
+            ->assertSessionHasErrors('password');
+        $this->assertGuest();
+    }
+
+    public function test_registration_fails_with_missing_name(): void
+    {
+        $this->post('/register', ['name' => '', 'email' => 'test@example.com', 'password' => 'password', 'password_confirmation' => 'password'])
+            ->assertSessionHasErrors('name');
+        $this->assertGuest();
+    }
+
+    public function test_registration_fails_with_invalid_email(): void
+    {
+        $this->post('/register', ['name' => 'Test', 'email' => 'not-an-email', 'password' => 'password', 'password_confirmation' => 'password'])
+            ->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 }
