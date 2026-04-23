@@ -78,7 +78,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('client-ai-memory.dismiss');
 
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::get('/', fn() => Inertia::render('Settings/Index'))->name('index');
+        Route::get('/', fn() => redirect()->route('settings.ai.edit'))->name('index');
         Route::get('/team', [TeamController::class, 'index'])->name('team');
         Route::patch('/preferences', function (Request $r) {
             $r->user()->update([

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Check, X, CircleAlert, Loader2 } from 'lucide-react';
-import AppLayout from '@/layouts/AppLayout';
+import AppLayout from '@/Layouts/AppLayout';
 import InputError from '@/Components/InputError';
 
 interface Props {
