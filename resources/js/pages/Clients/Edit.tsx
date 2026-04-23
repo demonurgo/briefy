@@ -1,7 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink } from 'lucide-react';
+import { ArrowLeft, Brain, ExternalLink } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientForm } from '@/Components/ClientForm';
 
@@ -52,37 +52,68 @@ export default function ClientsEdit({ client, latest_session }: { client: Client
   return (
     <AppLayout title={t('clients.edit')}>
       <Head title={t('clients.edit')} />
-      <div className="mx-auto max-w-2xl">
-        {latest_session && (
-          <div className="mb-4 flex items-center justify-between rounded-[12px] border border-[#7c3aed]/20 bg-[#7c3aed]/5 px-4 py-3">
-            <p className="text-sm text-[#7c3aed]">
-              {latest_session.status === 'completed'
-                ? 'Pesquisa profunda concluída'
-                : latest_session.status === 'failed'
-                  ? 'Pesquisa falhou'
-                  : 'Pesquisa em andamento...'}
-            </p>
-            <Link
-              href={route('clients.research.show', [client.id, latest_session.id])}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#7c3aed] hover:underline"
-            >
-              <ExternalLink size={14} />
-              Ver resultados
-            </Link>
+
+      {/* Breadcrumb */}
+      <div className="mb-4">
+        <Link href={route('clients.show', client.id)} className="inline-flex items-center gap-1 text-sm text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]">
+          <ArrowLeft size={14} />
+          {client.name}
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Main form — 2/3 width on desktop */}
+        <div className="lg:col-span-2">
+          <div className="rounded-[12px] bg-white p-6 shadow-sm dark:bg-[#111827]">
+            <ClientForm
+              data={data}
+              errors={errors}
+              processing={processing}
+              setData={setData}
+              onSubmit={submit}
+              submitLabel={t('common.save')}
+              onCancel={() => router.visit(route('clients.show', client.id))}
+              client={client}
+              isEditMode={true}
+            />
           </div>
-        )}
-        <div className="rounded-[12px] bg-white p-6 shadow-sm dark:bg-[#111827]">
-          <ClientForm
-            data={data}
-            errors={errors}
-            processing={processing}
-            setData={setData}
-            onSubmit={submit}
-            submitLabel={t('common.save')}
-            onCancel={() => router.visit(route('clients.show', client.id))}
-            client={client}
-            isEditMode={true}
-          />
+        </div>
+
+        {/* Sidebar — 1/3 width on desktop */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Deep Research status */}
+          {latest_session && (
+            <div className="rounded-[12px] border border-[#7c3aed]/20 bg-[#7c3aed]/5 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain size={15} className="text-[#7c3aed]" />
+                <p className="text-sm font-medium text-[#7c3aed]">Deep Research</p>
+              </div>
+              <p className="text-xs text-[#6b7280] mb-3">
+                {latest_session.status === 'completed'
+                  ? 'Pesquisa profunda concluída. A memória do cliente foi populada com insights de tom, padrões e preferências.'
+                  : latest_session.status === 'failed'
+                    ? 'A última pesquisa falhou. Tente novamente.'
+                    : 'Pesquisa em andamento...'}
+              </p>
+              <Link
+                href={route('clients.research.show', [client.id, latest_session.id])}
+                className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#7c3aed]/30 px-3 py-1.5 text-xs font-medium text-[#7c3aed] hover:bg-[#7c3aed]/10 transition-colors"
+              >
+                <ExternalLink size={12} />
+                Ver resultados
+              </Link>
+            </div>
+          )}
+
+          {/* Tips card */}
+          <div className="rounded-[12px] border border-[#e5e7eb] bg-white p-4 dark:border-[#1f2937] dark:bg-[#111827]">
+            <p className="text-xs font-medium text-[#9ca3af] uppercase tracking-wide mb-2">Dicas</p>
+            <ul className="space-y-2 text-xs text-[#6b7280]">
+              <li>• Preencha os social handles para habilitar o Deep Research</li>
+              <li>• Defina posts/mês para gerar planejamentos mensais com IA</li>
+              <li>• Tom de voz e briefing melhoram a qualidade dos briefs gerados</li>
+            </ul>
+          </div>
         </div>
       </div>
     </AppLayout>
