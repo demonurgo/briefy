@@ -106,9 +106,21 @@ completed: 2026-04-22
 - **Files modified:** `resources/js/pages/Planejamento/Index.tsx`
 - **Commit:** `b3bd202` (included in Task 4 commit)
 
+## Task 5: Human Verification [APPROVED]
+
+**Gate:** blocking checkpoint — required before plan finalization
+**Verdict:** APPROVED by user on 2026-04-22
+**Signal:** "approved" — autonomous execution authorized
+
+Acceptance criteria verified:
+- Plan generation completes within 60s for 5 items — PASS
+- All 3 card actions (Converter, Rejeitar, Redesenhar) work correctly — PASS
+- Bulk convert creates the expected number of demands in /demands — PASS
+- Dashboard widget shows and dismisses persistently (localStorage key survives reload) — PASS
+
 ## Known Stubs
 
-None — all components render real data from Inertia props. The page is fully functional pending Task 5 human verification.
+None — all components render real data from Inertia props.
 
 ## Pre-existing Issues (out of scope)
 
@@ -122,4 +134,4 @@ No new network endpoints, auth paths, or schema changes beyond the plan's threat
 
 ## Self-Check: PASSED
 
-All created files exist and all 5 commits (4 tasks + 1 fix) are present in git log.
+All created files exist, all 5 commits (4 tasks + 1 fix) are present in git log, and Task 5 human verification gate is APPROVED.
