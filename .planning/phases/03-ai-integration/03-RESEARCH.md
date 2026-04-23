@@ -1449,32 +1449,32 @@ export function BriefTab({ demand }: Props) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the MA `anthropic_api_key_mask` be computed in a DB trigger or a model event?**
    - What we know: Laravel model `saving` event is reliable; DB triggers are more bulletproof but harder to test.
    - What's unclear: whether the project's test infrastructure covers DB triggers.
-   - Recommendation: compute in a model `saving` observer. Simpler to test (`php artisan test` runs sync).
+   - **RESOLVED:** compute in a model `saving` observer. Simpler to test (`php artisan test` runs sync).
 
 2. **Does the user's Anthropic account need to "opt into" Managed Agents beta explicitly?**
    - What we know: docs say "Managed Agents is enabled by default for all API accounts."
    - What's unclear: whether BYOK users with freshly-generated keys need extra setup.
-   - Recommendation: in the "Test key" endpoint, include a probe for MA access — if a `POST /v1/agents` returns 403, surface a friendly "Managed Agents not yet enabled for your account — contact Anthropic" message.
+   - **RESOLVED:** in the "Test key" endpoint, include a probe for MA access — if a `POST /v1/agents` returns 403, surface a friendly "Managed Agents not yet enabled for your account — contact Anthropic" message.
 
 3. **Should `ClientResearchAgent` persist one agent+environment per organization, or create fresh per request?**
    - What we know: MA rate-limits create endpoints at 60/min. Agents are versioned.
    - What's unclear: whether reusing an agent+environment across hundreds of sessions has performance or cost implications.
-   - Recommendation: **reuse** — cache `agent_id` and `environment_id` on the organization. Versioning lets us rotate the agent config later without session loss.
+   - **RESOLVED:** **reuse** — cache `agent_id` and `environment_id` on the organization. Versioning lets us rotate the agent config later without session loss.
 
 4. **Is localStorage-keyed dismissal accessible to tabbed users (opened the same org on two browsers)?**
    - What we know: localStorage is per-origin + per-browser. Two browsers = two independent keyspaces.
    - What's unclear: whether users will complain.
-   - Recommendation: accept for Phase 3. If complaints surface, migrate to `users.preferences` JSON column in Phase 4.
+   - **RESOLVED:** accept for Phase 3. If complaints surface, migrate to `users.preferences` JSON column in Phase 4.
 
 5. **Should `social_handles` field have a per-platform toggle ("this client has no LinkedIn")?**
    - What we know: UI decision not locked in UI-SPEC; D-35 says "at least one required for MA launch".
    - What's unclear: whether a null value means "no such handle" or "forgot to enter".
-   - Recommendation: **omit empty keys from the JSON on save** — `null` = no handle; UI shows an add-button per platform. MA only crawls platforms with non-empty values.
+   - **RESOLVED:** **omit empty keys from the JSON on save** — `null` = no handle; UI shows an add-button per platform. MA only crawls platforms with non-empty values.
 
 ---
 
