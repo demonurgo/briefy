@@ -31,4 +31,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'password_confirmation',
             'anthropic_api_key',
         ]);
+
+        // Inertia non-GET requests: convert HTTP errors to back-redirect with flash
+        // instead of showing a raw 403/404 page inside the Inertia modal overlay.
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->hasHeader('X-Inertia') && !$request->isMethod('GET')) {
+                $messages = [
+                    403 => $e->getMessage() ?: 'Você não tem permissão para realizar esta ação.',
+                    404 => $e->getMessage() ?: 'O recurso solicitado não foi encontrado.',
+                    429 => 'Muitas tentativas. Aguarde um momento e tente novamente.',
+                ];
+                $message = $messages[$e->getStatusCode()] ?? ('Erro ' . $e->getStatusCode() . '. Tente novamente.');
+                return back()->with('error', $message);
+            }
+        });
     })->create();
