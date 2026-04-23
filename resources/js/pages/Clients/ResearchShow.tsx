@@ -1,6 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { Head, router } from '@inertiajs/react';
-import { ArrowLeft, Brain, CheckCircle2, Clock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Brain, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useEffect } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { AiMarkdown } from '@/Components/AiMarkdown';
@@ -66,6 +67,12 @@ function ConfidenceBar({ value }: { value: number }) {
 
 export default function ResearchShow({ client, session, insights }: Props) {
   const isRunning = ['queued', 'running', 'idle'].includes(session.status);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
+  const handleCancel = () => {
+    if (!confirmCancel) { setConfirmCancel(true); return; }
+    router.post(route('clients.research.cancel', [client.id, session.id]));
+  };
 
   // Auto-refresh every 10s while running
   useEffect(() => {
@@ -134,6 +141,20 @@ export default function ResearchShow({ client, session, insights }: Props) {
             <Loader2 size={32} className="mx-auto mb-3 animate-spin text-[#7c3aed]" />
             <p className="text-sm font-medium text-[#7c3aed]">{session.progress_summary ?? 'O agente está pesquisando o cliente...'}</p>
             <p className="mt-1 text-xs text-[#9ca3af]">Esta página atualiza automaticamente a cada 10 segundos</p>
+            <div className="mt-4">
+              <button
+                onClick={handleCancel}
+                onBlur={() => setTimeout(() => setConfirmCancel(false), 300)}
+                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                  confirmCancel
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'border border-[#e5e7eb] text-[#9ca3af] hover:border-red-400 hover:text-red-500 bg-white dark:bg-[#111827] dark:border-[#1f2937]'
+                }`}
+              >
+                <XCircle size={13} />
+                {confirmCancel ? 'Confirmar cancelamento' : 'Cancelar pesquisa'}
+              </button>
+            </div>
           </div>
         )}
 

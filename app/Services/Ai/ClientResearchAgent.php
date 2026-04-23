@@ -190,6 +190,36 @@ final class ClientResearchAgent
     }
 
     /**
+     * Cancel a running MA session: send interrupt event then delete the session.
+     * Best-effort — errors are caught so the local DB row is always updated.
+     */
+    public function cancel(ClientResearchSession $session): void
+    {
+        $org = $session->client->organization;
+        $maId = $session->managed_agent_session_id;
+
+        if ($maId) {
+            // 1. Send interrupt event to stop the agent gracefully.
+            try {
+                $this->httpFor($org)->post(self::API_BASE . "/sessions/{$maId}/events", [
+                    'events' => [['type' => 'user.interrupt']],
+                ]);
+            } catch (\Throwable) { /* best-effort */ }
+
+            // 2. Delete the MA session to free resources.
+            try {
+                $this->httpFor($org)->delete(self::API_BASE . "/sessions/{$maId}");
+            } catch (\Throwable) { /* best-effort */ }
+        }
+
+        $session->update([
+            'status'           => 'terminated',
+            'completed_at'     => now(),
+            'progress_summary' => 'Pesquisa cancelada pelo usuário.',
+        ]);
+    }
+
+    /**
      * Build an authenticated HTTP client for the given organization (BYOK).
      * Uses the beta_ma header from config/services.php (managed-agents-2026-04-01).
      */

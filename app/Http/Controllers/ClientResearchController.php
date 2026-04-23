@@ -174,6 +174,18 @@ class ClientResearchController extends Controller
         });
     }
 
+    /** POST /clients/{client}/research/{session}/cancel */
+    public function cancel(Client $client, ClientResearchSession $session): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorizeClient($client);
+        abort_if($session->client_id !== $client->id, 404);
+
+        $this->agent->cancel($session);
+
+        return redirect()->route('clients.research.show', [$client, $session])
+            ->with('success', 'Pesquisa cancelada.');
+    }
+
     /**
      * Org-scoping guard: ensure the client belongs to the authenticated user's org.
      * Cross-org access → 403 (T-03-112 boundary).
