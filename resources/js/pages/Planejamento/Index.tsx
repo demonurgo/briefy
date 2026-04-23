@@ -77,6 +77,11 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
   // --- Detail modal state ---
   const [detailItem, setDetailItem] = useState<import('@/Components/PlanningCard').Suggestion | null>(null);
 
+  // --- Regenerate / discard planning state ---
+  const [regenerateTarget, setRegenerateTarget] = useState<PlanningDemand | null>(null);
+  const [regenerateInstructions, setRegenerateInstructions] = useState('');
+  const [confirmDeletePlan, setConfirmDeletePlan] = useState<number | null>(null);
+
   // --- Selection state ---
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const toggleSelect = (id: number) => {
@@ -233,7 +238,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
               {items.map(planning => (
                 <div key={planning.id} className="mb-6">
                   {/* Planning header */}
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="mb-2 flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-medium text-[#6b7280] dark:text-[#9ca3af]">
                       {planning.client.name}
                     </span>
@@ -247,6 +252,35 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
                         · {planning.planning_suggestions.length} {planning.planning_suggestions.length === 1 ? 'item' : 'itens'}
                       </span>
                     )}
+                    <div className="ml-auto flex items-center gap-1.5">
+                      {planning.ai_analysis?.status !== 'generating' && (
+                        <button
+                          onClick={() => { setRegenerateTarget(planning); setRegenerateInstructions(''); }}
+                          className="inline-flex items-center gap-1 rounded-[7px] border border-[#e5e7eb] dark:border-[#1f2937] px-2.5 py-1 text-xs text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors"
+                        >
+                          <AiIcon size={11} />
+                          Descartar e refazer
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (confirmDeletePlan === planning.id) {
+                            router.delete(route('planejamento.destroy', planning.id), { preserveScroll: true });
+                            setConfirmDeletePlan(null);
+                          } else {
+                            setConfirmDeletePlan(planning.id);
+                          }
+                        }}
+                        onBlur={() => setTimeout(() => setConfirmDeletePlan(null), 300)}
+                        className={`inline-flex items-center gap-1 rounded-[7px] px-2.5 py-1 text-xs transition-colors ${
+                          confirmDeletePlan === planning.id
+                            ? 'bg-red-500 text-white hover:bg-red-600'
+                            : 'border border-[#e5e7eb] dark:border-[#1f2937] text-[#9ca3af] hover:border-red-400 hover:text-red-500'
+                        }`}
+                      >
+                        {confirmDeletePlan === planning.id ? 'Confirmar exclusão' : '🗑'}
+                      </button>
+                    </div>
                   </div>
                   {/* Cards grid — 2 per row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,6 +418,48 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
           >
             <X size={16} />
           </button>
+        </div>
+      )}
+
+      {/* Regenerate planning modal */}
+      {regenerateTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setRegenerateTarget(null)}>
+          <div className="w-full max-w-md rounded-[16px] bg-white dark:bg-[#111827] shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb] mb-1">
+              Descartar e refazer planejamento
+            </h3>
+            <p className="text-sm text-[#6b7280] mb-4">
+              O planejamento atual de <strong>{regenerateTarget.client.name}</strong> será descartado e gerado novamente. Deixe instruções específicas se quiser (ex: datas comemorativas, temas a incluir/evitar).
+            </p>
+            <textarea
+              value={regenerateInstructions}
+              onChange={e => setRegenerateInstructions(e.target.value)}
+              placeholder="Ex: Incluir Dia das Mães (11/05), evitar posts sobre concorrentes, focar em educação financeira..."
+              className="w-full resize-none rounded-[10px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-4 py-3 text-sm min-h-[100px] text-[#111827] dark:text-[#f9fafb] placeholder-[#9ca3af] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20"
+              autoFocus
+            />
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setRegenerateTarget(null)}
+                className="flex-1 rounded-[10px] border border-[#e5e7eb] dark:border-[#1f2937] py-2 text-sm text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  router.post(
+                    route('planejamento.regenerate', regenerateTarget.id),
+                    { instructions: regenerateInstructions || null },
+                    { preserveScroll: true, onSuccess: () => setRegenerateTarget(null) }
+                  );
+                }}
+                className="flex-1 flex items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] hover:bg-[#6d28d9] py-2 text-sm font-semibold text-white transition-colors"
+              >
+                <AiIcon size={14} variant="dark" />
+                Refazer planejamento
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

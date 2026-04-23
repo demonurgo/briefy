@@ -39,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [\App\Http\Controllers\MonthlyPlanningController::class, 'index'])->name('index');
         Route::post('/generate', [\App\Http\Controllers\MonthlyPlanningController::class, 'generate'])->middleware('ai.meter')->name('generate');
         Route::get('/estimate-cost', [\App\Http\Controllers\MonthlyPlanningController::class, 'estimateCost'])->name('estimate-cost');
+        Route::post('/{demand}/regenerate', [\App\Http\Controllers\MonthlyPlanningController::class, 'regenerate'])->middleware('ai.meter')->name('regenerate');
+        Route::delete('/{demand}', [\App\Http\Controllers\MonthlyPlanningController::class, 'destroyPlan'])->name('destroy');
     });
     Route::post('/planning-suggestions/{suggestion}/convert', [\App\Http\Controllers\MonthlyPlanningController::class, 'convert'])->name('planning-suggestions.convert');
     Route::post('/planning-suggestions/convert-bulk', [\App\Http\Controllers\MonthlyPlanningController::class, 'convertBulk'])->name('planning-suggestions.convertBulk');

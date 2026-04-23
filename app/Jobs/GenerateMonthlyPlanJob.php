@@ -25,6 +25,7 @@ class GenerateMonthlyPlanJob implements ShouldQueue
         public readonly int $year,
         public readonly int $month,
         public readonly int $userId,
+        public readonly ?string $instructions = null,
     ) {
         $this->onQueue('ai');
     }
@@ -37,7 +38,7 @@ class GenerateMonthlyPlanJob implements ShouldQueue
 
         try {
             $anthropic = $factory->forOrganization($org);
-            $plan      = $generator->generate($client, $this->year, $this->month, $anthropic);
+            $plan      = $generator->generate($client, $this->year, $this->month, $anthropic, $this->instructions);
 
             DB::transaction(function () use ($demand, $plan) {
                 foreach ($plan['items'] as $item) {

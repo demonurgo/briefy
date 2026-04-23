@@ -79,6 +79,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
 
   /** Shared state for Brief generation — owned here so header button can trigger from any tab */
   const [generatingBrief, setGeneratingBrief] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
 
@@ -224,6 +225,26 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                   <Edit2 size={14} />
                   {t('common.edit')}
                 </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      if (!confirmDelete) { setConfirmDelete(true); return; }
+                      router.delete(route('demands.destroy', demand.id), {
+                        onSuccess: onClose,
+                        onFinish: () => setConfirmDelete(false),
+                      });
+                    }}
+                    onBlur={() => setTimeout(() => setConfirmDelete(false), 200)}
+                    className={`inline-flex items-center gap-1 rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      confirmDelete
+                        ? 'bg-red-500 text-white hover:bg-red-600'
+                        : 'border border-[#e5e7eb] text-[#9ca3af] hover:border-red-400 hover:text-red-500 dark:border-[#1f2937]'
+                    }`}
+                  >
+                    <Trash2 size={13} />
+                    {confirmDelete ? 'Confirmar exclusão' : ''}
+                  </button>
+                )}
                 <button onClick={onClose} className="rounded-[8px] p-1.5 text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#6b7280] transition-colors dark:hover:bg-[#1f2937]">
                   <X size={18} />
                 </button>

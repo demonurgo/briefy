@@ -222,6 +222,59 @@ class MonthlyPlanningController extends Controller
         ]);
     }
 
+    /** POST /planejamento/{demand}/regenerate */
+    public function regenerate(Request $request, Demand $demand): RedirectResponse
+    {
+        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->type !== 'planning', 422);
+
+        $request->validate([
+            'instructions' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $org = auth()->user()->organization;
+        if (! $org->hasAnthropicKey()) {
+            return back()->with('error', __('app.ai_key_missing'));
+        }
+
+        $existing = $demand->ai_analysis ?? [];
+        $year  = (int) ($existing['target_year']  ?? now()->year);
+        $month = (int) ($existing['target_month'] ?? now()->month);
+
+        // Delete existing suggestions and reset status.
+        $demand->planningSuggestions()->delete();
+        $demand->update([
+            'ai_analysis' => array_merge($existing, [
+                'status'       => 'generating',
+                'target_year'  => $year,
+                'target_month' => $month,
+            ]),
+        ]);
+
+        GenerateMonthlyPlanJob::dispatch(
+            $demand->id,
+            $demand->client_id,
+            $year,
+            $month,
+            auth()->id(),
+            $request->input('instructions'),
+        );
+
+        return back()->with('success', __('app.planning_generating'));
+    }
+
+    /** DELETE /planejamento/{demand} */
+    public function destroyPlan(Demand $demand): RedirectResponse
+    {
+        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->type !== 'planning', 422);
+
+        $demand->planningSuggestions()->delete();
+        $demand->delete();
+
+        return back()->with('success', 'Planejamento excluído.');
+    }
+
     private function authorizeSuggestion(PlanningSuggestion $suggestion): void
     {
         abort_if(

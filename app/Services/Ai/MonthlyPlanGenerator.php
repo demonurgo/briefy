@@ -13,7 +13,7 @@ class MonthlyPlanGenerator
 {
     public function __construct(private SpanEmitter $emitter) {}
 
-    public function generate(ClientModel $client, int $year, int $month, AnthropicClientInterface $anthropic): array
+    public function generate(ClientModel $client, int $year, int $month, AnthropicClientInterface $anthropic, ?string $instructions = null): array
     {
         $expectedCount = (int) $client->monthly_posts;
         abort_if($expectedCount <= 0, 422, 'Cliente sem quota mensal configurada.');
@@ -43,6 +43,9 @@ class MonthlyPlanGenerator
             $attempts++;
             try {
                 $userMsg = "Gere {$expectedCount} itens para {$year}-" . sprintf('%02d', $month) . ".";
+                if ($instructions) {
+                    $userMsg .= "\n\nINSTRUÇÕES ADICIONAIS DO USUÁRIO (seguir com prioridade):\n" . $instructions;
+                }
                 if ($lastError) {
                     $userMsg .= "\n\nTENTATIVA ANTERIOR FALHOU a validação do schema: " . json_encode($lastError);
                 }
