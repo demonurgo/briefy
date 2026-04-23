@@ -1,220 +1,281 @@
-# Briefy — Design Brief Completo
+# Briefy — Design System & Brand Specification
 
-## Contexto do produto
+## 1. Product Context
 
-**Briefy** é um SaaS B2B para agências de marketing e freelancers gerenciarem demandas de clientes com inteligência artificial integrada via Claude (Anthropic). O foco é produtividade, clareza e confiança — a agência sente que tem controle total sobre seus projetos e que a IA trabalha *com* ela, não no lugar dela.
+**Briefy** is a B2B SaaS platform designed for marketing agencies and freelancers to manage client demands using integrated artificial intelligence.
 
-**Público-alvo:** Agências de marketing pequenas/médias e freelancers criativos (designers, redatores, social media managers). Perfil: adultos de 25–40 anos, acostumados com ferramentas como Notion, Linear, Trello.
+### Objective
+Provide productivity, clarity, and operational control, with AI acting as an assistant rather than a replacement.
 
-**Tom:** Profissional mas acessível. Moderno sem ser frio. Inteligente sem ser intimidador.
+### Target Audience
+- Small to medium marketing agencies
+- Creative freelancers (designers, copywriters, social media managers)
+- Age range: 25–40
+- Familiar with tools such as Notion, Linear, and Trello
 
-**Plataforma:** Web app (desktop-first com suporte mobile via bottom navigation). PWA instalável.
+### Tone & Personality
+- Professional and accessible
+- Minimalist and modern
+- Intelligent without being intimidating
+- Creative with a sense of control
 
----
-
-## O que precisa ser criado
-
-### 1. Logo principal
-
-**Nome:** Briefy
-
-**Conceito esperado:**
-- Combinação de logotipo (ícone + texto "Briefy")
-- O ícone deve remeter a: briefing/documento + inteligência artificial + comunicação
-- Ideias de formas: balão de fala estilizado, documento com faísca/spark, letra B abstraída, caneta/lápis com elemento digital
-
-**Variações necessárias:**
-- Logo completo horizontal (ícone + texto lado a lado)
-- Logo compacto (só ícone, para favicon e sidebar colapsada)
-- Versão clara (para fundos escuros)
-- Versão escura (para fundos claros)
-
-**Formato de entrega:** SVG (obrigatório), PNG 512x512
-
-**Restrições:**
-- Sem gradientes complexos — deve funcionar em 1 ou 2 cores
-- Deve ser legível em 16x16px (favicon)
-- Sem fontes customizadas no ícone — formas geométricas puras
+### Platform
+- Web application (desktop-first)
+- Responsive with mobile support
+- Installable PWA
 
 ---
 
-### 2. Ícone do Assistente de IA (Chatbot flutuante)
+## 2. Logo System
 
-**Descrição:** Botão fixo no canto inferior direito de todas as telas. Abre um painel de chat com Claude.
+### Name
+Briefy
 
-**Conceito esperado:**
-- Ícone circular ou levemente arredondado (40–48px)
-- Deve transmitir: IA, assistente, conversa inteligente
-- Ideias: faísca/spark dentro de balão, estrela estilizada, forma abstrata de "mente", ondas/pulso
-- Deve ser diferente do ícone principal do Briefy, mas coerente com o sistema visual
-- Efeito opcional: brilho sutil ou pulsação animável (CSS)
+### Concept
+- Symbol inspired by wind/tornado motion
+- Represents:
+  - Speed (movement)
+  - Organization (layered flow)
+  - Intelligence (spark/star element)
 
-**Variações necessárias:**
-- Estado padrão (fechado)
-- Estado ativo/aberto (pode ser só uma rotação ou mudança de cor)
+### Style
+- Minimalist
+- Organic geometry
+- Smooth curves
+- No complex gradients
+- Scalable and legible at small sizes
 
-**Formato de entrega:** SVG
+### Variations
+- Horizontal (icon + wordmark)
+- Compact (icon only)
+- Light version (for dark backgrounds)
+- Dark version (for light backgrounds)
 
----
-
-### 3. Sistema de cores
-
-**Defina as seguintes variáveis (responda com hex codes):**
-
-#### Cor primária (brand)
-> Usada em: botões principais, links ativos na navegação, badges de status, indicadores de progresso
-
-- `primary-50` — fundo levíssimo (hover states, backgrounds sutis)
-- `primary-100` — fundo suave
-- `primary-400` — versão clara (textos em dark mode)
-- `primary-500` — **cor principal**
-- `primary-600` — hover de botões
-- `primary-700` — pressed/active
-- `primary-900` — texto escuro sobre fundo primário claro
-
-> Referência de estilo: pode ser roxo-azulado (como o Notion/Linear), azul vibrante, verde-azulado, ou outro que combine com o conceito do logo.
-
-#### Modo claro (light mode)
-- `bg-page` — fundo da página (ex: `#f9fafb` cinza levíssimo ou `#ffffff` branco puro)
-- `bg-surface` — fundo de cards, sidebar, header (ex: `#ffffff`)
-- `bg-surface-hover` — hover de itens de lista (ex: `#f3f4f6`)
-- `border` — cor de bordas e divisores (ex: `#e5e7eb`)
-- `text-primary` — texto principal (ex: `#111827`)
-- `text-secondary` — texto secundário, labels (ex: `#6b7280`)
-- `text-muted` — texto desabilitado/placeholder (ex: `#9ca3af`)
-
-#### Modo escuro (dark mode)
-- `bg-page` — fundo da página (ex: `#0a0a0a` preto, `#0f172a` azul muito escuro, `#111827` cinza escuro)
-- `bg-surface` — fundo de cards, sidebar, header
-- `bg-surface-hover` — hover de itens
-- `border` — bordas e divisores
-- `text-primary` — texto principal
-- `text-secondary` — texto secundário
-- `text-muted` — placeholder/desabilitado
-
-#### Cores semânticas
-- `success` — verde (confirmações, status "approved") — hex
-- `warning` — amarelo/laranja (prazos próximos, alertas) — hex
-- `error` — vermelho (erros, exclusões) — hex
-- `info` — azul claro (informações neutras) — hex
+### Formats
+- SVG (primary)
+- PNG (512x512)
 
 ---
 
-### 4. Tipografia
+## 3. AI Assistant Icon
 
-**Defina:**
+### Concept
+- Derived from the main symbol
+- Represents an active intelligent assistant
 
-#### Fonte principal (UI + corpo)
-> Usada em: botões, labels, texto geral, parágrafos
-> Deve ser do Google Fonts ou fonte do sistema
-> Opções populares para SaaS: Inter, Geist, DM Sans, Plus Jakarta Sans, Nunito, Outfit
+### Characteristics
+- Circular shape (40–48px) 
+- Simplified geometry
+- Visually consistent with brand
 
-- Nome da fonte:
-- Pesos usados: (ex: 400, 500, 600, 700)
+### States
+- Default (closed)
+- Active (subtle glow or color shift)
 
-#### Fonte de títulos (opcional — pode ser a mesma)
-> Usada em: headings H1–H3, nome da organização, títulos de página
-- Nome da fonte: (se diferente da principal)
-- Peso: (ex: 600, 700, 800)
-
-#### Escala tipográfica
-> Defina os tamanhos para cada nível:
-- `text-xs` — labels pequenos, badges (ex: 11px ou 12px)
-- `text-sm` — texto secundário, tabelas (ex: 13px ou 14px)
-- `text-base` — texto padrão (ex: 14px ou 16px)
-- `text-lg` — subtítulos (ex: 16px ou 18px)
-- `text-xl` — títulos de seção (ex: 18px ou 20px)
-- `text-2xl` — títulos de página (ex: 20px ou 24px)
+### Format
+- SVG
 
 ---
 
-### 5. Estilo visual dos componentes
+## 4. Color System
 
-**Responda cada item:**
+### 4.1 Primary Brand Colors
 
-#### Border radius
-- Botões: (ex: `rounded-md` = 6px, `rounded-lg` = 8px, `rounded-full` = pill)
-- Cards: (ex: `rounded-lg` = 8px, `rounded-xl` = 12px)
-- Inputs/campos: (ex: `rounded-md`, `rounded-lg`)
-- Modais/painéis: (ex: `rounded-xl`, `rounded-2xl`)
 
-#### Sombras
-- Cards: (ex: sem sombra + só borda, sombra sutil `shadow-sm`, sombra média `shadow-md`)
-- Modais: (ex: `shadow-xl` forte, `shadow-lg` médio)
-- Estilo geral: flat (sem sombra, só bordas) / com sombras sutis / sombras pronunciadas
+primary-50 : #f3edff
+primary-100 : #e0d4ff
+primary-400 : #a78bfa
+primary-500 : #7c3aed
+primary-600 : #6d28d9
+primary-700 : #5b21b6
+primary-900 : #2e1065
 
-#### Densidade/espaçamento
-- Compacto (padding pequeno, tabelas densas — estilo Linear)
-- Médio (padrão — estilo Notion)
-- Espaçado (muito respiro — estilo Stripe)
 
 ---
 
-### 6. Ícones de status das demandas
+### 4.2 Light Mode
 
-As demandas têm 5 status. Defina a cor de cada um (ou diga "use o padrão"):
 
-| Status | Label | Cor sugerida |
-|---|---|---|
-| `todo` | A fazer | cinza neutro |
-| `in_progress` | Em andamento | azul |
-| `awaiting_feedback` | Aguardando feedback | amarelo/laranja |
-| `in_review` | Em revisão | roxo |
-| `approved` | Aprovado | verde |
+bg-page : #f9fafb
+bg-surface : #ffffff
+bg-surface-hover : #f3f4f6
+border : #e5e7eb
 
-> Você pode confirmar, ajustar as cores, ou pedir algo diferente.
+text-primary : #111827
+text-secondary : #6b7280
+text-muted : #9ca3af
 
----
-
-### 7. Ícones de PWA (para instalar como app)
-
-**Necessários:**
-- `icon-192.png` — 192×192px
-- `icon-512.png` — 512×512px
-- `apple-touch-icon.png` — 180×180px (para iOS)
-- Fundo: usar a `primary-500` ou cor que combinar com o logo
-- O ícone no centro deve ser a versão compacta do logo (só o símbolo, sem texto)
 
 ---
 
-### 8. Referências visuais (opcional mas muito útil)
+### 4.3 Dark Mode
 
-**Responda:**
-- Algum SaaS/app que você gosta do visual? (Linear, Vercel, Notion, Stripe, Loom, etc.)
-- Estilo preferido: minimalista / moderno-bold / clean corporativo / dark-first / colorido
-- Alguma cor que definitivamente NÃO quer usar?
-- Algum exemplo de logo que admira (mesmo de outro setor)?
 
----
+bg-page : #0b0f14
+bg-surface : #111827
+bg-surface-hover : #1f2937
+border : #1f2937
 
-### 9. Elementos adicionais (nice to have)
+text-primary : #f9fafb
+text-secondary : #9ca3af
+text-muted : #6b7280
 
-Se a IA de design conseguir gerar, seria ótimo ter também:
-- **Empty state illustration** — imagem vetorial simples para telas sem dados (ex: lista de clientes vazia)
-- **Favicon ICO/SVG** — versão 32×32 do ícone
-- **Open Graph image** — 1200×630px para compartilhamento em redes sociais
 
 ---
 
-## Como usar este brief
+### 4.4 Semantic Colors
 
-1. Copie este documento
-2. Cole em uma IA de design (Ideogram, Midjourney com /describe, ChatGPT com DALL-E, Galileo AI, v0.dev, etc.)
-3. Para o **logo e ícone do chatbot**: use ferramentas como Ideogram, Looka, ou peça para uma IA gerar o SVG
-4. Para o **sistema de cores e tipografia**: preencha os campos em branco e me envie de volta preenchido
-5. Para as **cores de status**: confirme ou ajuste a tabela
-6. Com tudo respondido, atualizo o `tailwind.config.js`, o design spec e retomo a implementação frontend
+
+success : #10b981
+warning : #f59e0b
+error : #ef4444
+info : #3b82f6
+
 
 ---
 
-## Checklist de entrega para o desenvolvedor
+## 5. Typography
 
-Quando tiver tudo, me envie:
+### Primary Font
+- Name: Inter
+- Weights: 400, 500, 600, 700
 
-- [ ] Logo SVG (completo + compacto + variações claro/escuro)
-- [ ] Ícone do chatbot SVG
-- [ ] Ícones PWA PNG (192, 512, 180)
-- [ ] Hex codes de todas as cores (preenchidos acima)
-- [ ] Nome da(s) fonte(s) escolhida(s)
-- [ ] Border radius e estilo de sombras escolhidos
-- [ ] Tabela de cores de status preenchida
+### Headings
+- Same font (Inter)
+- Weights: 600, 700
+
+### Type Scale
+
+
+text-xs : 12px
+text-sm : 14px
+text-base : 16px
+text-lg : 18px
+text-xl : 20px
+text-2xl : 24px
+
+
+---
+
+## 6. Component Style
+
+### Border Radius
+
+
+buttons : 8px
+cards : 12px
+inputs : 8px
+modals : 16px
+
+
+---
+
+### Shadows
+
+
+cards : shadow-sm
+modals : shadow-lg
+style : subtle elevation
+
+
+---
+
+### Spacing Density
+
+
+mode: medium
+reference: Notion-style layout
+
+
+---
+
+## 7. Task Status Colors
+
+
+todo : #9ca3af
+in_progress : #3b82f6
+awaiting_feedback : #f59e0b
+in_review : #8b5cf6
+approved : #10b981
+
+
+---
+
+## 8. PWA Icons
+
+### Sizes
+- 192x192
+- 512x512
+- 180x180 (Apple)
+
+### Guidelines
+- Background: primary-500 (#7c3aed)
+- Icon: compact logo (symbol only)
+- No text
+
+---
+
+## 9. Visual Elements
+
+### 9.1 Light Background
+- Base: white or very light gray
+- Soft flowing lines (wind concept)
+- Low-opacity purple accents
+- Decorative elements:
+  - dots
+  - stars
+  - organic shapes
+
+---
+
+### 9.2 Dark Background
+- Base: #0b0f14
+- Flowing lines with subtle purple glow
+- Slight neon effect
+- Tech-oriented aesthetic
+
+---
+
+### 9.3 Empty State Illustration
+
+#### Light Version
+- Outline illustration style
+- Soft purple strokes
+- Elements:
+  - document/list
+  - wind motion lines
+  - leaves and small decorative shapes
+
+#### Dark Version
+- Same composition
+- Purple glow accents
+- Higher contrast
+- Dark background integration
+
+---
+
+## 10. Visual Direction
+
+### Style Principles
+- Minimalist
+- Fluid
+- Technological
+- Dark-first compatibility
+
+### Core Elements
+- Motion (wind flow)
+- Curved lines
+- Subtle decorative details
+- Clean visual hierarchy
+
+---
+
+## 11. Deliverables
+
+- Logo (SVG: full + compact)
+- Chatbot icon (SVG)
+- Color system (hex tokens)
+- Typography system
+- UI tokens (spacing, radius, shadows)
+- Empty state illustrations (light/dark)
+- Background textures (light/dark)

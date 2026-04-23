@@ -4,8 +4,71 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< Updated upstream
     "content-hash": "164d3f0a2c6f53bedb6ba8516f557d32",
+=======
+    "content-hash": "8879adfdf41a84b6a4410ef58d3b8475",
+>>>>>>> Stashed changes
     "packages": [
+        {
+            "name": "anthropic-ai/sdk",
+            "version": "v0.16.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/anthropics/anthropic-sdk-php.git",
+                "reference": "ac047bba73d41f1319b99a27b295b309e0f07ec4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/anthropics/anthropic-sdk-php/zipball/ac047bba73d41f1319b99a27b295b309e0f07ec4",
+                "reference": "ac047bba73d41f1319b99a27b295b309e0f07ec4",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "php-http/discovery": "^1",
+                "psr/http-client": "^1",
+                "psr/http-client-implementation": "^1",
+                "psr/http-factory-implementation": "^1",
+                "psr/http-message": "^1|^2"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "^3.368",
+                "friendsofphp/php-cs-fixer": "^3",
+                "google/auth": "^1.49",
+                "nyholm/psr7": "^1",
+                "pestphp/pest": "^3",
+                "php-http/mock-client": "^1",
+                "phpstan/extension-installer": "^1",
+                "phpstan/phpstan": "^2",
+                "phpstan/phpstan-phpunit": "^2",
+                "phpunit/phpunit": "^11",
+                "symfony/http-client": "^7"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allows using the AWS Bedrock, AWS gateway, and Bedrock Mantle SDKs",
+                "google/auth": "Allows using the Google Vertex SDK"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Version.php"
+                ],
+                "psr-4": {
+                    "Anthropic\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Anthropic PHP SDK",
+            "support": {
+                "issues": "https://github.com/anthropics/anthropic-sdk-php/issues",
+                "source": "https://github.com/anthropics/anthropic-sdk-php/tree/v0.16.0"
+            },
+            "time": "2026-04-16T14:30:55+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.8",
@@ -3779,6 +3842,7 @@
             "time": "2024-10-02T11:20:13+00:00"
         },
         {
+<<<<<<< Updated upstream
             "name": "php-http/guzzle7-adapter",
             "version": "1.1.0",
             "source": {
@@ -3947,6 +4011,8 @@
             "time": "2024-03-15T13:55:21+00:00"
         },
         {
+=======
+>>>>>>> Stashed changes
             "name": "phpoption/phpoption",
             "version": "1.9.5",
             "source": {

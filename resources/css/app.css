@@ -9,3 +9,17 @@
     @apply bg-[#f9fafb] dark:bg-[#0b0f14] text-[#111827] dark:text-[#f9fafb] transition-colors duration-200;
   }
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .kanban-scroll::-webkit-scrollbar { height: 6px; }
+  .kanban-scroll::-webkit-scrollbar-track { background: transparent; }
+  .kanban-scroll::-webkit-scrollbar-thumb {
+    background-color: #7c3aed;
+    border-radius: 9999px;
+  }
+  .kanban-scroll::-webkit-scrollbar-thumb:hover { background-color: #6d28d9; }
+  .kanban-scroll { scrollbar-width: thin; scrollbar-color: #7c3aed transparent; }
+}
