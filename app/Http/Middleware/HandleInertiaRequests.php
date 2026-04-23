@@ -40,7 +40,16 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'role' => $user->role,
                     'preferences' => $user->preferences,
-                    'organization' => $user->organization?->only(['id', 'name', 'slug', 'logo']),
+                    'organization' => $user->organization ? array_merge(
+                        $user->organization->only(['id', 'name', 'slug', 'logo']),
+                        [
+                            'has_anthropic_key'       => $user->organization->hasAnthropicKey(),
+                            'anthropic_api_key_mask'  => $user->organization->anthropic_api_key_mask,
+                            'key_valid'               => (bool) ($user->organization->anthropic_key_valid ?? false),          // M3
+                            'managed_agents_enabled'  => (bool) ($user->organization->anthropic_managed_agents_ok ?? false),  // M3
+                            'last_key_check_at'       => optional($user->organization->anthropic_key_checked_at)->toIso8601String(), // M3
+                        ]
+                    ) : null,
                 ] : null,
             ],
             'locale' => $user?->getLocale() ?? 'pt-BR',

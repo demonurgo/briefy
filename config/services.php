@@ -36,4 +36,12 @@ return [
         ],
     ],
 
+    'anthropic' => [
+        'api_key_fallback' => env('ANTHROPIC_API_KEY'),           // dev/test only — NOT used in production paths
+        'beta_ma'          => 'managed-agents-2026-04-01',
+        'model_complex'    => env('ANTHROPIC_MODEL_COMPLEX', 'claude-opus-4-7'),
+        'model_chat'       => env('ANTHROPIC_MODEL_CHAT',    'claude-sonnet-4-6'),
+        'model_cheap'      => env('ANTHROPIC_MODEL_CHEAP',   'claude-haiku-4-5'),
+    ],
+
 ];

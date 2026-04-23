@@ -21,5 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // M4 — never flash raw Anthropic API key back to session on validation failure
+        $exceptions->dontFlash([
+            'current_password',
+            'password',
+            'password_confirmation',
+            'anthropic_api_key',
+        ]);
     })->create();
