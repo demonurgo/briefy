@@ -43,7 +43,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 3. AI Integration | 6/13 | In progress | - |
+| 3. AI Integration | 7/13 | In progress | - |
 | 4. Real-time Collaboration | 0/? | Not started | - |
 | 5. Dashboard + Onboarding | 0/? | Not started | - |
 
@@ -73,7 +73,7 @@ Plans:
 - [x] 03-08-PLAN.md - Shared frontend (AiIcon, useAiStream, useTypewriter, AiMarkdown, i18n)
 - [ ] 03-09-PLAN.md - DemandDetailModal 4-tab refactor + BriefTab + ChatTab
 - [ ] 03-10-PLAN.md - ClientForm monthly plan section + Clients/Index badges
-- [ ] 03-11-PLAN.md - /planejamento page + Dashboard widget + Sidebar nav
+- [x] 03-11-PLAN.md - /planejamento page + Dashboard widget + Sidebar nav
 - [ ] 03-12-PLAN.md - Client Research Managed Agent (hackathon prize track)
 - [ ] 03-13-PLAN.md - AI Usage Meter + Observability (Redis + OTEL, optional)
 **UI hint:** yes
@@ -143,4 +143,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-23 — Plan 03-08 complete (Shared AI frontend: useAiStream + useTypewriter + AiIcon + AiMarkdown + full 3-locale i18n tree)*
+*Last updated: 2026-04-22 — Plan 03-11 complete (/planejamento page + DashboardPlanningWidget + Sidebar nav — human verification approved)*

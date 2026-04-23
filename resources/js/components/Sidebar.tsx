@@ -12,7 +12,7 @@ const navItems = [
   { key: 'nav.dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { key: 'nav.clients', icon: Users, href: '/clients' },
   { key: 'nav.demands', icon: ClipboardList, href: '/demands' },
-  { key: 'nav.planning', icon: Calendar, href: '/planning' },
+  { key: 'nav.planning', icon: Calendar, href: '/planejamento' },
 ];
 
 interface Props {

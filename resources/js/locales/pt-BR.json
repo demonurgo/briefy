@@ -58,6 +58,7 @@
     "bulkConvert": "Converter {{count}} selecionados",
     "bulkCount": "{{count}} selecionados",
     "bulkConvertSuccess": "{{count}} demandas criadas.",
+    "costConfirmBody": "Isso irá gerar {{count}} sugestões de conteúdo para o mês selecionado.",
     "viewDemands": "Ver demandas",
     "openFromWidget": "Ver planejamento",
     "allClients": "Todos os clientes",
