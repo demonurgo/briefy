@@ -105,12 +105,13 @@ class MonthlyPlanningController extends Controller
                 'organization_id' => $planningDemand->organization_id,
                 'client_id'       => $planningDemand->client_id,
                 'created_by'      => auth()->id(),
-                'title'           => $suggestion->title,
-                'description'     => $suggestion->description,
-                'channel'         => $suggestion->channel,
-                'deadline'        => $suggestion->date,
-                'type'            => 'demand',
-                'status'          => 'todo',
+                'title'       => $suggestion->title,
+                'objective'   => $suggestion->description,   // AI brief → objective
+                'description' => null,                        // user fills with execution details
+                'channel'     => $suggestion->channel,
+                'deadline'    => $suggestion->date,
+                'type'        => 'demand',
+                'status'      => 'todo',
             ]);
             $suggestion->update([
                 'status' => 'accepted',
@@ -140,9 +141,13 @@ class MonthlyPlanningController extends Controller
                     'organization_id' => $s->demand->organization_id,
                     'client_id' => $s->demand->client_id,
                     'created_by' => auth()->id(),
-                    'title' => $s->title, 'description' => $s->description,
-                    'channel' => $s->channel, 'deadline' => $s->date,
-                    'type' => 'demand', 'status' => 'todo',
+                    'title'       => $s->title,
+                    'objective'   => $s->description,
+                    'description' => null,
+                    'channel'     => $s->channel,
+                    'deadline'    => $s->date,
+                    'type'        => 'demand',
+                    'status'      => 'todo',
                 ]);
                 $s->update(['status' => 'accepted', 'converted_demand_id' => $new->id]);
                 $count++;

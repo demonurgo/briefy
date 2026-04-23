@@ -53,7 +53,7 @@ export function DemandForm({ data, errors, processing, setData, onSubmit, submit
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelClass}>{t('demands.objective')}</label>
-          <input type="text" value={data.objective} onChange={e => setData('objective', e.target.value)} className={inputClass} />
+          <textarea value={data.objective} onChange={e => setData('objective', e.target.value)} className={inputClass + ' resize-none'} rows={4} />
           <InputError message={errors.objective} className="mt-1.5" />
         </div>
 
