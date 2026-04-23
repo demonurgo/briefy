@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict aElVUrctFFyXkjrHSgsOWhaVtqB1gAQRl2AxQooVc2Rr0hMVukyvnL4GdGGbwJQ
+\restrict yL2GxEf1ODO4nWwhnfBhyHA9qY6Bdns3qTDxJiY41BclKOIWOeKNYeqKV3i03r4
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.9
@@ -22,6 +22,43 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: activity_logs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.activity_logs (
+    id bigint NOT NULL,
+    organization_id bigint NOT NULL,
+    user_id bigint,
+    action_type character varying(255) NOT NULL,
+    subject_type character varying(50) NOT NULL,
+    subject_id bigint NOT NULL,
+    subject_name character varying(255) NOT NULL,
+    metadata json,
+    created_at timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT activity_logs_action_type_check CHECK (((action_type)::text = ANY ((ARRAY['demand.status_changed'::character varying, 'demand.created'::character varying, 'demand.comment_added'::character varying, 'demand.assigned'::character varying, 'demand.archived'::character varying, 'demand.restored'::character varying, 'client.created'::character varying, 'member.invited'::character varying])::text[])))
+);
+
+
+--
+-- Name: activity_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.activity_logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.activity_logs_id_seq OWNED BY public.activity_logs.id;
+
 
 --
 -- Name: ai_conversation_messages; Type: TABLE; Schema: public; Owner: -
@@ -246,6 +283,7 @@ CREATE TABLE public.client_research_sessions (
     progress_summary text,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
+    full_report json,
     CONSTRAINT client_research_sessions_status_check CHECK (((status)::text = ANY ((ARRAY['queued'::character varying, 'running'::character varying, 'idle'::character varying, 'completed'::character varying, 'failed'::character varying, 'terminated'::character varying])::text[])))
 );
 
@@ -289,7 +327,8 @@ CREATE TABLE public.clients (
     monthly_posts smallint,
     monthly_plan_notes text,
     planning_day smallint,
-    social_handles json
+    social_handles json,
+    important_dates json
 );
 
 
@@ -394,8 +433,8 @@ CREATE TABLE public.demands (
     type character varying(255) DEFAULT 'demand'::character varying NOT NULL,
     title character varying(255) NOT NULL,
     description text,
-    objective character varying(255),
-    tone character varying(255),
+    objective text,
+    tone text,
     channel character varying(255),
     deadline date,
     status character varying(255) DEFAULT 'todo'::character varying NOT NULL,
@@ -405,6 +444,10 @@ CREATE TABLE public.demands (
     assigned_to bigint,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
+    deleted_at timestamp(0) without time zone,
+    archived_at timestamp(0) without time zone,
+    priority character varying(255) DEFAULT 'medium'::character varying NOT NULL,
+    CONSTRAINT demands_priority_check CHECK (((priority)::text = ANY ((ARRAY['high'::character varying, 'medium'::character varying, 'low'::character varying])::text[]))),
     CONSTRAINT demands_status_check CHECK (((status)::text = ANY ((ARRAY['todo'::character varying, 'in_progress'::character varying, 'awaiting_feedback'::character varying, 'in_review'::character varying, 'approved'::character varying])::text[]))),
     CONSTRAINT demands_type_check CHECK (((type)::text = ANY ((ARRAY['demand'::character varying, 'planning'::character varying])::text[])))
 );
@@ -461,6 +504,43 @@ CREATE SEQUENCE public.failed_jobs_id_seq
 --
 
 ALTER SEQUENCE public.failed_jobs_id_seq OWNED BY public.failed_jobs.id;
+
+
+--
+-- Name: invitations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.invitations (
+    id bigint NOT NULL,
+    organization_id bigint NOT NULL,
+    invited_by bigint NOT NULL,
+    email character varying(255) NOT NULL,
+    role character varying(255) DEFAULT 'collaborator'::character varying NOT NULL,
+    token uuid NOT NULL,
+    accepted_at timestamp(0) without time zone,
+    expires_at timestamp(0) without time zone NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+--
+-- Name: invitations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.invitations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: invitations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.invitations_id_seq OWNED BY public.invitations.id;
 
 
 --
@@ -544,6 +624,20 @@ CREATE SEQUENCE public.migrations_id_seq
 --
 
 ALTER SEQUENCE public.migrations_id_seq OWNED BY public.migrations.id;
+
+
+--
+-- Name: organization_user; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.organization_user (
+    user_id bigint NOT NULL,
+    organization_id bigint NOT NULL,
+    role character varying(255) DEFAULT 'collaborator'::character varying NOT NULL,
+    joined_at timestamp(0) without time zone,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
 
 
 --
@@ -662,11 +756,12 @@ CREATE TABLE public.users (
     remember_token character varying(100),
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    organization_id bigint,
+    current_organization_id bigint,
     role character varying(255) DEFAULT 'admin'::character varying NOT NULL,
     preferences json DEFAULT '{"locale":"pt-BR","theme":"light"}'::json NOT NULL,
     last_login_at timestamp(0) without time zone,
-    CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['admin'::character varying, 'collaborator'::character varying])::text[])))
+    avatar character varying(255),
+    CONSTRAINT users_role_check CHECK (((role)::text = ANY ((ARRAY['owner'::character varying, 'admin'::character varying, 'collaborator'::character varying])::text[])))
 );
 
 
@@ -687,6 +782,13 @@ CREATE SEQUENCE public.users_id_seq
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: activity_logs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_logs ALTER COLUMN id SET DEFAULT nextval('public.activity_logs_id_seq'::regclass);
 
 
 --
@@ -767,6 +869,13 @@ ALTER TABLE ONLY public.failed_jobs ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
+-- Name: invitations id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invitations ALTER COLUMN id SET DEFAULT nextval('public.invitations_id_seq'::regclass);
+
+
+--
 -- Name: jobs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -799,6 +908,14 @@ ALTER TABLE ONLY public.planning_suggestions ALTER COLUMN id SET DEFAULT nextval
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: activity_logs activity_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_logs
+    ADD CONSTRAINT activity_logs_pkey PRIMARY KEY (id);
 
 
 --
@@ -914,6 +1031,22 @@ ALTER TABLE ONLY public.failed_jobs
 
 
 --
+-- Name: invitations invitations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invitations
+    ADD CONSTRAINT invitations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: invitations invitations_token_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invitations
+    ADD CONSTRAINT invitations_token_unique UNIQUE (token);
+
+
+--
 -- Name: job_batches job_batches_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -935,6 +1068,14 @@ ALTER TABLE ONLY public.jobs
 
 ALTER TABLE ONLY public.migrations
     ADD CONSTRAINT migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: organization_user organization_user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization_user
+    ADD CONSTRAINT organization_user_pkey PRIMARY KEY (user_id, organization_id);
 
 
 --
@@ -994,6 +1135,20 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: activity_logs_organization_id_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX activity_logs_organization_id_created_at_index ON public.activity_logs USING btree (organization_id, created_at);
+
+
+--
+-- Name: activity_logs_subject_type_subject_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX activity_logs_subject_type_subject_id_index ON public.activity_logs USING btree (subject_type, subject_id);
+
+
+--
 -- Name: cache_expiration_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1029,6 +1184,20 @@ CREATE INDEX client_research_sessions_managed_agent_session_id_index ON public.c
 
 
 --
+-- Name: invitations_email_organization_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX invitations_email_organization_id_index ON public.invitations USING btree (email, organization_id);
+
+
+--
+-- Name: invitations_token_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX invitations_token_index ON public.invitations USING btree (token);
+
+
+--
 -- Name: jobs_queue_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1047,6 +1216,22 @@ CREATE INDEX sessions_last_activity_index ON public.sessions USING btree (last_a
 --
 
 CREATE INDEX sessions_user_id_index ON public.sessions USING btree (user_id);
+
+
+--
+-- Name: activity_logs activity_logs_organization_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_logs
+    ADD CONSTRAINT activity_logs_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: activity_logs activity_logs_user_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.activity_logs
+    ADD CONSTRAINT activity_logs_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL;
 
 
 --
@@ -1194,6 +1379,38 @@ ALTER TABLE ONLY public.demands
 
 
 --
+-- Name: invitations invitations_invited_by_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invitations
+    ADD CONSTRAINT invitations_invited_by_foreign FOREIGN KEY (invited_by) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: invitations invitations_organization_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invitations
+    ADD CONSTRAINT invitations_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: organization_user organization_user_organization_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization_user
+    ADD CONSTRAINT organization_user_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE;
+
+
+--
+-- Name: organization_user organization_user_user_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.organization_user
+    ADD CONSTRAINT organization_user_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: planning_suggestions planning_suggestions_converted_demand_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1214,20 +1431,20 @@ ALTER TABLE ONLY public.planning_suggestions
 --
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_organization_id_foreign FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE SET NULL;
+    ADD CONSTRAINT users_organization_id_foreign FOREIGN KEY (current_organization_id) REFERENCES public.organizations(id) ON DELETE SET NULL;
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict aElVUrctFFyXkjrHSgsOWhaVtqB1gAQRl2AxQooVc2Rr0hMVukyvnL4GdGGbwJQ
+\unrestrict yL2GxEf1ODO4nWwhnfBhyHA9qY6Bdns3qTDxJiY41BclKOIWOeKNYeqKV3i03r4
 
 --
 -- PostgreSQL database dump
 --
 
-\restrict KI0UAAXRb31q1feVlYhxiKR1FdFusSzCYO1qoi641WTVCfYCr2VFksL9IdQVuvt
+\restrict GVzH3hqQ4lCYdc3DJS4Z00uTg249GRONLJG5ajpZUcsSPSvY25CTNbiukVbbVuf
 
 -- Dumped from database version 17.9
 -- Dumped by pg_dump version 17.9
@@ -1270,6 +1487,17 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 19	2026_04_22_200300_add_compacted_at_to_ai_conversations	4
 20	2026_04_22_200400_extend_client_ai_memory_for_phase3	4
 21	2026_04_22_200500_add_channel_to_planning_suggestions_table	4
+22	2026_04_23_131516_change_objective_tone_to_text_in_demands_table	5
+23	2026_04_23_134958_add_soft_deletes_to_demands_table	6
+24	2026_04_23_140500_add_archived_at_to_demands_table	7
+25	2026_04_23_143332_add_full_report_to_client_research_sessions	8
+26	2026_04_23_161532_add_important_dates_to_clients_table	9
+27	2026_04_23_300000_create_organization_user_table_and_rename_column	10
+28	2026_04_23_300100_create_invitations_table	11
+29	2026_04_23_300200_add_avatar_to_users_table	11
+30	2026_04_23_300300_expand_role_enum_on_users_table	11
+31	2026_04_23_200000_create_activity_logs_table	12
+32	2026_04_23_200001_add_priority_to_demands_table	12
 \.
 
 
@@ -1277,12 +1505,12 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 21, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 32, true);
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict KI0UAAXRb31q1feVlYhxiKR1FdFusSzCYO1qoi641WTVCfYCr2VFksL9IdQVuvt
+\unrestrict GVzH3hqQ4lCYdc3DJS4Z00uTg249GRONLJG5ajpZUcsSPSvY25CTNbiukVbbVuf
 
