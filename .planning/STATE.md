@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — AI + Real-time + Dashboard
 status: executing
-stopped_at: Completed 03-08-PLAN.md (Shared AI frontend hooks) — Plan 09 next
-last_updated: "2026-04-23T02:38:00Z"
-last_activity: 2026-04-23 — Plan 07 (Memory extraction + compaction) complete
+stopped_at: Phase 3 complete — Phase 4 (Real-time Collaboration) next
+last_updated: "2026-04-22T00:00:00Z"
+last_activity: 2026-04-22 — Phase 3 (AI Integration) verified and complete
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 14
-  completed_plans: 9
-  percent: 64
+  completed_plans: 13
+  percent: 43
 ---
 
 # Project State
@@ -21,25 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** Agency teams can create, track, and complete client demands efficiently, with AI accelerating brief creation.
-**Current focus:** Milestone v1.1 — Phase 3: AI Integration
+**Current focus:** Milestone v1.1 — Phase 4: Real-time Collaboration
 
 ## Current Position
 
-Phase: 3 — AI Integration
-Plan: 03-09 (Plans 01, 04, 05, 06, 07, 08 complete)
-Status: In progress
-Last activity: 2026-04-23 — Plan 08 (Shared AI frontend hooks + i18n) complete
+Phase: 4 — Real-time Collaboration
+Plan: Not started
+Status: Phase 3 complete — ready to begin Phase 4 planning
+Last activity: 2026-04-22 — Phase 3 verified complete (13/13 plans, all 5 success criteria met)
 
-Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
+Progress: [████░░░░░░] 43% (v1.0 complete: 2/5 phases; v1.1 Phase 3 complete)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: ~12 (estimated, phases 1-2)
+- Total plans completed: ~25 (phases 1-3 combined)
 - v1.0 phases: 2 phases shipped
-
-*Metrics will be tracked starting v1.1*
+- v1.1 Phase 3: 13 plans in 1 session (2026-04-22)
 
 ## Accumulated Context
 
@@ -68,7 +67,6 @@ Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 Chat: ChatStreamer is NOT final — allows anonymous test double subclasses
 - v1.1 Chat: Two-block system prompt — stable cached prefix (ephemeral) + volatile comments tail outside cache (80% cache hits on turns 2..N)
 - v1.1 Chat: User message persisted BEFORE eventStream() opens — survives client disconnect (AI-SPEC pattern b)
-- v1.1 Chat: Job stubs (ExtractClientMemoryJob, CompactConversationJob) in app/Jobs/ — dispatch() works, full impl Plan 07 (DONE)
 - v1.1 Memory: ClientMemoryExtractor NOT final — anonymous subclass test doubles; accepts AnthropicClientInterface (BYOK pattern)
 - v1.1 Memory: 4-gate pipeline — schema, confidence ≥0.6, PII scrub (CPF/CNPJ/email/BR phone), idempotent upsert by insight_hash
 - v1.1 Memory: client_id for upsert always from $demand->client — never from tool output (T-03-62)
@@ -82,12 +80,17 @@ Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 Frontend: useAiStream covers only POST delta-frame streams; GET custom-event SSE stays on native EventSource (v1.2 consolidation backlog per WARNING 8)
 - v1.1 Frontend: AiMarkdown uses per-element className overrides on react-markdown components — no @tailwindcss/typography plugin
 - v1.1 i18n: All AI, planning, clients.monthlyPlan/badges keys added to all 3 locales in Plan 08 — no merge conflicts in downstream plans
+- v1.1 MA: ClientResearchTimelineModal uses native EventSource (not useAiStream) — GET SSE stream, no POST body (WARNING 8 exception)
+- v1.1 MA: PollClientResearchSessionJob is self-rescheduling — delays 30s while running, 60s on complete/failed
+- v1.1 Observability: SpanEmitter is silent no-op when OTEL SDK absent or OTEL_EXPORTER_OTLP_ENDPOINT unset — zero runtime overhead
+- v1.1 Dashboard widget: DashboardPlanningWidget uses localStorage key pattern `planning_reminder_dismissed:{clientId}:{YYYY-MM}` + forceUpdate(n=>n+1) for dismiss re-render
 
 ### Pending Todos
 
 - Configure Anthropic API key in `.env` (ANTHROPIC_API_KEY) for dev/test fallback (forTesting())
 - anthropic-ai/sdk ^0.16.0 confirmed installed in vendor/ (Wave 0)
 - Run `php artisan reverb:install` before starting Phase 4
+- Run `php artisan migrate` to apply all 6 Phase 3 migrations to dev DB
 
 ### Blockers/Concerns
 
@@ -106,9 +109,13 @@ Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 
 | AI | Multi-turn session history per demand | Deferred v2 | v1.1 planning |
 | Real-time | Live cursor/presence on Kanban | Deferred v2 | v1.1 planning |
 | Real-time | Demand locking during edit | Deferred v2 | v1.1 planning |
+| AI Chat | Conversation picker dropdown (older conversations) | Deferred v1.2 | Phase 3 (FLAG 11/D-13) |
+| SSE | Consolidate useAiStream + EventSource into unified hook | Deferred v1.2 | Phase 3 (WARNING 8) |
+| MA | 03-12b — [backlog item] | Deferred v1.2 | Phase 3 |
 
 ## Session Continuity
 
-Last session: 2026-04-23
-Stopped at: Completed 03-08-PLAN.md (Shared AI frontend hooks) — Plan 09 next
+Last session: 2026-04-22
+Stopped at: Phase 3 complete — all 13 plans verified
 Resume file: None
+Next: Begin Phase 4 planning (Real-time Collaboration — Laravel Reverb + Echo)

@@ -26,6 +26,28 @@
 
 </details>
 
+<details>
+<summary><strong>v1.1 — AI + Real-time + Dashboard (Phases 3–5)</strong></summary>
+
+**Started:** 2026-04-22
+**Goal:** Add AI assistant capabilities, live collaboration, and analytics dashboard.
+
+### Phases
+
+- [x] **Phase 3: AI Integration** — Brief generation, AI chat, streaming responses, client memory, monthly planning generation
+- [ ] **Phase 4: Real-time Collaboration** — Live kanban updates, live comments, in-app notifications with unread bell
+- [ ] **Phase 5: Dashboard + Onboarding** — Metrics charts, activity feed, workload views, guided first-use flow
+
+### Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 3. AI Integration | 13/13 | Complete | 2026-04-22 |
+| 4. Real-time Collaboration | 0/? | Not started | - |
+| 5. Dashboard + Onboarding | 0/? | Not started | - |
+
+</details>
+
 ---
 
 ## v1.1 — AI + Real-time + Dashboard (Phases 3–5)
@@ -35,7 +57,7 @@
 
 ### Phases
 
-- [ ] **Phase 3: AI Integration** — Brief generation, AI chat, streaming responses, client memory, monthly planning generation
+- [x] **Phase 3: AI Integration** — Brief generation, AI chat, streaming responses, client memory, monthly planning generation
 - [ ] **Phase 4: Real-time Collaboration** — Live kanban updates, live comments, in-app notifications with unread bell
 - [ ] **Phase 5: Dashboard + Onboarding** — Metrics charts, activity feed, workload views, guided first-use flow
 
@@ -43,7 +65,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 3. AI Integration | 6/13 | In progress | - |
+| 3. AI Integration | 13/13 | Complete | 2026-04-22 |
 | 4. Real-time Collaboration | 0/? | Not started | - |
 | 5. Dashboard + Onboarding | 0/? | Not started | - |
 
@@ -55,27 +77,28 @@
 **Goal:** Users can accelerate demand work with AI — generating structured briefs and chatting with a context-aware assistant that remembers client patterns.
 **Depends on:** Phase 2 (demands and clients must exist as AI context)
 **Requirements:** AI-01, AI-02, AI-03, AI-04, AI-05, AI-06, AI-07, MPLAN-01, MPLAN-02, MPLAN-03, MPLAN-04, MPLAN-05
+**Status:** Complete — 2026-04-22
 **Success Criteria** (what must be TRUE):
   1. User clicks "Generate Brief" on a demand and a structured brief appears in the demand detail, built from the demand's title, client, channel, objective, tone, and description fields
   2. User can click "Regenerate Brief" to produce a new version, replacing the previous one
   3. User opens the AI chat tab on a demand, types a question, and receives a response that references the demand's metadata, files list, and past comments — without the user having to re-explain context
   4. AI responses stream progressively character by character rather than appearing all at once after a delay
   5. AI incorporates client-specific memory (tone preferences, past patterns) on subsequent demands for the same client, and updates that memory after each interaction
-**Plans:** 13 plans
+**Plans:** 13 plans (12b deferred to v1.2)
 Plans:
 - [x] 03-01-PLAN.md - BYOK infrastructure (encrypted API key, AnthropicClientFactory, /settings/ai page, Inertia shared props)
-- [ ] 03-02-PLAN.md - Schema migrations (monthly_plan, client_research_sessions, compacted_at) + BLOCKING migrate
-- [ ] 03-03-PLAN.md - AGPL-3.0 license + per-file headers script + README BYOK + npm deps
+- [x] 03-02-PLAN.md - Schema migrations (monthly_plan, client_research_sessions, compacted_at) + BLOCKING migrate
+- [x] 03-03-PLAN.md - AGPL-3.0 license + per-file headers script + README BYOK + npm deps
 - [x] 03-04-PLAN.md - Brief streaming (AiBriefController + BriefStreamer + inline edit)
 - [x] 03-05-PLAN.md - Chat streaming (AiChatController + ChatStreamer + conversation lifecycle)
 - [x] 03-06-PLAN.md - Monthly plan generation (Opus 4.7 + tool-use + 7-action controller)
 - [x] 03-07-PLAN.md - Memory extraction + compaction jobs (Haiku 4.5 + PII + confidence gates)
 - [x] 03-08-PLAN.md - Shared frontend (AiIcon, useAiStream, useTypewriter, AiMarkdown, i18n)
-- [ ] 03-09-PLAN.md - DemandDetailModal 4-tab refactor + BriefTab + ChatTab
-- [ ] 03-10-PLAN.md - ClientForm monthly plan section + Clients/Index badges
-- [ ] 03-11-PLAN.md - /planejamento page + Dashboard widget + Sidebar nav
-- [ ] 03-12-PLAN.md - Client Research Managed Agent (hackathon prize track)
-- [ ] 03-13-PLAN.md - AI Usage Meter + Observability (Redis + OTEL, optional)
+- [x] 03-09-PLAN.md - DemandDetailModal 4-tab refactor + BriefTab + ChatTab
+- [x] 03-10-PLAN.md - ClientForm monthly plan section + Clients/Index badges
+- [x] 03-11-PLAN.md - /planejamento page + Dashboard widget + Sidebar nav
+- [x] 03-12-PLAN.md - Client Research Managed Agent (hackathon prize track)
+- [x] 03-13-PLAN.md - AI Usage Meter + Observability (Redis + OTEL, optional)
 **UI hint:** yes
 
 ---
@@ -143,4 +166,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-23 — Plan 03-08 complete (Shared AI frontend: useAiStream + useTypewriter + AiIcon + AiMarkdown + full 3-locale i18n tree)*
+*Last updated: 2026-04-22 — Phase 3 complete (13/13 plans, all success criteria verified, DashboardPlanningWidget gap closed)*
