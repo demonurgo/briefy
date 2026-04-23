@@ -3,6 +3,10 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
+use App\Models\Demand;
+use App\Observers\ClientObserver;
+use App\Observers\DemandObserver;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,5 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Activity logging observers (Phase 5 — D-25)
+        Demand::observe(DemandObserver::class);
+        Client::observe(ClientObserver::class);
     }
 }
