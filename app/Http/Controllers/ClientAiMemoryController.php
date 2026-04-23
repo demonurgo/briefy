@@ -40,6 +40,6 @@ class ClientAiMemoryController extends Controller
      */
     private function authorizeMemory(ClientAiMemory $memory): void
     {
-        abort_if($memory->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($memory->organization_id !== auth()->user()->current_organization_id, 403);
     }
 }

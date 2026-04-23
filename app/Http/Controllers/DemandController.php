@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\Demand;
 use App\Models\DemandComment;
 use App\Models\DemandFile;
+use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +19,7 @@ class DemandController extends Controller
 {
     public function index(Request $request): Response
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
 
         $demands = Demand::where('organization_id', $orgId)
             ->whereNull('archived_at')
@@ -49,7 +50,8 @@ class DemandController extends Controller
             }
         }
 
-        $teamMembers = \App\Models\User::where('organization_id', $orgId)->get(['id', 'name']);
+        $org = Organization::find($orgId);
+        $teamMembers = $org ? $org->users()->get(['users.id', 'users.name']) : collect();
 
         return Inertia::render('Demands/Index', [
             'demands'        => $demands,
@@ -64,10 +66,11 @@ class DemandController extends Controller
 
     public function create(Client $client): Response
     {
-        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($client->organization_id !== auth()->user()->current_organization_id, 403);
 
-        $teamMembers = \App\Models\User::where('organization_id', auth()->user()->organization_id)
-            ->get(['id', 'name']);
+        $orgId = auth()->user()->current_organization_id;
+        $org = Organization::find($orgId);
+        $teamMembers = $org ? $org->users()->get(['users.id', 'users.name']) : collect();
 
         return Inertia::render('Demands/Create', [
             'client'      => $client,
@@ -77,11 +80,11 @@ class DemandController extends Controller
 
     public function store(StoreDemandRequest $request, Client $client): RedirectResponse
     {
-        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($client->organization_id !== auth()->user()->current_organization_id, 403);
 
         $demand = Demand::create([
             ...$request->validated(),
-            'organization_id' => auth()->user()->organization_id,
+            'organization_id' => auth()->user()->current_organization_id,
             'client_id'       => $client->id,
             'created_by'      => auth()->id(),
         ]);
@@ -102,8 +105,9 @@ class DemandController extends Controller
             'comments.user',
         ]);
 
-        $teamMembers = \App\Models\User::where('organization_id', auth()->user()->organization_id)
-            ->get(['id', 'name']);
+        $orgId = auth()->user()->current_organization_id;
+        $org = Organization::find($orgId);
+        $teamMembers = $org ? $org->users()->get(['users.id', 'users.name']) : collect();
 
         return Inertia::render('Demands/Show', [
             'demand'      => $demand,
@@ -117,8 +121,9 @@ class DemandController extends Controller
         $this->authorizeDemand($demand);
         $demand->load('client');
 
-        $teamMembers = \App\Models\User::where('organization_id', auth()->user()->organization_id)
-            ->get(['id', 'name']);
+        $orgId = auth()->user()->current_organization_id;
+        $org = Organization::find($orgId);
+        $teamMembers = $org ? $org->users()->get(['users.id', 'users.name']) : collect();
 
         return Inertia::render('Demands/Edit', [
             'demand'      => $demand,
@@ -240,6 +245,6 @@ class DemandController extends Controller
 
     private function authorizeDemand(Demand $demand): void
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
     }
 }

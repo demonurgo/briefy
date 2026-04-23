@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'organization_id' => null,
+            'current_organization_id' => null,
             'role' => 'admin',
             'preferences' => ['locale' => 'pt-BR', 'theme' => 'light'],
             'last_login_at' => null,

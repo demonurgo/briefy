@@ -209,6 +209,6 @@ class ClientResearchController extends Controller
      */
     private function authorizeClient(Client $client): void
     {
-        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($client->organization_id !== auth()->user()->current_organization_id, 403);
     }
 }

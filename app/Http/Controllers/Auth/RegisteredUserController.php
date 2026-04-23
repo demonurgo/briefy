@@ -53,9 +53,15 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'organization_id' => $organization->id,
-            'role' => 'admin',
+            'current_organization_id' => $organization->id,
+            'role' => 'owner',
             'preferences' => ['locale' => $locale, 'theme' => 'light'],
+        ]);
+
+        // Create pivot row so the user belongs to the organization via the pivot table.
+        $user->organizations()->attach($organization->id, [
+            'role'      => 'owner',
+            'joined_at' => now(),
         ]);
 
         event(new Registered($user));
