@@ -89,7 +89,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
         {/* Left column: client info + Deep Research */}
         <div className="space-y-5">
@@ -166,7 +166,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
         </div>
 
         {/* Right column: demands + important dates */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="space-y-5">
 
           {/* Demands card */}
           <div className="rounded-[12px] bg-white p-5 shadow-sm dark:bg-[#111827]">
