@@ -14,6 +14,10 @@ interface Client {
   brand_references: string | null;
   briefing: string | null;
   avatar: string | null;
+  monthly_posts: number | null;
+  monthly_plan_notes: string | null;
+  planning_day: number | null;
+  social_handles: Record<string, string> | null;
 }
 
 export default function ClientsEdit({ client }: { client: Client }) {
@@ -28,11 +32,20 @@ export default function ClientsEdit({ client }: { client: Client }) {
     brand_references: client.brand_references ?? '',
     briefing: client.briefing ?? '',
     avatar: null as File | null,
+    monthly_posts: client.monthly_posts ?? null,
+    monthly_plan_notes: client.monthly_plan_notes ?? '',
+    planning_day: client.planning_day ?? null,
+    social_handles: client.social_handles ?? ({} as Record<string, string>),
   });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('clients.update', client.id));
+    const cleanedHandles = Object.fromEntries(
+      Object.entries(data.social_handles ?? {}).filter(([, v]) => v && String(v).trim() !== '')
+    );
+    post(route('clients.update', client.id), {
+      data: { ...data, social_handles: cleanedHandles },
+    });
   };
 
   return (
@@ -48,6 +61,8 @@ export default function ClientsEdit({ client }: { client: Client }) {
             onSubmit={submit}
             submitLabel={t('common.save')}
             onCancel={() => router.visit(route('clients.show', client.id))}
+            client={client}
+            isEditMode={true}
           />
         </div>
       </div>

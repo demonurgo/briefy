@@ -2,11 +2,19 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Search, Trash2, Edit2, Eye } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Eye, Calendar } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientAvatar } from '@/Components/ClientAvatar';
+import { AiIcon } from '@/Components/AiIcon';
 import emptyLight from '@/assets/empty-state-light.svg';
 import emptyDark from '@/assets/empty-state-dark.svg';
+
+interface ActiveResearchSession {
+  id: number;
+  status: string;
+  started_at?: string;
+  estimated_remaining_minutes: number;
+}
 
 interface Client {
   id: number;
@@ -14,6 +22,8 @@ interface Client {
   segment: string | null;
   avatar: string | null;
   demands_count: number;
+  monthly_posts?: number | null;
+  active_research_session?: ActiveResearchSession | null;
 }
 
 interface Props {
@@ -91,6 +101,21 @@ export default function ClientsIndex({ clients, filters }: Props) {
                   {client.segment && (
                     <p className="truncate text-xs text-[#6b7280]">{client.segment}</p>
                   )}
+                  {/* Badges: posts/mês + pesquisa em andamento */}
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {client.monthly_posts != null && client.monthly_posts > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#f3edff] dark:bg-[#2e1065]/30 px-2 py-0.5 text-[11px] font-medium text-[#6d28d9] dark:text-[#a78bfa]">
+                        <Calendar size={11} />
+                        {t('clients.badges.postsPerMonth', { count: client.monthly_posts })}
+                      </span>
+                    )}
+                    {client.active_research_session && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#7c3aed]/10 px-2 py-0.5 text-[11px] font-medium text-[#7c3aed]">
+                        <AiIcon size={12} spinning />
+                        {t('clients.monthlyPlan.researchingBadge', { minutes: client.active_research_session.estimated_remaining_minutes })}
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-1 text-xs text-[#9ca3af]">
                     {t('clients.demandsCount', { count: client.demands_count })}
                   </p>
