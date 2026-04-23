@@ -38,4 +38,10 @@ return [
     'planning_rejected'           => 'Elemento rechazado.',
     'planning_updated'            => 'Elemento actualizado.',
     'planning_quota_missing'      => 'Configure el plan mensual del cliente para generar la planificación.',
+    'ma_started'                  => 'Investigación iniciada. Siga el progreso en la tarjeta del cliente.',
+    'ma_launch_failed'            => 'No fue posible iniciar la investigación. Inténtelo de nuevo.',
+    'ma_no_sources'               => 'Agregue al menos un handle social o sitio web antes de iniciar la investigación.',
+    'ma_already_running'          => 'Ya hay una investigación en curso para este cliente.',
+    'memory_suggestion_approved'  => 'Sugerencia aprobada.',
+    'memory_suggestion_dismissed' => 'Sugerencia descartada.',
 ];

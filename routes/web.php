@@ -59,6 +59,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/demands/{demand}/chat/{conversation}/stream', [\App\Http\Controllers\AiChatController::class, 'stream'])
         ->name('demands.chat.stream');
 
+    // Client Research — Managed Agents (Plan 12)
+    Route::post('/clients/{client}/research', [\App\Http\Controllers\ClientResearchController::class, 'launch'])
+        ->name('clients.research.launch');
+    Route::get('/clients/{client}/research/estimate-cost', [\App\Http\Controllers\ClientResearchController::class, 'estimateCost'])
+        ->name('clients.research.estimateCost');
+    Route::get('/clients/{client}/research/{session}', [\App\Http\Controllers\ClientResearchController::class, 'show'])
+        ->name('clients.research.show');
+    Route::get('/clients/{client}/research/{session}/events', [\App\Http\Controllers\ClientResearchController::class, 'streamEvents'])
+        ->name('clients.research.stream');
+
+    // Client AI Memory — approve/dismiss suggested insights (D-38 / Plan 12)
+    Route::post('/client-ai-memory/{memory}/approve', [\App\Http\Controllers\ClientAiMemoryController::class, 'approve'])
+        ->name('client-ai-memory.approve');
+    Route::post('/client-ai-memory/{memory}/dismiss', [\App\Http\Controllers\ClientAiMemoryController::class, 'dismiss'])
+        ->name('client-ai-memory.dismiss');
+
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', fn() => Inertia::render('Settings/Index'))->name('index');
         Route::get('/team', [TeamController::class, 'index'])->name('team');
