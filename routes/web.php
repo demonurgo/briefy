@@ -99,9 +99,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/client-ai-memory/{memory}/dismiss', [\App\Http\Controllers\ClientAiMemoryController::class, 'dismiss'])
         ->name('client-ai-memory.dismiss');
 
+    // Team management — admin/owner only routes (protected by EnsureRole middleware)
+    Route::get('/settings/team', [TeamController::class, 'index'])->name('settings.team');
+    Route::post('/team/invite', [TeamController::class, 'invite'])
+        ->middleware('role:admin,owner')
+        ->name('team.invite');
+    Route::delete('/team/invitations/{invitation}', [TeamController::class, 'cancelInvitation'])
+        ->middleware('role:admin,owner')
+        ->name('team.invitations.cancel');
+    Route::post('/team/invitations/{invitation}/resend', [TeamController::class, 'resendInvitation'])
+        ->middleware('role:admin,owner')
+        ->name('team.invitations.resend');
+    Route::patch('/team/{user}/role', [TeamController::class, 'updateRole'])
+        ->middleware('role:admin,owner')
+        ->name('team.role');
+    Route::delete('/team/{user}/remove', [TeamController::class, 'remove'])
+        ->middleware('role:admin,owner')
+        ->name('team.remove');
+
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', fn() => redirect()->route('settings.ai.edit'))->name('index');
-        Route::get('/team', [TeamController::class, 'index'])->name('team');
+
         Route::patch('/preferences', function (Request $r) {
             $r->user()->update([
                 'preferences' => array_merge(
