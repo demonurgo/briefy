@@ -43,7 +43,6 @@ class ItemRedesigner
                 messages: [['role' => 'user', 'content' => 'Rewrite the item per feedback. Output JSON only.']],
                 model: $model,  // Haiku 4.5
                 system: $system,
-                temperature: 0.7,
             ),
         );
         $durationMs = (microtime(true) - $startedAt) * 1000;

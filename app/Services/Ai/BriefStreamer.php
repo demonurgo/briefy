@@ -43,7 +43,6 @@ class BriefStreamer
                     messages: [['role' => 'user', 'content' => $userMessage]],
                     model: $model,
                     system: $system,
-                    temperature: 0.7,
                 ),
             );
 

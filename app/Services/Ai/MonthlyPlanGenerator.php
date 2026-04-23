@@ -63,7 +63,6 @@ class MonthlyPlanGenerator
                             'input_schema' => MonthlyPlanSchema::toolSchema($expectedCount),
                         ]],
                         toolChoice: ['type' => 'tool', 'name' => 'submit_plan'],
-                        temperature: 0.4,
                     ),
                 );
                 $durationMs = (microtime(true) - $startedAt) * 1000;

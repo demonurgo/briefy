@@ -87,7 +87,6 @@ SYS;
                         'input_schema' => MemoryInsightSchema::toolSchema(),
                     ]],
                     tool_choice: ['type' => 'tool', 'name' => 'record_insights'],
-                    temperature: 0.2,
                 ),
             );
             $durationMs = (microtime(true) - $startedAt) * 1000;

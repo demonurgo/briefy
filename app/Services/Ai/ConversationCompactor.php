@@ -64,7 +64,6 @@ final class ConversationCompactor
                     messages: [['role' => 'user', 'content' => "Resuma a conversa abaixo em até 400 tokens, preservando fatos referenciados e decisões tomadas. Escreva em português do Brasil.\n\n{$transcript}"]],
                     model: $model,
                     system: 'You summarise conversations into compact seed-messages for context continuity. Preserve names, dates, client-specific preferences, and any decisions made.',
-                    temperature: 0.3,
                 ),
             );
             $durationMs = (microtime(true) - $startedAt) * 1000;

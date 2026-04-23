@@ -62,7 +62,6 @@ class ChatStreamer
                     messages: $history,
                     model: $model,
                     system: $system,
-                    temperature: 0.7,
                 ),
             );
 
