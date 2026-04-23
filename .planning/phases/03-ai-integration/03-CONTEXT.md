@@ -201,6 +201,14 @@ Out of scope for Phase 3: real-time collaboration, notifications, dashboard char
 - Modo de aprovação do cliente (portal cliente) — agency-only por ora
 - Limite de tokens por plano de assinatura (deferred billing phase)
 
+### Deferred to v1.2 (from Codex review H6 — 03-REVIEWS.md)
+
+- **Live SSE timeline de Managed Agent events** — substituído em v1.1 por polling de DB a cada 30s. Ver `03-12b-PLAN.md` Task 1.
+- **`ClientResearchTimelineModal`** — modal com timeline clicável das sessões MA. Ver `03-12b-PLAN.md` Task 2.
+- **`ClientAiMemoryPanel` Sugestões tab** — UI Aprovar/Descartar para insights com `status='suggested'` (confidence < 0.6). Em v1.1 os insights são persistidos mas sem UI de review. Ver `03-12b-PLAN.md` Task 3.
+- **Notificação in-app de conclusão de MA session** — depende da infra de notificações da Phase 4. Ver `03-12b-PLAN.md` Task 4.
+- **Conversation picker na ChatTab** — v1.1 mostra apenas a conversa mais recente; histórico só acessível via DB (FLAG 11 do plan-checker original).
+
 </deferred>
 
 ---
