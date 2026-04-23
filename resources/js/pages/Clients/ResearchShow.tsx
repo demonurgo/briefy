@@ -66,7 +66,8 @@ function ConfidenceBar({ value }: { value: number }) {
 }
 
 export default function ResearchShow({ client, session, insights }: Props) {
-  const isRunning = ['queued', 'running', 'idle'].includes(session.status);
+  // 'idle' from MA means waiting for input — only treat as running if local DB says running/queued
+  const isRunning = ['queued', 'running'].includes(session.status);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
   const handleCancel = () => {

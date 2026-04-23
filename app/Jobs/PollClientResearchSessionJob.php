@@ -72,7 +72,45 @@ class PollClientResearchSessionJob implements ShouldQueue
                 return;
             }
 
-            if (in_array($remoteStatus, ['failed', 'errored'])) {
+            // MA sessions end as 'idle' with stop_reason=end_turn (not 'completed').
+            // Also check events for session.status_idle with end_turn stop_reason.
+            if ($remoteStatus === 'idle') {
+                // Check if any event in this batch signals end_turn
+                $endTurn = false;
+                foreach ($events as $ev) {
+                    if (($ev['type'] ?? '') === 'session.status_idle') {
+                        $stopType = $ev['stop_reason']['type'] ?? '';
+                        if ($stopType === 'end_turn') {
+                            $endTurn = true;
+                            break;
+                        }
+                    }
+                }
+                if ($endTurn || empty($events)) {
+                    // Also fetch the last few events to check if we missed the end_turn signal
+                    if (! $endTurn) {
+                        $allBatch = $agent->fetchEvents($this->session, null);
+                        foreach (array_slice($allBatch['events'] ?? [], -5) as $ev) {
+                            if (($ev['type'] ?? '') === 'session.status_idle') {
+                                if (($ev['stop_reason']['type'] ?? '') === 'end_turn') {
+                                    $endTurn = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if ($endTurn) {
+                        $this->session->update([
+                            'status'           => 'completed',
+                            'completed_at'     => now(),
+                            'progress_summary' => 'Pesquisa concluída.',
+                        ]);
+                        return;
+                    }
+                }
+            }
+
+            if (in_array($remoteStatus, ['failed', 'errored', 'terminated'])) {
                 $this->session->update([
                     'status'           => 'failed',
                     'completed_at'     => now(),
