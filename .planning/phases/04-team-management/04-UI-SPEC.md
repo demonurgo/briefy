@@ -46,6 +46,8 @@ Exceptions:
 - Touch targets minimum: 32px (`h-8 w-8`) for icon-only buttons — established in AppLayout bell button
 - Avatar sizes: 32px sm (`h-8 w-8`), 40px md (`h-10 w-10`), 64px lg (`h-16 w-16`) — mirrors ClientAvatar.tsx exactly
 - Settings page max-width: `max-w-2xl` (672px) — matches existing Settings/Ai.tsx
+- Button vertical padding: 6px (`py-1.5`) — established in Phase 1–3 button components (PrimaryButton, SecondaryButton, DangerButton), unchanged in this phase
+- Badge vertical padding: 2px (`py-0.5`) — matches StatusBadge.tsx established pattern used across Phase 1–3, unchanged in this phase
 
 **Source:** CONTEXT.md D-23–D-27 + AppLayout.tsx measurements + ClientAvatar.tsx size tokens
 
@@ -58,15 +60,17 @@ Inter font throughout. Four active roles mapped to existing project usage.
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 14px (`text-sm`) | 400 (regular) | 1.5 | Form labels, roster names, invite table cells, description text |
-| Label | 12px (`text-xs`) | 500 (medium) | 1.4 | Input labels (`font-medium`), badge text, hint text, join-date values |
+| Label | 12px (`text-xs`) | 400 (regular) | 1.4 | Input labels, badge text, hint text, join-date values — visual distinction from Body comes from size (12px vs 14px), not weight |
 | Heading | 20px (`text-xl`) | 600 (semibold) | 1.2 | Settings page `<h1>` title per section anchor |
 | Sub-heading | 14px (`text-sm`) | 600 (semibold) | 1.4 | Card section titles (mirrors `Settings/Ai.tsx` `h2` pattern: `text-sm font-semibold`) |
+
+**Declared weights: 400 (regular) and 600 (semibold) only.**
 
 Notes:
 - No 28px+ display size in this phase — highest heading is 20px matching existing Settings/Ai.tsx `text-xl font-semibold`
 - Avatar initials: 12px (`text-xs`) for sm, 14px (`text-sm`) for md, 20px (`text-xl`) for lg — mirrors ClientAvatar.tsx
 - Avatar initials weight: 600 (`font-semibold`) — CONTEXT.md D-19 specifies "iniciais em branco com font-weight semibold"
-- Navigation sub-nav links: 14px (`text-sm`) weight 500, active state weight 600
+- Navigation sub-nav links: 14px (`text-sm`) weight 400 (default), active state weight 600 (`font-semibold`)
 
 **Source:** design-brief.md §5 + Settings/Ai.tsx measured + ClientAvatar.tsx + CONTEXT.md D-19
 
@@ -100,7 +104,7 @@ Notes:
 | admin | `bg-[#3b82f6]/10` | `text-[#3b82f6]` | `border-[#3b82f6]/20` |
 | collaborator | `bg-[#9ca3af]/10` | `text-[#9ca3af]` | `border-[#9ca3af]/20` |
 
-Pattern mirrors StatusBadge.tsx exactly — `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium`.
+Pattern mirrors StatusBadge.tsx exactly — `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold`.
 
 **Border tokens:**
 - Light: `#e5e7eb` (border between sections, card borders, input borders)
@@ -154,13 +158,13 @@ Dropdown panel: `w-56 rounded-[12px] border border-[#e5e7eb] dark:border-[#1f293
 Animation: HeadlessUI `Transition` — `ease-out duration-200` enter, `opacity-0 scale-95` → `opacity-100 scale-100` (matches existing Dropdown.tsx pattern)
 
 Dropdown items (each org):
-- Layout: `flex items-center gap-3 px-4 py-2.5`
+- Layout: `flex items-center gap-3 px-4 py-2` — 8px vertical padding
 - OrgLogo or org initials (24px circle)
 - Org name `text-sm text-[#111827] dark:text-[#f9fafb]`
 - Active checkmark: `Check` icon 14px in `text-[#7c3aed]` (right side, only current org)
 - Hover: `hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]`
 
-Divider + "Criar nova organização" as last item — `text-sm text-[#7c3aed] flex items-center gap-2 px-4 py-2.5`
+Divider + "Criar nova organização" as last item — `text-sm text-[#7c3aed] flex items-center gap-2 px-4 py-2`
 
 PATCH on item click: `router.patch(route('settings.current-org'), { organization_id: id }, { preserveScroll: false })`
 
@@ -179,9 +183,9 @@ Sticky internal nav at top of settings page content area. Appears below the `<h1
 
 Layout: `flex gap-1 border-b border-[#e5e7eb] dark:border-[#1f2937] mb-8 sticky top-14 bg-[#f9fafb] dark:bg-[#0b0f14] z-30 -mx-4 md:-mx-6 px-4 md:px-6`
 
-Each tab link: `text-sm font-medium px-1 py-3 border-b-2 -mb-px transition-colors`
-- Default: `border-transparent text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]`
-- Active: `border-[#7c3aed] text-[#7c3aed]`
+Each tab link: `text-sm px-1 py-3 border-b-2 -mb-px transition-colors`
+- Default: `border-transparent font-normal text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]`
+- Active: `border-[#7c3aed] text-[#7c3aed] font-semibold`
 
 Tabs: Perfil | Organização | Equipe | IA
 
@@ -218,6 +222,8 @@ Shell: `AppLayout` with `title="Configurações"`
 
 Content wrapper: `mx-auto max-w-2xl` — matches Settings/Ai.tsx exactly
 
+**Focal point:** The active section heading highlighted in the sticky sub-nav, combined with the first visible section card directly beneath it, anchors the user's eye and communicates current position in the settings hierarchy.
+
 Section structure (4 anchors):
 
 ```
@@ -236,7 +242,7 @@ Section dividers between panels: `my-8` vertical gap. No visual HR line — gap 
 
 Fields:
 1. **Avatar upload**: circular 64px (`UserAvatar` size lg) + "Alterar foto" button beneath. Click opens file input (hidden). Drag & drop on the avatar circle also accepted.
-   - Upload button: `text-sm text-[#7c3aed] hover:text-[#6d28d9] font-medium`
+   - Upload button: `text-sm text-[#7c3aed] hover:text-[#6d28d9] font-semibold`
    - Constraint hint: `text-xs text-[#9ca3af]` — "JPG, PNG ou WebP. Máx. 2MB."
 2. **Nome**: `TextInput` full-width
 3. **Email**: `TextInput` readonly — `bg-[#f9fafb] dark:bg-[#0b0f14] cursor-not-allowed opacity-75`
@@ -273,7 +279,7 @@ Sub-sections stacked vertically with `space-y-6`:
 **C. Team roster** (visible to all):
 - Row: `flex items-center gap-4 py-3 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0`
 - Left: `UserAvatar` size sm
-- Center: name `text-sm font-medium` + email `text-xs text-[#6b7280]`
+- Center: name `text-sm font-semibold` + email `text-xs text-[#6b7280]`
 - Role badge: `RoleBadge` component
 - Join date: `text-xs text-[#9ca3af]` — "Desde DD/MM/AAAA"
 - Actions (admin/owner only, not on owner row):
@@ -298,6 +304,8 @@ Layout: centered card, no AppLayout, no sidebar. Full-page `min-h-screen bg-[#f9
 
 Card: `max-w-md w-full rounded-[16px] bg-white dark:bg-[#111827] p-8 shadow-lg`
 
+**Focal point:** The heading "Você foi convidado para [Org Name]" is the first landmark the user reads and immediately communicates context and intent; all subsequent form elements below it are secondary.
+
 Content:
 1. Briefy logo (compact SVG) centered
 2. Heading: "Você foi convidado para [Org Name]" — `text-xl font-semibold text-center mb-2`
@@ -313,7 +321,7 @@ Content:
 
 Error state (expired/invalid token): card shows "Este convite expirou ou já foi utilizado." + link "Solicitar novo convite"
 
-Submit button: `w-full bg-[#7c3aed] hover:bg-[#6d28d9] rounded-[8px] py-2.5 text-sm font-medium text-white`
+Submit button: `w-full bg-[#7c3aed] hover:bg-[#6d28d9] rounded-[8px] py-3 text-sm font-semibold text-white`
 
 ---
 
@@ -476,4 +484,4 @@ No third-party component registries are used in this phase. All UI is built from
 | Dropdown.tsx | 1 — org switcher animation + outside-click pattern |
 | User input this session | 0 — all decisions answered from upstream artifacts |
 
-*UI-SPEC generated: 2026-04-23 — Phase 4: Team Management*
+*UI-SPEC revised: 2026-04-23 — Phase 4: Team Management (checker revision r2)*
