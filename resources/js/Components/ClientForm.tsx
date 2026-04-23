@@ -64,6 +64,18 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
 
   return (
     <form onSubmit={onSubmit} className="space-y-5" encType="multipart/form-data">
+      {/* Avatar first */}
+      <div>
+        <label className={labelClass}>{t('clients.avatar')}</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={e => setData('avatar', e.target.files?.[0] ?? null)}
+          className="block w-full text-sm text-[#6b7280] file:mr-4 file:rounded-[8px] file:border-0 file:bg-[#7c3aed] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[#6d28d9]"
+        />
+        <InputError message={errors.avatar} className="mt-1.5" />
+      </div>
+
       <div>
         <label className={labelClass}>{t('clients.name')} *</label>
         <input
@@ -157,17 +169,6 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
         <InputError message={errors.briefing} className="mt-1.5" />
       </div>
 
-      <div>
-        <label className={labelClass}>{t('clients.avatar')}</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={e => setData('avatar', e.target.files?.[0] ?? null)}
-          className="block w-full text-sm text-[#6b7280] file:mr-4 file:rounded-[8px] file:border-0 file:bg-[#7c3aed] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[#6d28d9]"
-        />
-        <InputError message={errors.avatar} className="mt-1.5" />
-      </div>
-
       {/* === Plano de Conteúdo Mensal — D-16/D-17 === */}
       <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] pt-6 mt-6">
         <h3 className="mb-1 text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">
@@ -176,17 +177,32 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
         <p className="mb-4 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.sectionSubtitle')}</p>
 
         <div className="space-y-5">
-          <div>
-            <label className={labelClass}>{t('clients.monthlyPlan.monthlyPostsLabel')}</label>
-            <input
-              type="number" min={0} max={200} step={1}
-              value={data.monthly_posts ?? ''}
-              onChange={e => setData('monthly_posts', e.target.value === '' ? null : Number(e.target.value))}
-              placeholder={t('clients.monthlyPlan.monthlyPostsPlaceholder')}
-              className={inputClass}
-            />
-            <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.monthlyPostsHint')}</p>
-            <InputError message={errors.monthly_posts} className="mt-1.5" />
+          {/* Posts/mês + Dia do planejamento — mesma linha */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>{t('clients.monthlyPlan.monthlyPostsLabel')}</label>
+              <input
+                type="number" min={0} max={200} step={1}
+                value={data.monthly_posts ?? ''}
+                onChange={e => setData('monthly_posts', e.target.value === '' ? null : Number(e.target.value))}
+                placeholder={t('clients.monthlyPlan.monthlyPostsPlaceholder')}
+                className={inputClass}
+              />
+              <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.monthlyPostsHint')}</p>
+              <InputError message={errors.monthly_posts} className="mt-1.5" />
+            </div>
+            <div>
+              <label className={labelClass}>{t('clients.monthlyPlan.planningDayLabel')}</label>
+              <input
+                type="number" min={1} max={31} step={1}
+                value={data.planning_day ?? ''}
+                onChange={e => setData('planning_day', e.target.value === '' ? null : Number(e.target.value))}
+                placeholder={t('clients.monthlyPlan.planningDayPlaceholder')}
+                className={inputClass}
+              />
+              <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.planningDayHint')}</p>
+              <InputError message={errors.planning_day} className="mt-1.5" />
+            </div>
           </div>
 
           <div>
@@ -200,19 +216,6 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
             />
             <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.notesHint')}</p>
             <InputError message={errors.monthly_plan_notes} className="mt-1.5" />
-          </div>
-
-          <div>
-            <label className={labelClass}>{t('clients.monthlyPlan.planningDayLabel')}</label>
-            <input
-              type="number" min={1} max={31} step={1}
-              value={data.planning_day ?? ''}
-              onChange={e => setData('planning_day', e.target.value === '' ? null : Number(e.target.value))}
-              placeholder={t('clients.monthlyPlan.planningDayPlaceholder')}
-              className={`${inputClass} max-w-[120px]`}
-            />
-            <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.planningDayHint')}</p>
-            <InputError message={errors.planning_day} className="mt-1.5" />
           </div>
         </div>
       </div>
