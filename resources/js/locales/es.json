@@ -131,6 +131,11 @@
     },
     "badges": {
       "postsPerMonth": "{{count}} publicaciones/mes"
+    },
+    "research": {
+      "confirmTitle": "Iniciar investigación con IA",
+      "confirmBody": "Esta investigación durará {{minutes}} minutos y usará tu clave Anthropic (BYOK).",
+      "confirmCta": "Iniciar investigación"
     }
   },
   "settings": {

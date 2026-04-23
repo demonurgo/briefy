@@ -131,6 +131,11 @@
     },
     "badges": {
       "postsPerMonth": "{{count}} posts/month"
+    },
+    "research": {
+      "confirmTitle": "Start AI research",
+      "confirmBody": "This research will run for {{minutes}} minutes and use your Anthropic key (BYOK).",
+      "confirmCta": "Start research"
     }
   },
   "settings": {
