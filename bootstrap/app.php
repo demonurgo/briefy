@@ -18,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        //
+        $middleware->alias([
+            'ai.meter' => \App\Http\Middleware\AiUsageMeter::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // M4 — never flash raw Anthropic API key back to session on validation failure
