@@ -1,4 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/Components/InputError';
@@ -35,13 +36,19 @@ interface Props {
   submitLabel: string;
   onCancel: () => void;
   /** Pass the full client object in edit mode so the MA launch button can use the id */
-  client?: { id: number } | null;
+  client?: { id: number; avatar?: string | null } | null;
   isEditMode?: boolean;
 }
 
 export function ClientForm({ data, errors, processing, setData, onSubmit, submitLabel, onCancel, client, isEditMode = false }: Props) {
   const { t } = useTranslation();
   const page = usePage<any>();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const existingAvatarUrl = client?.avatar
+    ? (client.avatar.startsWith('http') ? client.avatar : `/storage/${client.avatar}`)
+    : null;
+  const displayAvatar = previewUrl ?? existingAvatarUrl;
 
   const toggleChannel = (channel: string) => {
     const channels = data.channels.includes(channel)
@@ -67,12 +74,37 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
       {/* Avatar first */}
       <div>
         <label className={labelClass}>{t('clients.avatar')}</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={e => setData('avatar', e.target.files?.[0] ?? null)}
-          className="block w-full text-sm text-[#6b7280] file:mr-4 file:rounded-[8px] file:border-0 file:bg-[#7c3aed] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[#6d28d9]"
-        />
+        <div className="flex items-center gap-4">
+          {displayAvatar ? (
+            <img
+              src={displayAvatar}
+              alt="Avatar"
+              className="h-16 w-16 rounded-full object-cover border border-[#e5e7eb] dark:border-[#1f2937] shrink-0"
+            />
+          ) : (
+            <div className="h-16 w-16 rounded-full bg-[#f3f4f6] dark:bg-[#1f2937] flex items-center justify-center text-[#9ca3af] text-xs shrink-0">
+              {data.name ? data.name.charAt(0).toUpperCase() : '?'}
+            </div>
+          )}
+          <div className="flex-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => {
+                const file = e.target.files?.[0] ?? null;
+                setData('avatar', file);
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  setPreviewUrl(url);
+                } else {
+                  setPreviewUrl(null);
+                }
+              }}
+              className="block w-full text-sm text-[#6b7280] file:mr-4 file:rounded-[8px] file:border-0 file:bg-[#7c3aed] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[#6d28d9]"
+            />
+            <p className="mt-1 text-xs text-[#9ca3af]">PNG, JPG ou GIF. Recomendado: 200×200px.</p>
+          </div>
+        </div>
         <InputError message={errors.avatar} className="mt-1.5" />
       </div>
 
