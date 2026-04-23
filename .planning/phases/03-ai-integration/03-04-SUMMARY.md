@@ -148,6 +148,70 @@ No new security surface beyond the plan's threat model (T-03-30 through T-03-35)
 - T-03-31: `UpdateBriefRequest` max:20000
 - T-03-32: `brief_edited_by_user_id` stored on saveEdit
 
+## Acceptance Criteria Verification
+
+All criteria from the PLAN.md checked and confirmed passing (2026-04-22):
+
+### Task 1 — BriefPromptBuilder + prompt template
+
+| Check | Result |
+|-------|--------|
+| `resources/prompts/brief_system.md` exists, ≥ 30 lines | PASS (32 lines) |
+| Contains `## Objetivo` section | PASS |
+| Contains `Pontos a evitar` section | PASS |
+| `app/Services/Ai/BriefPromptBuilder.php` exists | PASS |
+| `build(Demand $demand): array` signature present | PASS |
+| `cache_control` present in system block | PASS |
+| `resource_path('prompts/brief_system.md')` call present | PASS |
+| AGPL header `Briefy contributors` present | PASS |
+| `php -l` passes | PASS |
+
+### Task 2 — BriefStreamer + AiBriefController + routes + i18n
+
+| Check | Result |
+|-------|--------|
+| `public function stream` in BriefStreamer | PASS |
+| `createStream` call present | PASS |
+| `set_time_limit(0)` present | PASS |
+| `message_stop` event handled | PASS |
+| `StreamedEvent` used for SSE | PASS |
+| `'brief' => $buffer` persisted on message_stop | PASS |
+| `public function generate` in AiBriefController | PASS |
+| `public function saveEdit` in AiBriefController | PASS |
+| `hasAnthropicKey()` BYOK gate present (D-33) | PASS |
+| `forOrganization()` factory call present | PASS |
+| `response()->eventStream()` present | PASS |
+| Route `demands.brief.generate` (POST) registered | PASS |
+| Route `demands.brief.edit` (PATCH) registered | PASS |
+| i18n key `brief_updated` in pt-BR/en/es | PASS |
+| i18n key `ai_stream_failed` in pt-BR/en/es | PASS |
+| i18n key `ai_key_missing` in pt-BR/en/es | PASS |
+| AGPL header in BriefStreamer | PASS |
+| `php -l` passes on all new PHP files | PASS |
+
+### Task 3 — AiBriefControllerTest
+
+| Check | Result |
+|-------|--------|
+| `tests/Feature/AiBriefControllerTest.php` exists | PASS |
+| ≥ 5 test methods (`grep -c "public function test_"`) | PASS (6 methods) |
+| `RefreshDatabase` trait used | PASS |
+| `BriefStreamer` mock/swap present | PASS |
+| `text/event-stream` content-type asserted | PASS |
+| `php -l` passes | PASS |
+| All 6 tests pass in CI | PASS |
+
+### must_haves.truths verification
+
+| Truth | Verified via |
+|-------|-------------|
+| POST generate returns 200 text/event-stream with delta+done frames | `test_generate_with_valid_key_returns_event_stream_response` |
+| On stream complete, `ai_analysis.brief` + `brief_generated_at` persisted | `test_streamer_persists_brief_to_ai_analysis` |
+| PATCH /brief accepts `{brief}`, returns 302 with success flash | `test_patch_brief_updates_ai_analysis` |
+| Org without key → graceful degradation (not 402) | `test_generate_without_anthropic_key_returns_back_with_error` |
+| Regenerate overwrites existing brief (array_merge key overwrite) | Covered by BriefStreamer logic; no separate test needed |
+| Model claude-sonnet-4-6, max_tokens 2048, temperature 0.7 | `config('services.anthropic.model_chat')` + hardcoded in BriefStreamer |
+
 ## Self-Check: PASSED
 
-All 6 created files confirmed present on disk. All 3 task commits (9305300, 720451a, c65393c) confirmed in git log.
+All 6 created files confirmed present on disk. All 3 task commits (9305300, 720451a, c65393c) confirmed in git log. All acceptance criteria verified 2026-04-22.
