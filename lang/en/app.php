@@ -29,4 +29,5 @@ return [
     'brief_updated'      => 'Brief updated.',
     'ai_stream_failed'   => 'Brief generation was interrupted. Please try again.',
     'ai_key_missing'     => 'Configure your Anthropic key in Settings → AI.',
+    'ai_chat_stream_failed' => 'The response was interrupted. Send your message again.',
 ];

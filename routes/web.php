@@ -40,6 +40,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/demands/{demand}/brief', [\App\Http\Controllers\AiBriefController::class, 'saveEdit'])
         ->name('demands.brief.edit');
 
+    // AI — Chat per demand (streaming)
+    Route::post('/demands/{demand}/chat/conversations', [\App\Http\Controllers\AiChatController::class, 'startConversation'])
+        ->name('demands.chat.start');
+    Route::post('/demands/{demand}/chat/{conversation}/stream', [\App\Http\Controllers\AiChatController::class, 'stream'])
+        ->name('demands.chat.stream');
+
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', fn() => Inertia::render('Settings/Index'))->name('index');
         Route::get('/team', [TeamController::class, 'index'])->name('team');

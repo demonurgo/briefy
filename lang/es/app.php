@@ -29,4 +29,5 @@ return [
     'brief_updated'      => 'Brief actualizado.',
     'ai_stream_failed'   => 'La generación del brief fue interrumpida. Inténtalo de nuevo.',
     'ai_key_missing'     => 'Configure su clave Anthropic en Configuración → IA.',
+    'ai_chat_stream_failed' => 'La respuesta se interrumpió. Envíe su mensaje nuevamente.',
 ];
