@@ -34,6 +34,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [PlanningController::class, 'index'])->name('index');
     });
 
+    // Monthly Planning — planejamento mensal (Plan 06)
+    Route::prefix('planejamento')->name('planejamento.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MonthlyPlanningController::class, 'index'])->name('index');
+        Route::post('/generate', [\App\Http\Controllers\MonthlyPlanningController::class, 'generate'])->name('generate');
+        Route::get('/estimate-cost', [\App\Http\Controllers\MonthlyPlanningController::class, 'estimateCost'])->name('estimate-cost');
+    });
+    Route::post('/planning-suggestions/{suggestion}/convert', [\App\Http\Controllers\MonthlyPlanningController::class, 'convert'])->name('planning-suggestions.convert');
+    Route::post('/planning-suggestions/convert-bulk', [\App\Http\Controllers\MonthlyPlanningController::class, 'convertBulk'])->name('planning-suggestions.convertBulk');
+    Route::post('/planning-suggestions/{suggestion}/redesign', [\App\Http\Controllers\MonthlyPlanningController::class, 'redesign'])->name('planning-suggestions.redesign');
+    Route::post('/planning-suggestions/{suggestion}/reject', [\App\Http\Controllers\MonthlyPlanningController::class, 'reject'])->name('planning-suggestions.reject');
+    Route::patch('/planning-suggestions/{suggestion}', [\App\Http\Controllers\MonthlyPlanningController::class, 'update'])->name('planning-suggestions.update');
+    Route::redirect('/planning', '/planejamento');
+
     // AI — Brief generation (SSE) + inline edit
     Route::post('/demands/{demand}/brief/generate', [\App\Http\Controllers\AiBriefController::class, 'generate'])
         ->name('demands.brief.generate');

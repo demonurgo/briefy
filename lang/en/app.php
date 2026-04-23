@@ -30,4 +30,12 @@ return [
     'ai_stream_failed'   => 'Brief generation was interrupted. Please try again.',
     'ai_key_missing'     => 'Configure your Anthropic key in Settings → AI.',
     'ai_chat_stream_failed' => 'The response was interrupted. Send your message again.',
+    'planning_generated'          => 'Planning generated successfully.',
+    'planning_generation_failed'  => 'Could not generate the planning. Please try again.',
+    'planning_converted'          => 'Item converted to demand.',
+    'planning_bulk_converted'     => ':count demands created.',
+    'planning_redesign_failed'    => 'Could not redesign the item.',
+    'planning_rejected'           => 'Item rejected.',
+    'planning_updated'            => 'Item updated.',
+    'planning_quota_missing'      => 'Configure the client monthly plan to generate planning.',
 ];
