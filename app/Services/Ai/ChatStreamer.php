@@ -5,6 +5,7 @@ namespace App\Services\Ai;
 use App\Jobs\CompactConversationJob;
 use App\Jobs\ExtractClientMemoryJob;
 use App\Models\AiConversation;
+use App\Services\Ai\Telemetry\SpanEmitter;
 use Generator;
 use Illuminate\Http\StreamedEvent;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,10 @@ class ChatStreamer
 {
     public const COMPACTION_THRESHOLD = 30;
 
-    public function __construct(private ChatPromptBuilder $prompts) {}
+    public function __construct(
+        private ChatPromptBuilder $prompts,
+        private SpanEmitter $emitter,
+    ) {}
 
     /**
      * Stream the assistant response. Caller is responsible for persisting the USER
@@ -42,16 +46,27 @@ class ChatStreamer
             ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
             ->all();
 
-        $assistant = '';
+        $assistant       = '';
+        $streamStartedAt = microtime(true);
+        $model           = (string) config('services.anthropic.model_chat');
+        $orgId           = (int) ($demand->organization_id ?? 0);
+        $attrs           = ['demand_id' => $demand->id, 'model' => $model];
 
         try {
-            $stream = $anthropic->messages()->createStream(
-                maxTokens: 2048,
-                messages: $history,
-                model: (string) config('services.anthropic.model_chat'),
-                system: $system,
-                temperature: 0.7,
+            $stream = $this->emitter->emit(
+                'chat',
+                $orgId,
+                $attrs,
+                fn () => $anthropic->messages()->createStream(
+                    maxTokens: 2048,
+                    messages: $history,
+                    model: $model,
+                    system: $system,
+                    temperature: 0.7,
+                ),
             );
+
+            $lastUsage = null;
 
             foreach ($stream as $event) {
                 if ($event->type === 'content_block_delta'
@@ -64,7 +79,24 @@ class ChatStreamer
                     );
                 }
 
+                // Capture cumulative usage as it arrives.
+                if (isset($event->usage)) {
+                    $lastUsage = $event->usage;
+                }
+
                 if ($event->type === 'message_stop') {
+                    // Record token usage + cost on stream completion.
+                    if ($lastUsage) {
+                        $this->emitter->recordUsage(
+                            'chat',
+                            $orgId,
+                            $attrs,
+                            inputTokens:  (int) ($lastUsage->inputTokens  ?? $lastUsage->input_tokens  ?? 0),
+                            outputTokens: (int) ($lastUsage->outputTokens ?? $lastUsage->output_tokens ?? 0),
+                            durationMs:   (microtime(true) - $streamStartedAt) * 1000,
+                        );
+                    }
+
                     $msg = $conversation->messages()->create([
                         'role'    => 'assistant',
                         'content' => $assistant,

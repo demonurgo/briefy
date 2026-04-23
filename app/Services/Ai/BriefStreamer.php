@@ -3,13 +3,17 @@
 namespace App\Services\Ai;
 
 use App\Models\Demand;
+use App\Services\Ai\Telemetry\SpanEmitter;
 use Generator;
 use Illuminate\Http\StreamedEvent;
 use Illuminate\Support\Facades\Log;
 
 class BriefStreamer
 {
-    public function __construct(private BriefPromptBuilder $prompts) {}
+    public function __construct(
+        private BriefPromptBuilder $prompts,
+        private SpanEmitter $emitter,
+    ) {}
 
     /**
      * Run the streaming generation. Yields StreamedEvent instances and persists
@@ -23,16 +27,27 @@ class BriefStreamer
 
         [$system, $userMessage] = $this->prompts->build($demand);
 
-        $buffer = '';
+        $buffer          = '';
+        $streamStartedAt = microtime(true);
+        $model           = (string) config('services.anthropic.model_chat');
+        $orgId           = (int) $demand->organization_id;
+        $attrs           = ['demand_id' => $demand->id, 'model' => $model];
 
         try {
-            $stream = $anthropic->messages()->createStream(
-                maxTokens: 2048,
-                messages: [['role' => 'user', 'content' => $userMessage]],
-                model: (string) config('services.anthropic.model_chat'),  // Sonnet 4.6
-                system: $system,
-                temperature: 0.7,
+            $stream = $this->emitter->emit(
+                'brief',
+                $orgId,
+                $attrs,
+                fn () => $anthropic->messages()->createStream(
+                    maxTokens: 2048,
+                    messages: [['role' => 'user', 'content' => $userMessage]],
+                    model: $model,
+                    system: $system,
+                    temperature: 0.7,
+                ),
             );
+
+            $lastUsage = null;
 
             foreach ($stream as $event) {
                 if ($event->type === 'content_block_delta'
@@ -45,7 +60,24 @@ class BriefStreamer
                     );
                 }
 
+                // Capture cumulative usage as it arrives.
+                if (isset($event->usage)) {
+                    $lastUsage = $event->usage;
+                }
+
                 if ($event->type === 'message_stop') {
+                    // Record token usage + cost now that we have the final counts.
+                    if ($lastUsage) {
+                        $this->emitter->recordUsage(
+                            'brief',
+                            $orgId,
+                            $attrs,
+                            inputTokens:  (int) ($lastUsage->inputTokens  ?? $lastUsage->input_tokens  ?? 0),
+                            outputTokens: (int) ($lastUsage->outputTokens ?? $lastUsage->output_tokens ?? 0),
+                            durationMs:   (microtime(true) - $streamStartedAt) * 1000,
+                        );
+                    }
+
                     // Persist inside the stream so DB is authoritative even if the
                     // client disconnected before receiving the final event.
                     $demand->update([
@@ -54,7 +86,7 @@ class BriefStreamer
                             [
                                 'brief'               => $buffer,
                                 'brief_generated_at'  => now()->toIso8601String(),
-                                'brief_model'         => (string) config('services.anthropic.model_chat'),
+                                'brief_model'         => $model,
                             ]
                         ),
                     ]);
@@ -67,8 +99,8 @@ class BriefStreamer
             }
         } catch (\Throwable $e) {
             Log::warning('brief.stream_failed', [
-                'demand_id' => $demand->id,
-                'error_class' => class_basename($e),
+                'demand_id'     => $demand->id,
+                'error_class'   => class_basename($e),
                 'partial_chars' => strlen($buffer),
             ]);
             yield new StreamedEvent(

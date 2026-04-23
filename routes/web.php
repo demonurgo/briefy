@@ -37,18 +37,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Monthly Planning — planejamento mensal (Plan 06)
     Route::prefix('planejamento')->name('planejamento.')->group(function () {
         Route::get('/', [\App\Http\Controllers\MonthlyPlanningController::class, 'index'])->name('index');
-        Route::post('/generate', [\App\Http\Controllers\MonthlyPlanningController::class, 'generate'])->name('generate');
+        Route::post('/generate', [\App\Http\Controllers\MonthlyPlanningController::class, 'generate'])->middleware('ai.meter')->name('generate');
         Route::get('/estimate-cost', [\App\Http\Controllers\MonthlyPlanningController::class, 'estimateCost'])->name('estimate-cost');
     });
     Route::post('/planning-suggestions/{suggestion}/convert', [\App\Http\Controllers\MonthlyPlanningController::class, 'convert'])->name('planning-suggestions.convert');
     Route::post('/planning-suggestions/convert-bulk', [\App\Http\Controllers\MonthlyPlanningController::class, 'convertBulk'])->name('planning-suggestions.convertBulk');
-    Route::post('/planning-suggestions/{suggestion}/redesign', [\App\Http\Controllers\MonthlyPlanningController::class, 'redesign'])->name('planning-suggestions.redesign');
+    Route::post('/planning-suggestions/{suggestion}/redesign', [\App\Http\Controllers\MonthlyPlanningController::class, 'redesign'])->middleware('ai.meter')->name('planning-suggestions.redesign');
     Route::post('/planning-suggestions/{suggestion}/reject', [\App\Http\Controllers\MonthlyPlanningController::class, 'reject'])->name('planning-suggestions.reject');
     Route::patch('/planning-suggestions/{suggestion}', [\App\Http\Controllers\MonthlyPlanningController::class, 'update'])->name('planning-suggestions.update');
     Route::redirect('/planning', '/planejamento');
 
     // AI — Brief generation (SSE) + inline edit
     Route::post('/demands/{demand}/brief/generate', [\App\Http\Controllers\AiBriefController::class, 'generate'])
+        ->middleware('ai.meter')
         ->name('demands.brief.generate');
     Route::patch('/demands/{demand}/brief', [\App\Http\Controllers\AiBriefController::class, 'saveEdit'])
         ->name('demands.brief.edit');
@@ -57,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/demands/{demand}/chat/conversations', [\App\Http\Controllers\AiChatController::class, 'startConversation'])
         ->name('demands.chat.start');
     Route::post('/demands/{demand}/chat/{conversation}/stream', [\App\Http\Controllers\AiChatController::class, 'stream'])
+        ->middleware('ai.meter')
         ->name('demands.chat.stream');
 
     // Client Research — Managed Agents (Plan 12)
@@ -93,7 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/ai', [\App\Http\Controllers\Settings\AiController::class, 'update'])->name('ai.update');
         // M4 — throttle test key probes to 3/min/user. 'throttle:3,1' = 3 attempts per 1 minute.
         Route::post('/ai/test', [\App\Http\Controllers\Settings\AiController::class, 'testKey'])
-            ->middleware('throttle:3,1')
+            ->middleware(['throttle:3,1', 'ai.meter'])
             ->name('ai.test');
     });
 });

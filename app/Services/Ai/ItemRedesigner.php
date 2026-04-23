@@ -4,9 +4,12 @@ namespace App\Services\Ai;
 
 use App\Models\PlanningSuggestion;
 use App\Services\Ai\AnthropicClientInterface;
+use App\Services\Ai\Telemetry\SpanEmitter;
 
 class ItemRedesigner
 {
+    public function __construct(private SpanEmitter $emitter) {}
+
     public function redesign(PlanningSuggestion $suggestion, string $feedback, AnthropicClientInterface $anthropic): array
     {
         $demand = $suggestion->demand; // planning-type demand
@@ -26,13 +29,36 @@ class ItemRedesigner
             '{{client_memory_short}}' => $memory,
         ]);
 
-        $response = $anthropic->messages()->create(
-            maxTokens: 512,
-            messages: [['role' => 'user', 'content' => 'Rewrite the item per feedback. Output JSON only.']],
-            model: (string) config('services.anthropic.model_cheap'),  // Haiku 4.5
-            system: $system,
-            temperature: 0.7,
+        $model  = (string) config('services.anthropic.model_cheap');
+        $orgId  = (int) ($client?->organization_id ?? 0);
+        $attrs  = ['suggestion_id' => $suggestion->id, 'model' => $model];
+
+        $startedAt = microtime(true);
+        $response  = $this->emitter->emit(
+            'redesign',
+            $orgId,
+            $attrs,
+            fn () => $anthropic->messages()->create(
+                maxTokens: 512,
+                messages: [['role' => 'user', 'content' => 'Rewrite the item per feedback. Output JSON only.']],
+                model: $model,  // Haiku 4.5
+                system: $system,
+                temperature: 0.7,
+            ),
         );
+        $durationMs = (microtime(true) - $startedAt) * 1000;
+
+        $usage = $response->usage ?? null;
+        if ($usage) {
+            $this->emitter->recordUsage(
+                'redesign',
+                $orgId,
+                $attrs,
+                inputTokens:  (int) ($usage->inputTokens  ?? $usage->input_tokens  ?? 0),
+                outputTokens: (int) ($usage->outputTokens ?? $usage->output_tokens ?? 0),
+                durationMs:   $durationMs,
+            );
+        }
 
         $text = $response->content[0]->text ?? '';
         // Strip code fences if the model ignored the "no fences" rule.
