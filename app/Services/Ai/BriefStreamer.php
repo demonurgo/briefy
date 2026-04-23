@@ -7,7 +7,7 @@ use Generator;
 use Illuminate\Http\StreamedEvent;
 use Illuminate\Support\Facades\Log;
 
-final class BriefStreamer
+class BriefStreamer
 {
     public function __construct(private BriefPromptBuilder $prompts) {}
 
