@@ -56,10 +56,17 @@ class User extends Authenticatable
 
     /**
      * Get the user's role in their current organization from the pivot table.
+     * Cached per-request on the model instance to avoid N+1 in middleware/guards.
      * Accessor: $user->current_role
      */
     public function getCurrentRoleAttribute(): ?string
     {
+        if ($this->relationLoaded('organizations')) {
+            return $this->organizations
+                ->firstWhere('id', $this->current_organization_id)
+                ?->pivot?->role;
+        }
+
         return $this->organizations()
             ->wherePivot('organization_id', $this->current_organization_id)
             ->first()?->pivot?->role;

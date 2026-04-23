@@ -67,7 +67,10 @@ class InvitationController extends Controller
                 'role'                    => $invitation->role,  // write-through (Open Question 2)
             ]);
 
-            Auth::login($existingUser);
+            // Only login if not already authenticated as this user
+            if (!Auth::check() || Auth::id() !== $existingUser->id) {
+                Auth::login($existingUser);
+            }
         } else {
             // D-04: new user — create account and attach to org
             $request->validate([

@@ -32,7 +32,7 @@ class InvitationMail extends Mailable
         return new Content(
             markdown: 'mail.invitation',
             with: [
-                'acceptUrl' => route('invitations.store', $this->invitation->token),
+                'acceptUrl' => route('invitations.show', $this->invitation->token),
                 'orgName'   => $this->organization->name,
                 'role'      => $this->invitation->role,
                 'expiresAt' => $this->invitation->expires_at->format('d/m/Y'),
