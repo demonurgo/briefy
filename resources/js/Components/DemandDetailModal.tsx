@@ -378,59 +378,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
               {/* Tab panels */}
               <TabPanels className="flex flex-1 overflow-hidden">
 
-                {/* Tab 1: Comentários */}
-                <TabPanel className="flex h-full w-full flex-col overflow-hidden focus:outline-none">
-                  <div className="flex-1 overflow-y-auto no-scrollbar">
-                    {demand.comments.length === 0
-                      ? <p className="px-6 py-8 text-center text-sm text-[#9ca3af]">{t('demands.empty')}</p>
-                      : <ul className="divide-y divide-[#e5e7eb] dark:divide-[#1f2937]">
-                          {demand.comments.map(c => (
-                            <li key={c.id} className="group px-6 py-4">
-                              <div className="mb-1.5 flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-[#111827] dark:text-[#f9fafb]">{c.user.name}</span>
-                                  <span className="text-xs text-[#9ca3af]">{new Date(c.created_at).toLocaleString('pt-BR')}</span>
-                                </div>
-                                {editingCommentId !== c.id && (c.user.id === auth.user.id || isAdmin) && (
-                                  <div className="flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-                                    {c.user.id === auth.user.id && (
-                                      <button onClick={() => { setEditingCommentId(c.id); setEditingCommentBody(c.body); }} className="text-[#9ca3af] hover:text-[#7c3aed]"><Pencil size={13} /></button>
-                                    )}
-                                    <button onClick={() => deleteComment(c.id)} className="text-[#9ca3af] hover:text-red-500"><Trash2 size={13} /></button>
-                                  </div>
-                                )}
-                              </div>
-                              {editingCommentId === c.id ? (
-                                <div className="space-y-2">
-                                  <textarea autoFocus value={editingCommentBody} onChange={e => setEditingCommentBody(e.target.value)} rows={3}
-                                    className="w-full resize-none rounded-[8px] border border-[#7c3aed] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:bg-[#111827] dark:text-[#f9fafb]" />
-                                  <div className="flex gap-2">
-                                    <button onClick={() => saveComment(c.id)} className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#6d28d9]">{t('common.save')}</button>
-                                    <button onClick={() => setEditingCommentId(null)} className="rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-xs text-[#6b7280] dark:border-[#1f2937]">{t('common.cancel')}</button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <p className="whitespace-pre-wrap text-sm text-[#6b7280]">{c.body}</p>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                    }
-                  </div>
-                  <form onSubmit={submitComment} className="shrink-0 border-t border-[#e5e7eb] px-6 py-4 dark:border-[#1f2937]">
-                    <textarea value={commentForm.data.body} onChange={e => commentForm.setData('body', e.target.value)}
-                      placeholder={t('demands.writeComment')} rows={3}
-                      className="w-full resize-none rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm text-[#111827] placeholder-[#9ca3af] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb] dark:placeholder-[#6b7280]" />
-                    <div className="mt-3 flex justify-end">
-                      <button type="submit" disabled={commentForm.processing || !commentForm.data.body.trim()}
-                        className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-4 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors disabled:cursor-not-allowed disabled:opacity-60">
-                        <Send size={13} />{t('demands.send')}
-                      </button>
-                    </div>
-                  </form>
-                </TabPanel>
-
-                {/* Tab 2: Arquivos */}
+                {/* Tab 1: Arquivos */}
                 <TabPanel className="flex h-full w-full flex-col overflow-hidden focus:outline-none">
                   <div className="overflow-y-auto no-scrollbar">
                     <div className="flex items-center justify-between px-5 py-3">
@@ -490,6 +438,58 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                         </ul>
                     }
                   </div>
+                </TabPanel>
+
+                {/* Tab 2: Comentários */}
+                <TabPanel className="flex h-full w-full flex-col overflow-hidden focus:outline-none">
+                  <div className="flex-1 overflow-y-auto no-scrollbar">
+                    {demand.comments.length === 0
+                      ? <p className="px-6 py-8 text-center text-sm text-[#9ca3af]">{t('demands.empty')}</p>
+                      : <ul className="divide-y divide-[#e5e7eb] dark:divide-[#1f2937]">
+                          {demand.comments.map(c => (
+                            <li key={c.id} className="group px-6 py-4">
+                              <div className="mb-1.5 flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-[#111827] dark:text-[#f9fafb]">{c.user.name}</span>
+                                  <span className="text-xs text-[#9ca3af]">{new Date(c.created_at).toLocaleString('pt-BR')}</span>
+                                </div>
+                                {editingCommentId !== c.id && (c.user.id === auth.user.id || isAdmin) && (
+                                  <div className="flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                                    {c.user.id === auth.user.id && (
+                                      <button onClick={() => { setEditingCommentId(c.id); setEditingCommentBody(c.body); }} className="text-[#9ca3af] hover:text-[#7c3aed]"><Pencil size={13} /></button>
+                                    )}
+                                    <button onClick={() => deleteComment(c.id)} className="text-[#9ca3af] hover:text-red-500"><Trash2 size={13} /></button>
+                                  </div>
+                                )}
+                              </div>
+                              {editingCommentId === c.id ? (
+                                <div className="space-y-2">
+                                  <textarea autoFocus value={editingCommentBody} onChange={e => setEditingCommentBody(e.target.value)} rows={3}
+                                    className="w-full resize-none rounded-[8px] border border-[#7c3aed] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:bg-[#111827] dark:text-[#f9fafb]" />
+                                  <div className="flex gap-2">
+                                    <button onClick={() => saveComment(c.id)} className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#6d28d9]">{t('common.save')}</button>
+                                    <button onClick={() => setEditingCommentId(null)} className="rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-xs text-[#6b7280] dark:border-[#1f2937]">{t('common.cancel')}</button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="whitespace-pre-wrap text-sm text-[#6b7280]">{c.body}</p>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                    }
+                  </div>
+                  <form onSubmit={submitComment} className="shrink-0 border-t border-[#e5e7eb] px-6 py-4 dark:border-[#1f2937]">
+                    <textarea value={commentForm.data.body} onChange={e => commentForm.setData('body', e.target.value)}
+                      placeholder={t('demands.writeComment')} rows={3}
+                      className="w-full resize-none rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm text-[#111827] placeholder-[#9ca3af] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb] dark:placeholder-[#6b7280]" />
+                    <div className="mt-3 flex justify-end">
+                      <button type="submit" disabled={commentForm.processing || !commentForm.data.body.trim()}
+                        className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-4 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors disabled:cursor-not-allowed disabled:opacity-60">
+                        <Send size={13} />{t('demands.send')}
+                      </button>
+                    </div>
+                  </form>
                 </TabPanel>
 
                 {/* Tab 3: Brief */}
