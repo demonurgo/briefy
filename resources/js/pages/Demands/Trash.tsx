@@ -31,7 +31,7 @@ function daysLeft(expiresAt: string): number {
 export default function DemandsTrash({ demands }: Props) {
   const { t } = useTranslation();
   const { auth } = usePage().props as { auth: { user: { role: string } }; [key: string]: unknown };
-  const isAdmin = auth?.user?.role === 'admin';
+  const isAdmin = ['admin', 'owner'].includes(auth?.user?.role ?? '');
 
   const restore = (id: number) =>
     router.post(route('trash.restore', id), {}, { preserveScroll: true });

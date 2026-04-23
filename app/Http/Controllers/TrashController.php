@@ -40,7 +40,14 @@ class TrashController extends Controller
     /** POST /demands/{demand}/trash — soft delete (move to trash) */
     public function trash(Demand $demand): RedirectResponse
     {
-        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
+        $user = auth()->user();
+        abort_if($demand->organization_id !== $user->current_organization_id, 403);
+
+        // Collaborators can only trash their OWN demands
+        if (!$user->isAdminOrOwner() && $demand->created_by !== $user->id) {
+            abort(403, 'Você só pode mover para a lixeira demandas que criou.');
+        }
+
         $demand->delete();
         return back()->with('success', 'Demanda movida para a lixeira.');
     }
@@ -55,18 +62,15 @@ class TrashController extends Controller
         return back()->with('success', 'Demanda restaurada.');
     }
 
-    /** DELETE /lixeira/{demand}/force — permanent delete */
+    /** DELETE /lixeira/{demand}/force — permanent delete (admin/owner only) */
     public function forceDelete(int $id): RedirectResponse
     {
         $user = auth()->user();
+        abort_unless($user->isAdminOrOwner(), 403, 'Apenas administradores podem excluir permanentemente.');
+
         $demand = Demand::onlyTrashed()
             ->where('organization_id', $user->current_organization_id)
             ->findOrFail($id);
-
-        // Collaborators can only permanently delete their OWN demands (D-14)
-        if (!$user->isAdminOrOwner() && $demand->created_by !== $user->id) {
-            abort(403, 'Permissão insuficiente.');
-        }
 
         $demand->files->each(fn ($f) => \Storage::disk('public')->delete($f->path_or_url));
         $demand->forceDelete();

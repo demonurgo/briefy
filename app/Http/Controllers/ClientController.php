@@ -126,6 +126,7 @@ class ClientController extends Controller
     public function updateImportantDates(Request $request, Client $client): \Illuminate\Http\JsonResponse
     {
         $this->authorizeClient($client);
+        abort_unless($request->user()->isAdminOrOwner(), 403, 'Apenas admins podem editar datas importantes.');
         $request->validate([
             'important_dates'             => 'nullable|array|max:50',
             'important_dates.*.label'     => 'required|string|max:100',

@@ -39,6 +39,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { auth } = usePage().props as any;
   const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+  const isAdmin = ['admin', 'owner'].includes(auth?.user?.role ?? '');
   const hasActiveSession = sessions.some(s => s.status === 'queued' || s.status === 'running');
 
   // Research launch
@@ -137,9 +138,11 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
               </div>
             )}
           </div>
-          <Link href={route('clients.edit', client.id)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]">
-            <Edit2 size={14} />{t('common.edit')}
-          </Link>
+          {isAdmin && (
+            <Link href={route('clients.edit', client.id)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]">
+              <Edit2 size={14} />{t('common.edit')}
+            </Link>
+          )}
         </div>
       </div>
 
@@ -214,7 +217,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                         </p>
                       </div>
                     </Link>
-                    {deletingSessionId === s.id ? (
+                    {isAdmin && (deletingSessionId === s.id ? (
                       <div className="flex gap-1 shrink-0">
                         <button onClick={() => deleteSession(s.id)} className="rounded bg-red-500 px-1.5 py-0.5 text-[10px] text-white">OK</button>
                         <button onClick={() => setDeletingSessionId(null)} className="rounded border border-[#e5e7eb] px-1.5 py-0.5 text-[10px] text-[#6b7280]">×</button>
@@ -223,7 +226,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                       <button onClick={() => setDeletingSessionId(s.id)} className="shrink-0 p-1 text-[#9ca3af] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Trash2 size={11} />
                       </button>
-                    )}
+                    ))}
                   </li>
                 ))}
               </ul>
@@ -277,7 +280,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
               )}
               {sorted.map((d, i) => {
                 const origIdx = dates.findIndex(x => x.label === d.label && x.month === d.month && x.day === d.day);
-                return editingIdx === origIdx ? (
+                return isAdmin && editingIdx === origIdx ? (
                   <div key={i} className="flex items-center gap-2 px-5 py-3">
                     <input value={editBuf.label} onChange={e => setEditBuf(b => ({ ...b, label: e.target.value }))}
                       placeholder="Descrição" className={`${inputCls} flex-1`} autoFocus />
@@ -296,18 +299,20 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                       {String(d.day).padStart(2,'0')} {MONTHS_SHORT[d.month-1]}
                     </span>
                     <span className="flex-1 text-sm text-[#374151] dark:text-[#d1d5db]">{d.label}</span>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => { setEditingIdx(origIdx); setEditBuf({ ...d }); }}
-                        className="rounded p-1 text-[#9ca3af] hover:text-[#7c3aed]"><Pencil size={13} /></button>
-                      <button onClick={() => removeDate(origIdx)}
-                        className="rounded p-1 text-[#9ca3af] hover:text-red-500"><Trash2 size={13} /></button>
-                    </div>
+                    {isAdmin && (
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => { setEditingIdx(origIdx); setEditBuf({ ...d }); }}
+                          className="rounded p-1 text-[#9ca3af] hover:text-[#7c3aed]"><Pencil size={13} /></button>
+                        <button onClick={() => removeDate(origIdx)}
+                          className="rounded p-1 text-[#9ca3af] hover:text-red-500"><Trash2 size={13} /></button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
 
-              {/* Add new row */}
-              {addingNew ? (
+              {/* Add new row — admin only */}
+              {isAdmin && (addingNew ? (
                 <div className="flex items-center gap-2 px-5 py-3">
                   <input value={newDate.label} onChange={e => setNewDate(b => ({ ...b, label: e.target.value }))}
                     placeholder="Ex: Aniversário da empresa" className={`${inputCls} flex-1`} autoFocus />
@@ -328,7 +333,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                     Adicionar data importante
                   </button>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </div>

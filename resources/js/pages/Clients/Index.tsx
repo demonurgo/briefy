@@ -58,6 +58,7 @@ export default function ClientsIndex({ clients, filters }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { auth } = usePage().props as any;
   const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+  const isAdmin = ['admin', 'owner'].includes(auth?.user?.role ?? '');
   const [search, setSearch] = useState(filters.search ?? '');
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -166,8 +167,8 @@ export default function ClientsIndex({ clients, filters }: Props) {
                   )}
                 </div>
 
-                {/* Delete button */}
-                <div onClick={e => e.preventDefault()}>
+                {/* Delete button — admin/owner only */}
+                {isAdmin && <div onClick={e => e.preventDefault()}>
                   {deletingId === client.id ? (
                     <div className="flex items-center gap-1">
                       <button onClick={() => handleDelete(client.id)} className="rounded-[6px] bg-red-500 px-2 py-1 text-[11px] font-medium text-white hover:bg-red-600">
@@ -185,7 +186,7 @@ export default function ClientsIndex({ clients, filters }: Props) {
                       <Trash2 size={14} />
                     </button>
                   )}
-                </div>
+                </div>}
               </div>
 
               {/* Tone of voice */}
