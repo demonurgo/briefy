@@ -55,13 +55,19 @@ class TrashController extends Controller
         return back()->with('success', 'Demanda restaurada.');
     }
 
-    /** DELETE /lixeira/{demand}/force — permanent delete (admin only) */
+    /** DELETE /lixeira/{demand}/force — permanent delete */
     public function forceDelete(int $id): RedirectResponse
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
+        $user = auth()->user();
         $demand = Demand::onlyTrashed()
-            ->where('organization_id', auth()->user()->current_organization_id)
+            ->where('organization_id', $user->current_organization_id)
             ->findOrFail($id);
+
+        // Collaborators can only permanently delete their OWN demands (D-14)
+        if (!$user->isAdminOrOwner() && $demand->created_by !== $user->id) {
+            abort(403, 'Permissão insuficiente.');
+        }
+
         $demand->files->each(fn ($f) => \Storage::disk('public')->delete($f->path_or_url));
         $demand->forceDelete();
         return back()->with('success', 'Demanda excluída permanentemente.');

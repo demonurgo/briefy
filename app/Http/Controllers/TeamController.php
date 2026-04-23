@@ -21,7 +21,7 @@ class TeamController extends Controller
     }
 
     /**
-     * POST /settings/team/invite
+     * POST /team/invite
      * Create invitation + send email (TEAM-01, T-04-07: role validated IN admin|collaborator).
      */
     public function invite(Request $request): RedirectResponse
@@ -68,7 +68,7 @@ class TeamController extends Controller
     }
 
     /**
-     * DELETE /settings/team/invitations/{invitation}
+     * DELETE /team/invitations/{invitation}
      * Cancel a pending invitation (D-05: admin/owner only).
      */
     public function cancelInvitation(Request $request, Invitation $invitation): RedirectResponse
@@ -84,23 +84,26 @@ class TeamController extends Controller
     }
 
     /**
-     * POST /settings/team/invitations/{invitation}/resend
-     * Resend invitation email and extend expiry.
+     * POST /team/invitations/{invitation}/resend
+     * Resend invitation email and refresh token + extend expiry.
      */
     public function resendInvitation(Request $request, Invitation $invitation): RedirectResponse
     {
         abort_unless($request->user()->isAdminOrOwner(), 403);
         abort_if($invitation->organization_id !== $request->user()->current_organization_id, 403);
 
-        // Extend expiry on resend
-        $invitation->update(['expires_at' => now()->addDays(7)]);
+        // Fresh token + extended expiry on resend
+        $invitation->update([
+            'token'      => (string) Str::uuid(),
+            'expires_at' => now()->addDays(7),
+        ]);
         Mail::to($invitation->email)->send(new InvitationMail($invitation, $invitation->organization));
 
         return back()->with('success', 'Convite reenviado.');
     }
 
     /**
-     * PATCH /settings/team/{user}/role
+     * PATCH /team/{user}/role
      * Update member role with pivot write-through (TEAM-03, T-04-10: owner protected).
      */
     public function updateRole(Request $request, User $user): RedirectResponse
@@ -124,13 +127,15 @@ class TeamController extends Controller
         $org->users()->updateExistingPivot($user->id, ['role' => $request->role]);
 
         // Pitfall 3: write-through to users.role for backward compatibility
-        $user->update(['role' => $request->role]);
+        if ($user->current_organization_id === $org->id) {
+            $user->update(['role' => $request->role]);
+        }
 
         return back()->with('success', 'Função atualizada.');
     }
 
     /**
-     * DELETE /settings/team/{user}/remove
+     * DELETE /team/{user}/remove
      * Detach member from org pivot (TEAM-03, D-12: owner blocked).
      */
     public function remove(Request $request, User $user): RedirectResponse

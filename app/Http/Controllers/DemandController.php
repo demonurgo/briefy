@@ -60,7 +60,7 @@ class DemandController extends Controller
             'autoCreate'     => $request->boolean('create'),
             'selectedDemand' => $selectedDemand,
             'teamMembers'    => $teamMembers,
-            'isAdmin'        => auth()->user()->isAdmin(),
+            'isAdmin'        => auth()->user()->isAdminOrOwner(),
         ]);
     }
 
@@ -143,6 +143,13 @@ class DemandController extends Controller
     public function destroy(Demand $demand): RedirectResponse
     {
         $this->authorizeDemand($demand);
+
+        // Collaborators can only delete their OWN demands (D-14)
+        $user = auth()->user();
+        if (!$user->isAdminOrOwner() && $demand->created_by !== $user->id) {
+            abort(403, 'Apenas admins podem excluir demandas de outros usuários.');
+        }
+
         $demand->delete(); // soft delete — files preserved, restorable for 30 days
 
         return back()->with('success', __('app.demand_deleted'));

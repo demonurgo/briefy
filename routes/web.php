@@ -103,6 +103,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/client-ai-memory/{memory}/dismiss', [\App\Http\Controllers\ClientAiMemoryController::class, 'dismiss'])
         ->name('client-ai-memory.dismiss');
 
+    // Team management — admin/owner only routes (protected by EnsureRole middleware)
+    // Named without 'settings.' prefix so tests can use route('team.invite') etc.
+    Route::post('/team/invite', [TeamController::class, 'invite'])
+        ->middleware('role:admin,owner')
+        ->name('team.invite');
+    Route::delete('/team/invitations/{invitation}', [TeamController::class, 'cancelInvitation'])
+        ->middleware('role:admin,owner')
+        ->name('team.invitation.cancel');
+    Route::post('/team/invitations/{invitation}/resend', [TeamController::class, 'resendInvitation'])
+        ->middleware('role:admin,owner')
+        ->name('team.invitation.resend');
+    Route::patch('/team/{user}/role', [TeamController::class, 'updateRole'])
+        ->middleware('role:admin,owner')
+        ->name('team.updateRole');
+    Route::delete('/team/{user}/remove', [TeamController::class, 'remove'])
+        ->middleware('role:admin,owner')
+        ->name('team.remove');
+
     Route::prefix('settings')->name('settings.')->group(function () {
         // Unified settings page (D-22: single /settings page with anchor sections)
         Route::get('/', [\App\Http\Controllers\Settings\SettingsController::class, 'index'])->name('index');
@@ -134,14 +152,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/ai/test', [\App\Http\Controllers\Settings\AiController::class, 'testKey'])
             ->middleware(['throttle:3,1', 'ai.meter'])
             ->name('ai.test');
-
-        // Team management routes — admin/owner only (enforced in controller, T-04-07, T-04-10, T-04-11)
-        Route::get('/team', [TeamController::class, 'index'])->name('team');
-        Route::post('/team/invite', [TeamController::class, 'invite'])->name('team.invite');
-        Route::delete('/team/invitations/{invitation}', [TeamController::class, 'cancelInvitation'])->name('team.invitation.cancel');
-        Route::post('/team/invitations/{invitation}/resend', [TeamController::class, 'resendInvitation'])->name('team.invitation.resend');
-        Route::patch('/team/{user}/role', [TeamController::class, 'updateRole'])->name('team.updateRole');
-        Route::delete('/team/{user}/remove', [TeamController::class, 'remove'])->name('team.remove');
     });
 
     // Notifications
