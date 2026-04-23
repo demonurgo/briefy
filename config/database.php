@@ -1,4 +1,5 @@
 <?php
+// (c) 2026 Briefy contributors — AGPL-3.0
 
 use Illuminate\Support\Str;
 use Pdo\Mysql;

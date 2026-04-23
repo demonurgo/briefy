@@ -1,4 +1,5 @@
 <?php
+// (c) 2026 Briefy contributors — AGPL-3.0
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

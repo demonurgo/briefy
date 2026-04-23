@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import ptBR from '../locales/pt-BR.json';

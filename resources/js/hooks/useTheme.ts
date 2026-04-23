@@ -1,10 +1,12 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import { useCallback, useEffect, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 
 type Theme = 'light' | 'dark';
 
 interface PageProps {
-  auth: { user: { preferences: { theme: string } } };
+  [key: string]: unknown;
+  auth: { user: { id: number; name: string; email: string; preferences: { theme: string } } };
 }
 
 export function useTheme() {

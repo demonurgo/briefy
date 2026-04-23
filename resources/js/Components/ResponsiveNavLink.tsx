@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import { InertiaLinkProps, Link } from '@inertiajs/react';
 
 export default function ResponsiveNavLink({

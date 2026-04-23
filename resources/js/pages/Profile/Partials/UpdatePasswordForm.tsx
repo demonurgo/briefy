@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';

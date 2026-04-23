@@ -1,64 +1,101 @@
 <?php
-
+// (c) 2026 Briefy contributors — AGPL-3.0
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreClientRequest;
+use App\Http\Requests\UpdateClientRequest;
+use App\Models\Client;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ClientController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): \Inertia\Response
+    public function index(Request $request): Response
     {
-        return \Inertia\Inertia::render('Clients/Index', ['clients' => []]);
+        $clients = Client::where('organization_id', auth()->user()->organization_id)
+            ->withCount('demands')
+            ->when($request->search, fn($q, $s) => $q->where('name', 'ilike', "%{$s}%"))
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('Clients/Index', [
+            'clients' => $clients,
+            'filters' => $request->only('search'),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): Response
     {
-        //
+        return Inertia::render('Clients/Create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreClientRequest $request): RedirectResponse
     {
-        //
+        $data = $request->validated();
+        $data['organization_id'] = auth()->user()->organization_id;
+
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $client = Client::create($data);
+
+        return redirect()->route('clients.show', $client)
+            ->with('success', __('app.client_created'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Client $client): Response
     {
-        //
+        $this->authorizeClient($client);
+
+        $demands = $client->demands()
+            ->with(['creator', 'assignee'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return Inertia::render('Clients/Show', [
+            'client'  => $client,
+            'demands' => $demands,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Client $client): Response
     {
-        //
+        $this->authorizeClient($client);
+        return Inertia::render('Clients/Edit', ['client' => $client]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateClientRequest $request, Client $client): RedirectResponse
     {
-        //
+        $this->authorizeClient($client);
+        $data = $request->validated();
+
+        if ($request->hasFile('avatar')) {
+            if ($client->avatar) Storage::disk('public')->delete($client->avatar);
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $client->update($data);
+
+        return redirect()->route('clients.show', $client)
+            ->with('success', __('app.client_updated'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Client $client): RedirectResponse
     {
-        //
+        $this->authorizeClient($client);
+        if ($client->avatar) Storage::disk('public')->delete($client->avatar);
+        $client->delete();
+
+        return redirect()->route('clients.index')
+            ->with('success', __('app.client_deleted'));
+    }
+
+    private function authorizeClient(Client $client): void
+    {
+        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
     }
 }

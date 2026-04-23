@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { AxiosInstance } from 'axios';
 import { route as ziggyRoute } from 'ziggy-js';

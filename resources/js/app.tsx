@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import './lib/i18n';
 import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/react';

@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 

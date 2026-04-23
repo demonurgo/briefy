@@ -1,3 +1,4 @@
+// (c) 2026 Briefy contributors — AGPL-3.0
 import { Link, usePage } from '@inertiajs/react';
 import { Calendar, ClipboardList, LayoutDashboard, MoreHorizontal, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
