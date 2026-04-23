@@ -24,6 +24,20 @@
     "demandsCount_other": "{{count}} demandas",
     "confirmDelete": "Tem certeza que deseja excluir este cliente?"
   },
+  "settings": {
+    "ai": {
+      "title": "Configuração de IA",
+      "description": "Cada organização usa a própria chave Anthropic (BYOK). Nenhuma chave é compartilhada entre organizações.",
+      "keyLabel": "Chave da API Anthropic",
+      "keyHint": "A chave começa com sk-ant-. Armazenada criptografada; só os 4 últimos caracteres ficam visíveis depois.",
+      "testKey": "Testar chave",
+      "testFailed": "Não foi possível testar a chave.",
+      "testThrottled": "Muitas tentativas em sequência. Aguarde 1 minuto.",
+      "lastCheck": "Última verificação: {{date}}",
+      "maUnavailableBanner": "Managed Agents não está habilitado nesta conta Anthropic. Chat, Brief e Planejamento continuam funcionando; a pesquisa automática de cliente (🤖 Conhecer este cliente com IA) ficará desabilitada.",
+      "status": { "configured": "Chave configurada", "missing": "Nenhuma chave configurada" }
+    }
+  },
   "demands": {
     "title": "Demandas",
     "new": "Nova demanda",

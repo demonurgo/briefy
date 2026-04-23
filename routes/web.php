@@ -20,6 +20,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->shallow()
         ->except(['index']);
 
+    // Demand file, comment, and status actions
+    Route::post('/demands/{demand}/files', [DemandController::class, 'addFile'])->name('demands.files.store');
+    Route::delete('/demands/{demand}/files/{file}', [DemandController::class, 'deleteFile'])->name('demands.files.destroy');
+    Route::post('/demands/{demand}/comments', [DemandController::class, 'addComment'])->name('demands.comments.store');
+    Route::patch('/demands/{demand}/comments/{comment}', [DemandController::class, 'updateComment'])->name('demands.comments.update');
+    Route::delete('/demands/{demand}/comments/{comment}', [DemandController::class, 'deleteComment'])->name('demands.comments.destroy');
+    Route::patch('/demands/{demand}/files/{file}', [DemandController::class, 'updateFile'])->name('demands.files.update');
+    Route::patch('/demands/{demand}/status', [DemandController::class, 'updateStatus'])->name('demands.status.update');
+    Route::put('/demands/{demand}/inline', [DemandController::class, 'updateInline'])->name('demands.inline.update');
+
     Route::prefix('planning')->name('planning.')->group(function () {
         Route::get('/', [PlanningController::class, 'index'])->name('index');
     });
@@ -36,6 +46,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ]);
             return back()->with('success', 'Preferências salvas.');
         })->name('preferences');
+
+        // BYOK — AI settings (admin only; key health persist M3; throttled test endpoint M4)
+        Route::get('/ai', [\App\Http\Controllers\Settings\AiController::class, 'edit'])->name('ai.edit');
+        Route::patch('/ai', [\App\Http\Controllers\Settings\AiController::class, 'update'])->name('ai.update');
+        // M4 — throttle test key probes to 3/min/user. 'throttle:3,1' = 3 attempts per 1 minute.
+        Route::post('/ai/test', [\App\Http\Controllers\Settings\AiController::class, 'testKey'])
+            ->middleware('throttle:3,1')
+            ->name('ai.test');
     });
 });
 

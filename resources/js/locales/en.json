@@ -24,6 +24,20 @@
     "demandsCount_other": "{{count}} demands",
     "confirmDelete": "Are you sure you want to delete this client?"
   },
+  "settings": {
+    "ai": {
+      "title": "AI Configuration",
+      "description": "Each organization uses its own Anthropic key (BYOK). No key is shared between organizations.",
+      "keyLabel": "Anthropic API Key",
+      "keyHint": "The key starts with sk-ant-. Stored encrypted; only the last 4 characters are visible afterwards.",
+      "testKey": "Test key",
+      "testFailed": "Could not test the key.",
+      "testThrottled": "Too many attempts in a row. Wait 1 minute.",
+      "lastCheck": "Last check: {{date}}",
+      "maUnavailableBanner": "Managed Agents is not enabled on this Anthropic account. Chat, Brief and Planning continue to work; automatic client research (🤖 Get to know this client with AI) will be disabled.",
+      "status": { "configured": "Key configured", "missing": "No key configured" }
+    }
+  },
   "demands": {
     "title": "Demands",
     "new": "New demand",
