@@ -21,6 +21,7 @@ class DemandController extends Controller
         $orgId = auth()->user()->organization_id;
 
         $demands = Demand::where('organization_id', $orgId)
+            ->whereNull('archived_at')
             ->with(['client', 'assignee'])
             ->when($request->client_id, fn($q, $id) => $q->where('client_id', $id))
             ->when($request->status, fn($q, $s) => $q->where('status', $s))

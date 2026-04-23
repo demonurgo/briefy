@@ -1,7 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useRef, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Calendar, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, Settings, Trash2, Users } from 'lucide-react';
+import { Archive, Calendar, CheckCircle2, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, Settings, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import logoLight from '../assets/logo.svg';
 import logoDark from '../assets/logo-dark.svg';
@@ -95,6 +95,22 @@ export function Sidebar({ collapsed, onToggle }: Props) {
           <Settings size={18} className="shrink-0" />
           {!collapsed && t('nav.settings')}
         </Link>
+
+        {/* Concluídas */}
+        {(() => {
+          const { archive_count } = usePage().props as { archive_count: number; [key: string]: unknown };
+          return (
+            <Link href="/concluidas" title={collapsed ? 'Concluídas' : undefined} className={linkClass('/concluidas')}>
+              <CheckCircle2 size={18} className="shrink-0" />
+              {!collapsed && 'Concluídas'}
+              {!collapsed && archive_count > 0 && (
+                <span className="ml-auto rounded-full bg-[#d1fae5] px-1.5 py-0.5 text-[10px] font-medium text-[#065f46] dark:bg-[#064e3b] dark:text-[#6ee7b7]">
+                  {archive_count}
+                </span>
+              )}
+            </Link>
+          );
+        })()}
 
         {/* Trash */}
         {(() => {

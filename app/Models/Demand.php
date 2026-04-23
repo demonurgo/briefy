@@ -19,6 +19,7 @@ class Demand extends Model
 
     protected $casts = [
         'deadline' => 'date',
+        'archived_at' => 'datetime',
         'ai_analysis' => 'array',
         'recurrence_day' => 'integer',
     ];

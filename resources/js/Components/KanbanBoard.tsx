@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Loader2, Trash2, User } from 'lucide-react';
+import { Archive, Calendar, CheckCircle2, Loader2, Trash2, User } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -26,7 +26,7 @@ function TrashZone({ visible }: { visible: boolean }) {
   return (
     <div
       ref={setNodeRef}
-      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-lg transition-all duration-200 ${
+      className={`fixed bottom-6 left-6 z-50 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium shadow-lg transition-all duration-200 ${
         visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
       } ${
         isOver
@@ -35,7 +35,26 @@ function TrashZone({ visible }: { visible: boolean }) {
       }`}
     >
       <Trash2 size={16} className={isOver ? 'text-white' : 'text-[#9ca3af]'} />
-      {isOver ? 'Solte para mover para a lixeira' : 'Arraste aqui para excluir'}
+      {isOver ? 'Mover para a lixeira' : 'Lixeira'}
+    </div>
+  );
+}
+
+function ArchiveZone({ visible }: { visible: boolean }) {
+  const { isOver, setNodeRef } = useDroppable({ id: '__archive__' });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium shadow-lg transition-all duration-200 ${
+        visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
+      } ${
+        isOver
+          ? 'bg-[#10b981] text-white shadow-emerald-200'
+          : 'bg-white dark:bg-[#111827] border border-[#e5e7eb] dark:border-[#1f2937] text-[#9ca3af]'
+      }`}
+    >
+      <CheckCircle2 size={16} className={isOver ? 'text-white' : 'text-[#9ca3af]'} />
+      {isOver ? 'Marcar como concluída' : 'Concluída'}
     </div>
   );
 }
@@ -192,6 +211,13 @@ export function KanbanBoard({ demands: initialDemands, onDemandClick, loadingDem
       return;
     }
 
+    // Dropped on archive zone
+    if (overId === '__archive__') {
+      setDemands(prev => prev.filter(d => d.id !== demandId));
+      router.post(route('demands.archive', demandId), {}, { preserveScroll: true });
+      return;
+    }
+
     if (!STATUSES.includes(overId as typeof STATUSES[number])) return;
 
     const original = initialDemands.find(d => d.id === demandId);
@@ -227,6 +253,7 @@ export function KanbanBoard({ demands: initialDemands, onDemandClick, loadingDem
       </div>
 
       <TrashZone visible={activeId !== null} />
+      <ArchiveZone visible={activeId !== null} />
 
       <DragOverlay dropAnimation={{ duration: 150, easing: 'ease' }}>
         {activeDemand && <DemandCard demand={activeDemand} isDragging />}

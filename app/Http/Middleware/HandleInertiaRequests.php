@@ -64,6 +64,9 @@ class HandleInertiaRequests extends Middleware
             'trash_count' => $user
                 ? \App\Models\Demand::onlyTrashed()->where('organization_id', $user->organization_id)->count()
                 : 0,
+            'archive_count' => $user
+                ? \App\Models\Demand::where('organization_id', $user->organization_id)->whereNotNull('archived_at')->count()
+                : 0,
         ]);
     }
 }
