@@ -1,6 +1,6 @@
 {
   "nav": { "dashboard": "Dashboard", "clients": "Clients", "demands": "Demands", "planning": "Planning", "settings": "Settings", "more": "More" },
-  "common": { "save": "Save", "cancel": "Cancel", "delete": "Delete", "create": "Create", "edit": "Edit", "loading": "Loading...", "confirm": "Confirm", "search": "Search", "noResults": "No results found", "actions": "Actions", "view": "View", "all": "All" },
+  "common": { "save": "Save", "cancel": "Cancel", "delete": "Delete", "create": "Create", "edit": "Edit", "loading": "Loading...", "confirm": "Confirm", "search": "Search", "noResults": "No results found", "actions": "Actions", "view": "View", "all": "All", "dismiss": "Dismiss", "continue": "Continue", "saving": "Saving...", "costConfirm": { "prefix": "This operation will cost approximately", "suffix": "Continue?", "continue": "Continue" } },
   "demand": {
     "statuses": { "todo": "To do", "in_progress": "In progress", "awaiting_feedback": "Awaiting feedback", "in_review": "In review", "approved": "Approved" },
     "types": { "demand": "Demand", "planning": "Planning" }
