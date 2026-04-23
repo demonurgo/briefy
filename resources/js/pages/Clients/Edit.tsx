@@ -19,6 +19,7 @@ interface Client {
   monthly_plan_notes: string | null;
   planning_day: number | null;
   social_handles: Record<string, string> | null;
+  important_dates: Array<{ label: string; month: number; day: number }> | null;
 }
 
 export default function ClientsEdit({ client, latest_session }: { client: Client; latest_session?: { id: number; status: string } | null }) {
@@ -37,6 +38,7 @@ export default function ClientsEdit({ client, latest_session }: { client: Client
     monthly_plan_notes: client.monthly_plan_notes ?? '',
     planning_day: client.planning_day ?? null,
     social_handles: client.social_handles ?? ({} as Record<string, string>),
+    important_dates: (client.important_dates ?? []) as Array<{ label: string; month: number; day: number }>,
   });
 
   const submit = (e: React.FormEvent) => {

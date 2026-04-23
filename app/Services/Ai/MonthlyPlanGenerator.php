@@ -43,6 +43,18 @@ class MonthlyPlanGenerator
             $attempts++;
             try {
                 $userMsg = "Gere {$expectedCount} itens para {$year}-" . sprintf('%02d', $month) . ".";
+
+                // Inject important dates that fall in the target month
+                $importantDates = collect($client->important_dates ?? [])
+                    ->filter(fn ($d) => isset($d['month']) && (int) $d['month'] === $month)
+                    ->values();
+                if ($importantDates->isNotEmpty()) {
+                    $dateLines = $importantDates->map(fn ($d) =>
+                        sprintf('- Dia %02d/%02d: %s', $d['day'], $d['month'], $d['label'])
+                    )->implode("\n");
+                    $userMsg .= "\n\nDATAS IMPORTANTES DESTE MÊS (obrigatório incluir um post específico para cada uma):\n" . $dateLines;
+                }
+
                 if ($instructions) {
                     $userMsg .= "\n\nINSTRUÇÕES ADICIONAIS DO USUÁRIO (seguir com prioridade):\n" . $instructions;
                 }

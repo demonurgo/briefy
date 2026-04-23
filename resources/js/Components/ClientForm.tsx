@@ -2,8 +2,11 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
+import { Plus, Trash2 } from 'lucide-react';
 import InputError from '@/Components/InputError';
 import { AiIcon } from '@/Components/AiIcon';
+
+const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 const CHANNELS = ['instagram', 'facebook', 'linkedin', 'tiktok', 'twitter', 'youtube', 'email', 'whatsapp', 'website'];
 
@@ -20,11 +23,12 @@ interface FormData {
   brand_references: string;
   briefing: string;
   avatar: File | null;
-  // Phase 3 — monthly plan + social handles
+  // Phase 3 — monthly plan + social handles + important dates
   monthly_posts?: number | null;
   monthly_plan_notes?: string;
   planning_day?: number | null;
   social_handles?: Record<string, string>;
+  important_dates?: Array<{ label: string; month: number; day: number }>;
 }
 
 interface Props {
@@ -276,6 +280,73 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
           ))}
         </div>
         <InputError message={errors.social_handles} className="mt-1.5" />
+      </div>
+
+      {/* === Datas Importantes === */}
+      <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] pt-6 mt-6">
+        <h3 className="mb-1 text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">Datas Importantes</h3>
+        <p className="mb-4 text-xs text-[#9ca3af]">
+          Datas que serão automaticamente incluídas no planejamento quando cairem no mês gerado.
+          Ex: aniversário da empresa, aniversário do fundador, lançamento de produto.
+        </p>
+
+        <div className="space-y-2">
+          {(data.important_dates ?? []).map((date, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={date.label}
+                onChange={e => {
+                  const next = [...(data.important_dates ?? [])];
+                  next[idx] = { ...next[idx], label: e.target.value };
+                  setData('important_dates', next);
+                }}
+                placeholder="Ex: Aniversário da empresa"
+                className={`${inputClass} flex-1`}
+              />
+              <select
+                value={date.month}
+                onChange={e => {
+                  const next = [...(data.important_dates ?? [])];
+                  next[idx] = { ...next[idx], month: Number(e.target.value) };
+                  setData('important_dates', next);
+                }}
+                className={`${inputClass} w-24`}
+              >
+                {MONTHS.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+              </select>
+              <input
+                type="number" min={1} max={31}
+                value={date.day}
+                onChange={e => {
+                  const next = [...(data.important_dates ?? [])];
+                  next[idx] = { ...next[idx], day: Number(e.target.value) };
+                  setData('important_dates', next);
+                }}
+                placeholder="Dia"
+                className={`${inputClass} w-20`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const next = (data.important_dates ?? []).filter((_, i) => i !== idx);
+                  setData('important_dates', next);
+                }}
+                className="shrink-0 rounded-[8px] border border-[#e5e7eb] p-2 text-[#9ca3af] hover:border-red-400 hover:text-red-500 transition-colors dark:border-[#1f2937]"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setData('important_dates', [...(data.important_dates ?? []), { label: '', month: 1, day: 1 }])}
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-dashed border-[#d1d5db] px-3 py-1.5 text-xs text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#374151]"
+          >
+            <Plus size={13} />
+            Adicionar data
+          </button>
+        </div>
       </div>
 
       {/* === Deep Research — only in edit mode === */}

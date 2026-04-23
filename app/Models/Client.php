@@ -13,11 +13,12 @@ class Client extends Model
     protected $fillable = [
         'organization_id', 'name', 'segment', 'channels',
         'tone_of_voice', 'target_audience', 'brand_references', 'briefing', 'avatar',
-        'monthly_posts', 'monthly_plan_notes', 'planning_day', 'social_handles',
+        'monthly_posts', 'monthly_plan_notes', 'planning_day', 'social_handles', 'important_dates',
     ];
     protected $casts = [
         'channels' => 'array',
         'social_handles' => 'array',
+        'important_dates' => 'array',
         'monthly_posts' => 'integer',
         'planning_day' => 'integer',
     ];

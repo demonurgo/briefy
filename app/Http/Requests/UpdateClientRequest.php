@@ -23,8 +23,12 @@ class UpdateClientRequest extends FormRequest
             'monthly_posts'       => 'nullable|integer|min:0|max:200',
             'monthly_plan_notes'  => 'nullable|string|max:1000',
             'planning_day'        => 'nullable|integer|min:1|max:31',
-            'social_handles'      => 'nullable|array',
-            'social_handles.*'    => 'string|max:255',
+            'social_handles'              => 'nullable|array',
+            'social_handles.*'            => 'string|max:255',
+            'important_dates'             => 'nullable|array|max:50',
+            'important_dates.*.label'     => 'required|string|max:100',
+            'important_dates.*.month'     => 'required|integer|min:1|max:12',
+            'important_dates.*.day'       => 'required|integer|min:1|max:31',
         ];
     }
 }

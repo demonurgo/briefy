@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { ArrowLeft, Brain, CheckCircle2, Edit2, Loader2, Plus, Trash2, XCircle } from 'lucide-react';
+import { ArrowLeft, Brain, Calendar, CheckCircle2, ClipboardList, Edit2, Loader2, Trash2, XCircle } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientAvatar } from '@/Components/ClientAvatar';
 
@@ -16,9 +16,14 @@ const STATUS_COLORS: Record<string, string> = {
 
 interface Demand { id: number; title: string; status: string; deadline: string | null; type: string; }
 interface Session { id: number; status: string; started_at: string | null; completed_at: string | null; progress_summary: string | null; }
+const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+interface ImportantDate { label: string; month: number; day: number; }
+
 interface Client {
   id: number; name: string; segment: string | null; avatar: string | null;
   channels: string[]; tone_of_voice: string | null; target_audience: string | null; briefing: string | null;
+  important_dates?: ImportantDate[] | null;
 }
 
 function SessionStatusIcon({ status }: { status: string }) {
@@ -149,38 +154,52 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
           )}
         </div>
 
-        {/* Right: demands */}
-        <div className="lg:col-span-2">
-          <div className="rounded-[12px] bg-white shadow-sm dark:bg-[#111827]">
-            <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-4 dark:border-[#1f2937]">
-              <h3 className="font-semibold text-[#111827] dark:text-[#f9fafb]">{t('nav.demands')}</h3>
-              <Link href={route('clients.demands.create', client.id)} className="inline-flex items-center gap-1 text-sm font-medium text-[#7c3aed] hover:text-[#6d28d9] dark:text-[#a78bfa]">
-                <Plus size={15} />{t('demands.new')}
+        {/* Right: actions + important dates */}
+        <div className="lg:col-span-2 space-y-5">
+
+          {/* Demands button */}
+          <div className="rounded-[12px] bg-white p-5 shadow-sm dark:bg-[#111827] flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-[#111827] dark:text-[#f9fafb]">{t('nav.demands')}</p>
+              <p className="text-xs text-[#9ca3af] mt-0.5">{demands.length} demanda{demands.length !== 1 ? 's' : ''} ativa{demands.length !== 1 ? 's' : ''}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href={route('clients.demands.create', client.id)}
+                className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]"
+              >
+                {t('demands.new')}
+              </Link>
+              <Link
+                href={route('demands.index', { client_id: client.id })}
+                className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors"
+              >
+                <ClipboardList size={14} />
+                Ver quadro
               </Link>
             </div>
-            {demands.length === 0 ? (
-              <div className="px-6 py-10 text-center text-sm text-[#9ca3af]">{t('demands.empty')}</div>
-            ) : (
-              <ul className="divide-y divide-[#e5e7eb] dark:divide-[#1f2937]">
-                {demands.map(demand => (
-                  <li key={demand.id}>
-                    <Link
-                      href={route('demands.index', { client_id: client.id, demand: demand.id })}
-                      className="flex items-center gap-3 px-6 py-3.5 hover:bg-[#f9fafb] transition-colors dark:hover:bg-[#0b0f14]"
-                    >
-                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[demand.status]}`}>
-                        {t(`demand.statuses.${demand.status}`)}
-                      </span>
-                      <span className="flex-1 truncate text-sm text-[#111827] dark:text-[#f9fafb]">{demand.title}</span>
-                      {demand.deadline && (
-                        <span className="shrink-0 text-xs text-[#9ca3af]">{new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
-                      )}
-                    </Link>
+          </div>
+
+          {/* Important dates */}
+          {client.important_dates && client.important_dates.length > 0 && (
+            <div className="rounded-[12px] bg-white shadow-sm dark:bg-[#111827]">
+              <div className="flex items-center gap-2 border-b border-[#e5e7eb] px-5 py-3.5 dark:border-[#1f2937]">
+                <Calendar size={15} className="text-[#f59e0b]" />
+                <h3 className="text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">Datas Importantes</h3>
+                <span className="ml-auto text-xs text-[#9ca3af]">Incluídas automaticamente no planejamento</span>
+              </div>
+              <ul className="divide-y divide-[#f3f4f6] dark:divide-[#1f2937]">
+                {client.important_dates.sort((a, b) => a.month - b.month || a.day - b.day).map((d, i) => (
+                  <li key={i} className="flex items-center gap-3 px-5 py-3">
+                    <span className="shrink-0 rounded-full bg-[#fef3c7] px-2.5 py-0.5 text-xs font-semibold text-[#92400e]">
+                      {String(d.day).padStart(2, '0')} {MONTHS[d.month - 1]}
+                    </span>
+                    <span className="text-sm text-[#374151] dark:text-[#d1d5db]">{d.label}</span>
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
