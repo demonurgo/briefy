@@ -27,10 +27,13 @@ interface ClientLite {
   monthly_plan_notes: string | null;
 }
 
+interface TeamMember { id: number; name: string; }
+
 interface Props {
   plannings: PlanningDemand[];
   clients: ClientLite[];
   filters: { client_id?: string };
+  teamMembers: TeamMember[];
 }
 
 // Returns the next month in YYYY-MM format
@@ -68,7 +71,7 @@ function groupByMonth(plannings: PlanningDemand[]): Array<{ label: string; items
   return Array.from(map.entries()).map(([label, items]) => ({ label, items }));
 }
 
-export default function PlanejamentoIndex({ plannings, clients, filters }: Props) {
+export default function PlanejamentoIndex({ plannings, clients, filters, teamMembers }: Props) {
   const { t } = useTranslation();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { auth } = usePage().props as any;
@@ -84,6 +87,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
 
   // --- Selection state ---
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [bulkAssignedTo, setBulkAssignedTo] = useState<string>('');
   const toggleSelect = (id: number) => {
     setSelected(prev => {
       const next = new Set(prev);
@@ -414,12 +418,24 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
           <span className="text-sm text-[#6b7280] dark:text-[#9ca3af]">
             {t('planning.bulkCount', { count: selected.size })}
           </span>
+          {teamMembers.length > 0 && (
+            <select
+              value={bulkAssignedTo}
+              onChange={e => setBulkAssignedTo(e.target.value)}
+              className="rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-2 py-1.5 text-sm text-[#6b7280] dark:text-[#9ca3af] focus:border-[#7c3aed] focus:outline-none"
+            >
+              <option value="">Responsável</option>
+              {teamMembers.map(m => (
+                <option key={m.id} value={String(m.id)}>{m.name}</option>
+              ))}
+            </select>
+          )}
           <button
             onClick={() =>
               router.post(
                 route('planning-suggestions.convertBulk'),
-                { ids: Array.from(selected) },
-                { preserveScroll: true, onSuccess: () => setSelected(new Set()) },
+                { ids: Array.from(selected), assigned_to: bulkAssignedTo || null },
+                { preserveScroll: true, onSuccess: () => { setSelected(new Set()); setBulkAssignedTo(''); } },
               )
             }
             className="flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] hover:bg-[#6d28d9] px-3 py-1.5 text-sm font-medium text-white transition-colors"
@@ -482,6 +498,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
       {detailItem && (
         <PlanningItemModal
           suggestion={detailItem}
+          teamMembers={teamMembers}
           onClose={() => setDetailItem(null)}
           onLocalUpdate={(next) => { handleLocalUpdate(next); setDetailItem(next); }}
         />

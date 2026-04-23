@@ -1,10 +1,12 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { ArrowLeft, Brain, Calendar, CheckCircle2, ClipboardList, Edit2, Loader2, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientAvatar } from '@/Components/ClientAvatar';
+import { AiIcon } from '@/Components/AiIcon';
+import { CostConfirmModal } from '@/Components/CostConfirmModal';
 
 const MONTHS_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -34,6 +36,34 @@ const inputCls = 'rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-1.5 tex
 
 export default function ClientsShow({ client, demands, sessions = [] }: { client: Client; demands: Demand[]; sessions?: Session[] }) {
   const { t } = useTranslation();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { auth } = usePage().props as any;
+  const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+  const hasActiveSession = sessions.some(s => s.status === 'queued' || s.status === 'running');
+
+  // Research launch
+  const [pendingCost, setPendingCost] = useState<{ cost_usd: number; duration_minutes: string } | null>(null);
+  const [launchBusy, setLaunchBusy] = useState(false);
+
+  const openResearchWithConfirm = async () => {
+    try {
+      const res = await fetch(route('clients.research.estimateCost', client.id), {
+        credentials: 'same-origin', headers: { 'Accept': 'application/json' },
+      });
+      const data = await res.json();
+      setPendingCost({ cost_usd: data.cost_usd, duration_minutes: data.duration_minutes });
+    } catch {
+      setPendingCost({ cost_usd: 0, duration_minutes: '20-40' });
+    }
+  };
+
+  const confirmLaunch = () => {
+    setLaunchBusy(true);
+    router.post(route('clients.research.launch', client.id), {}, {
+      preserveScroll: true,
+      onFinish: () => { setLaunchBusy(false); setPendingCost(null); },
+    });
+  };
 
   // Session delete
   const [deletingSessionId, setDeletingSessionId] = useState<number | null>(null);
@@ -91,9 +121,26 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
         <Link href={route('clients.index')} className="inline-flex items-center gap-1 text-sm text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]">
           <ArrowLeft size={14} />{t('clients.title')}
         </Link>
-        <Link href={route('clients.edit', client.id)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]">
-          <Edit2 size={14} />{t('common.edit')}
-        </Link>
+        <div className="flex items-center gap-2">
+          <div className="relative group/research">
+            <button
+              disabled={!hasKey || hasActiveSession}
+              onClick={() => hasKey && !hasActiveSession && openResearchWithConfirm()}
+              className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-[#1f2937]"
+            >
+              <AiIcon size={14} />
+              {hasActiveSession ? 'Pesquisando...' : t('clients.research.deepResearch')}
+            </button>
+            {!hasKey && (
+              <div className="pointer-events-none absolute right-0 top-full mt-1 hidden group-hover/research:block z-50 w-56 rounded-[8px] bg-[#111827] px-3 py-2 text-xs text-[#f9fafb] shadow-lg">
+                Configure sua chave Anthropic em Configurações → IA
+              </div>
+            )}
+          </div>
+          <Link href={route('clients.edit', client.id)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]">
+            <Edit2 size={14} />{t('common.edit')}
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -135,12 +182,24 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
           </div>
 
           {/* Deep Research (compact) */}
-          {sessions.length > 0 && (
-            <div className="rounded-[12px] bg-white shadow-sm dark:bg-[#111827]">
-              <div className="flex items-center gap-2 border-b border-[#e5e7eb] px-4 py-3 dark:border-[#1f2937]">
-                <Brain size={14} className="text-[#7c3aed]" />
-                <h3 className="text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">Deep Research</h3>
-              </div>
+          <div className="rounded-[12px] bg-white shadow-sm dark:bg-[#111827]">
+            <div className="flex items-center gap-2 border-b border-[#e5e7eb] px-4 py-3 dark:border-[#1f2937]">
+              <Brain size={14} className="text-[#7c3aed]" />
+              <h3 className="text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">Deep Research</h3>
+              {sessions.length > 0 && !hasActiveSession && (
+                <button
+                  disabled={!hasKey}
+                  onClick={() => hasKey && openResearchWithConfirm()}
+                  className="ml-auto inline-flex items-center gap-1 rounded-[6px] border border-[#e5e7eb] dark:border-[#1f2937] px-2 py-1 text-[11px] text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <AiIcon size={11} />
+                  Nova pesquisa
+                </button>
+              )}
+            </div>
+            {sessions.length === 0 ? (
+              <p className="px-4 py-4 text-xs text-[#9ca3af]">Nenhuma pesquisa realizada ainda.</p>
+            ) : (
               <ul className="divide-y divide-[#f3f4f6] dark:divide-[#1f2937]">
                 {sessions.slice(0, 5).map(s => (
                   <li key={s.id} className="group flex items-center gap-2 px-4 py-2.5 hover:bg-[#f9fafb] dark:hover:bg-[#0b0f14] transition-colors">
@@ -168,8 +227,8 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Right column: demands + important dates */}
@@ -274,6 +333,16 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
           </div>
         </div>
       </div>
+      <CostConfirmModal
+        open={pendingCost !== null}
+        costUsd={pendingCost?.cost_usd ?? 0}
+        title={t('clients.research.confirmTitle')}
+        body={t('clients.research.confirmBody', { minutes: pendingCost?.duration_minutes ?? '20-40' })}
+        confirmLabel={t('clients.research.confirmCta')}
+        busy={launchBusy}
+        onConfirm={confirmLaunch}
+        onCancel={() => setPendingCost(null)}
+      />
     </AppLayout>
   );
 }

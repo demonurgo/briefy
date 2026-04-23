@@ -6,8 +6,11 @@ import { Calendar, Check, RefreshCw, X } from 'lucide-react';
 import { AiIcon } from '@/Components/AiIcon';
 import type { Suggestion } from '@/Components/PlanningCard';
 
+interface TeamMember { id: number; name: string; }
+
 interface Props {
   suggestion: Suggestion;
+  teamMembers: TeamMember[];
   onClose: () => void;
   onLocalUpdate: (next: Suggestion) => void;
 }
@@ -26,13 +29,14 @@ function getCsrf(): string {
   return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
 }
 
-export function PlanningItemModal({ suggestion, onClose, onLocalUpdate }: Props) {
+export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpdate }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<'details' | 'redesign'>('details');
   const [feedback, setFeedback] = useState('');
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<'reject' | null>(null);
+  const [assignedTo, setAssignedTo] = useState<string>('');
 
   const { id, date, title, description, channel, status } = suggestion;
 
@@ -45,7 +49,7 @@ export function PlanningItemModal({ suggestion, onClose, onLocalUpdate }: Props)
   const channelColor = channel ? (CHANNEL_COLORS[channel] ?? 'bg-[#f3f4f6] text-[#6b7280]') : '';
 
   const handleConvert = () => {
-    router.post(route('planning-suggestions.convert', id), {}, {
+    router.post(route('planning-suggestions.convert', id), { assigned_to: assignedTo || null }, {
       preserveScroll: true,
       onSuccess: () => { onLocalUpdate({ ...suggestion, status: 'accepted' }); onClose(); },
     });
@@ -166,9 +170,21 @@ export function PlanningItemModal({ suggestion, onClose, onLocalUpdate }: Props)
 
         {/* Footer actions */}
         {status === 'pending' && (
-          <div className="flex items-center gap-2 p-5 border-t border-[#e5e7eb] dark:border-[#1f2937]">
+          <div className="flex flex-col gap-2 p-5 border-t border-[#e5e7eb] dark:border-[#1f2937]">
+            {tab === 'details' && teamMembers.length > 0 && (
+              <select
+                value={assignedTo}
+                onChange={e => setAssignedTo(e.target.value)}
+                className="w-full rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm text-[#111827] dark:text-[#f9fafb] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20"
+              >
+                <option value="">Responsável (opcional)</option>
+                {teamMembers.map(m => (
+                  <option key={m.id} value={String(m.id)}>{m.name}</option>
+                ))}
+              </select>
+            )}
             {tab === 'details' ? (
-              <>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={handleConvert}
                   className="flex-1 flex items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2.5 text-sm font-semibold text-white transition-colors"
@@ -186,9 +202,9 @@ export function PlanningItemModal({ suggestion, onClose, onLocalUpdate }: Props)
                 >
                   {confirming === 'reject' ? 'Confirmar rejeição' : 'Rejeitar'}
                 </button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => { setTab('details'); setFeedback(''); setError(null); }}
                   disabled={applying}
@@ -204,7 +220,7 @@ export function PlanningItemModal({ suggestion, onClose, onLocalUpdate }: Props)
                   {applying ? <AiIcon size={14} variant="dark" spinning /> : <RefreshCw size={14} />}
                   {applying ? 'Redesenhando...' : 'Aplicar redesign'}
                 </button>
-              </>
+              </div>
             )}
           </div>
         )}

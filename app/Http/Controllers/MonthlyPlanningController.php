@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,10 +41,13 @@ class MonthlyPlanningController extends Controller
         $clients = Client::where('organization_id', $orgId)->orderBy('name')
             ->get(['id', 'name', 'monthly_posts', 'monthly_plan_notes']);
 
+        $teamMembers = \App\Models\User::where('organization_id', $orgId)->get(['id', 'name']);
+
         return Inertia::render('Planejamento/Index', [
-            'plannings' => $planningDemands,
-            'clients'   => $clients,
-            'filters'   => $request->only('client_id'),
+            'plannings'   => $planningDemands,
+            'clients'     => $clients,
+            'filters'     => $request->only('client_id'),
+            'teamMembers' => $teamMembers,
         ]);
     }
 
@@ -96,20 +100,26 @@ class MonthlyPlanningController extends Controller
     }
 
     /** POST /planning-suggestions/{suggestion}/convert */
-    public function convert(PlanningSuggestion $suggestion): RedirectResponse
+    public function convert(Request $request, PlanningSuggestion $suggestion): RedirectResponse
     {
         $this->authorizeSuggestion($suggestion);
         abort_if($suggestion->status !== 'pending', 422, 'Item já foi convertido ou rejeitado.');
 
-        DB::transaction(function () use ($suggestion) {
+        $orgId = auth()->user()->organization_id;
+        $request->validate([
+            'assigned_to' => ['nullable', Rule::exists('users', 'id')->where('organization_id', $orgId)],
+        ]);
+
+        DB::transaction(function () use ($request, $suggestion) {
             $planningDemand = $suggestion->demand;
             $newDemand = Demand::create([
                 'organization_id' => $planningDemand->organization_id,
                 'client_id'       => $planningDemand->client_id,
                 'created_by'      => auth()->id(),
+                'assigned_to'     => $request->input('assigned_to'),
                 'title'       => $suggestion->title,
-                'objective'   => $suggestion->description,   // AI brief → objective
-                'description' => null,                        // user fills with execution details
+                'objective'   => $suggestion->description,
+                'description' => null,
                 'channel'     => $suggestion->channel,
                 'deadline'    => $suggestion->date,
                 'type'        => 'demand',
@@ -127,9 +137,11 @@ class MonthlyPlanningController extends Controller
     /** POST /planning-suggestions/convert-bulk */
     public function convertBulk(Request $request): RedirectResponse
     {
+        $orgId = auth()->user()->organization_id;
         $request->validate([
-            'ids'   => ['required', 'array', 'min:1', 'max:100'],
-            'ids.*' => ['integer', 'exists:planning_suggestions,id'],
+            'ids'         => ['required', 'array', 'min:1', 'max:100'],
+            'ids.*'       => ['integer', 'exists:planning_suggestions,id'],
+            'assigned_to' => ['nullable', Rule::exists('users', 'id')->where('organization_id', $orgId)],
         ]);
 
         $count = 0;
@@ -141,15 +153,16 @@ class MonthlyPlanningController extends Controller
                 if ($s->status !== 'pending') continue;
                 $new = Demand::create([
                     'organization_id' => $s->demand->organization_id,
-                    'client_id' => $s->demand->client_id,
-                    'created_by' => auth()->id(),
-                    'title'       => $s->title,
-                    'objective'   => $s->description,
-                    'description' => null,
-                    'channel'     => $s->channel,
-                    'deadline'    => $s->date,
-                    'type'        => 'demand',
-                    'status'      => 'todo',
+                    'client_id'       => $s->demand->client_id,
+                    'created_by'      => auth()->id(),
+                    'assigned_to'     => $request->input('assigned_to'),
+                    'title'           => $s->title,
+                    'objective'       => $s->description,
+                    'description'     => null,
+                    'channel'         => $s->channel,
+                    'deadline'        => $s->date,
+                    'type'            => 'demand',
+                    'status'          => 'todo',
                 ]);
                 $s->update(['status' => 'accepted', 'converted_demand_id' => $new->id]);
                 $count++;

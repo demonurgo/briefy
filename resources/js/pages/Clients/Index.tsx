@@ -1,6 +1,6 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Archive, Brain, Calendar, MessageSquare, Plus, Search, Trash2 } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
@@ -55,6 +55,9 @@ const CHANNEL_COLORS: Record<string, string> = {
 
 export default function ClientsIndex({ clients, filters }: Props) {
   const { t } = useTranslation();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { auth } = usePage().props as any;
+  const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
   const [search, setSearch] = useState(filters.search ?? '');
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -224,6 +227,25 @@ export default function ClientsIndex({ clients, filters }: Props) {
                   {t('clients.monthlyPlan.researchingBadge', {
                     minutes: client.active_research_session.estimated_remaining_minutes,
                   })}
+                </div>
+              )}
+
+              {/* Deep research CTA — shown when no active session */}
+              {!client.active_research_session && (
+                <div onClick={e => e.preventDefault()} className="mt-3 relative group/research">
+                  <button
+                    disabled={!hasKey}
+                    onClick={() => hasKey && openResearchWithConfirm(client.id)}
+                    className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] px-3 py-1.5 text-xs font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <AiIcon size={12} />
+                    {t('clients.research.deepResearch')}
+                  </button>
+                  {!hasKey && (
+                    <div className="pointer-events-none absolute left-0 top-full mt-1 hidden group-hover/research:block z-50 w-56 rounded-[8px] bg-[#111827] px-3 py-2 text-xs text-[#f9fafb] shadow-lg">
+                      Configure sua chave Anthropic em Configurações → IA
+                    </div>
+                  )}
                 </div>
               )}
             </Link>
