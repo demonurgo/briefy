@@ -8,7 +8,7 @@ use App\Models\ClientAiMemory;
 use App\Services\Ai\Schemas\MemoryInsightSchema;
 use Illuminate\Support\Facades\Log;
 
-final class ClientMemoryExtractor
+class ClientMemoryExtractor
 {
     // PII patterns for Brazil + generic email/phone. Applied before DB write (Dimension 10 / T-03-61).
     private const PII_PATTERNS = [
