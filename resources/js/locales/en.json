@@ -179,9 +179,10 @@
       "postsPerMonth": "{{count}} posts/month"
     },
     "research": {
-      "confirmTitle": "Start AI research",
-      "confirmBody": "This research will run for {{minutes}} minutes and use your Anthropic key (BYOK).",
-      "confirmCta": "Start research"
+      "deepResearch": "Deep Research client",
+      "hint": "Research takes 20-40 min and automatically populates the client memory with tone, pattern and preference insights.",
+      "disabledNoSources": "Add at least one social handle or website before starting the research.",
+      "disabledNoKey": "Configure an Anthropic key in Settings → AI to use this feature."
     }
   },
   "settings": {

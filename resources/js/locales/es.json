@@ -179,9 +179,10 @@
       "postsPerMonth": "{{count}} publicaciones/mes"
     },
     "research": {
-      "confirmTitle": "Iniciar investigación con IA",
-      "confirmBody": "Esta investigación durará {{minutes}} minutos y usará tu clave Anthropic (BYOK).",
-      "confirmCta": "Iniciar investigación"
+      "deepResearch": "Deep Research del cliente",
+      "hint": "La investigación tarda 20-40 min y llena automáticamente la memoria del cliente con insights de tono, patrones y preferencias.",
+      "disabledNoSources": "Añade al menos un social handle o sitio web antes de iniciar la investigación.",
+      "disabledNoKey": "Configura una clave Anthropic en Configuración → IA para usar esta función."
     }
   },
   "settings": {

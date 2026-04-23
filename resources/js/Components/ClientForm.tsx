@@ -50,7 +50,8 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
     setData('channels', channels);
   };
 
-  const hasKey: boolean = page.props.auth?.organization?.has_anthropic_key ?? false;
+  const org = (page.props.auth as any)?.user?.organization;
+  const hasKey: boolean = org?.has_anthropic_key ?? false;
   const hasSources: boolean = Object.values(data.social_handles ?? {}).some(Boolean);
   const maDisabled = !hasKey || !hasSources;
 
@@ -242,20 +243,20 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
         <InputError message={errors.social_handles} className="mt-1.5" />
       </div>
 
-      {/* === "🤖 Conhecer este cliente com IA" — only in edit mode + only when social_handles has something === */}
+      {/* === Deep Research — only in edit mode === */}
       {isEditMode && (
         <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] pt-6 mt-6">
           <button
             type="button"
             onClick={handleLaunch}
             disabled={maDisabled}
-            title={maDisabled ? (hasKey ? 'Adicione pelo menos um social handle ou website.' : t('clients.monthlyPlan.knowWithAiDisabledTooltip')) : undefined}
-            className="inline-flex items-center gap-2 rounded-[8px] border border-[#7c3aed] px-4 py-2 text-sm font-medium text-[#7c3aed] hover:bg-[#7c3aed]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={maDisabled ? (hasKey ? t('clients.research.disabledNoSources') : t('clients.research.disabledNoKey')) : undefined}
+            className="inline-flex items-center gap-2 rounded-[8px] bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <AiIcon size={16} />
-            {t('clients.monthlyPlan.knowWithAi')}
+            <AiIcon size={16} variant="dark" />
+            {t('clients.research.deepResearch')}
           </button>
-          <p className="mt-2 text-xs text-[#9ca3af]">A pesquisa leva 20-40 min e popula a memória do cliente automaticamente.</p>
+          <p className="mt-2 text-xs text-[#9ca3af]">{t('clients.research.hint')}</p>
         </div>
       )}
 
