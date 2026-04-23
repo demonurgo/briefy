@@ -12,6 +12,10 @@ use Inertia\Inertia;
 
 Route::get('/', fn() => redirect()->route('dashboard'));
 
+// Guest-accessible invitation acceptance routes (T-04-08: UUID token + expiry + single-use gate)
+Route::get('/invite/{token}', [\App\Http\Controllers\InvitationController::class, 'show'])->name('invitations.show');
+Route::post('/invite/{token}/accept', [\App\Http\Controllers\InvitationController::class, 'store'])->name('invitations.store');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -100,8 +104,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('client-ai-memory.dismiss');
 
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::get('/', fn() => redirect()->route('settings.ai.edit'))->name('index');
-        Route::get('/team', [TeamController::class, 'index'])->name('team');
+        // Unified settings page (D-22: single /settings page with anchor sections)
+        Route::get('/', [\App\Http\Controllers\Settings\SettingsController::class, 'index'])->name('index');
+
+        // Profile management (TEAM-04)
+        Route::patch('/profile', [\App\Http\Controllers\Settings\ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/avatar', [\App\Http\Controllers\Settings\ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+
+        // Organization settings
+        Route::patch('/organization', [\App\Http\Controllers\Settings\ProfileController::class, 'updateOrganization'])->name('organization.update');
+
+        // Org switcher (D-10)
+        Route::patch('/current-org', [\App\Http\Controllers\Settings\SettingsController::class, 'switchOrg'])->name('current-org');
+
         Route::patch('/preferences', function (Request $r) {
             $r->user()->update([
                 'preferences' => array_merge(
@@ -112,13 +127,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return back()->with('success', 'Preferências salvas.');
         })->name('preferences');
 
-        // BYOK — AI settings (admin only; key health persist M3; throttled test endpoint M4)
-        Route::get('/ai', [\App\Http\Controllers\Settings\AiController::class, 'edit'])->name('ai.edit');
+        // D-26: /settings/ai now redirects to /settings#ai; AI routes kept for PATCH/POST
+        Route::get('/ai', fn() => redirect('/settings#ai', 301))->name('ai.edit');
         Route::patch('/ai', [\App\Http\Controllers\Settings\AiController::class, 'update'])->name('ai.update');
         // M4 — throttle test key probes to 3/min/user. 'throttle:3,1' = 3 attempts per 1 minute.
         Route::post('/ai/test', [\App\Http\Controllers\Settings\AiController::class, 'testKey'])
             ->middleware(['throttle:3,1', 'ai.meter'])
             ->name('ai.test');
+
+        // Team management routes — admin/owner only (enforced in controller, T-04-07, T-04-10, T-04-11)
+        Route::get('/team', [TeamController::class, 'index'])->name('team');
+        Route::post('/team/invite', [TeamController::class, 'invite'])->name('team.invite');
+        Route::delete('/team/invitations/{invitation}', [TeamController::class, 'cancelInvitation'])->name('team.invitation.cancel');
+        Route::post('/team/invitations/{invitation}/resend', [TeamController::class, 'resendInvitation'])->name('team.invitation.resend');
+        Route::patch('/team/{user}/role', [TeamController::class, 'updateRole'])->name('team.updateRole');
+        Route::delete('/team/{user}/remove', [TeamController::class, 'remove'])->name('team.remove');
     });
 
     // Notifications
