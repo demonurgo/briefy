@@ -47,15 +47,13 @@ final class ClientResearchAgent
         try {
             $agentId = $this->ensureAgent($org, $client);
 
+            $envId = $org->client_research_environment_id;
+            abort_if(empty($envId), 422, 'Organization has no MA environment ID configured in /settings/ai.');
+
+            // Step 1: Create the session (idle state).
             $resp = $this->httpFor($org)->post(self::API_BASE . '/sessions', [
-                'agent_id' => $agentId,
-                'input' => [
-                    ['role' => 'user', 'content' => $this->prompts->userMessage($client)],
-                ],
-                'metadata' => [
-                    'briefy_client_id'       => $client->id,
-                    'briefy_organization_id' => $org->id,
-                ],
+                'agent'          => $agentId,
+                'environment_id' => $envId,
             ]);
 
             if (! $resp->ok()) {
@@ -64,7 +62,24 @@ final class ClientResearchAgent
 
             $body      = $resp->json();
             $sessionId = $body['id'] ?? $body['session_id'] ?? null;
-            $eventsUrl = $body['events_url'] ?? (self::API_BASE . "/sessions/{$sessionId}/events");
+            $eventsUrl = self::API_BASE . "/sessions/{$sessionId}/events";
+
+            // Step 2: Send the initial user message to kick the agent out of idle.
+            // The session starts in idle state and only begins working after receiving a user.message event.
+            $evResp = $this->httpFor($org)->post(self::API_BASE . "/sessions/{$sessionId}/events", [
+                'events' => [
+                    [
+                        'type'    => 'user.message',
+                        'content' => [
+                            ['type' => 'text', 'text' => $this->prompts->userMessage($client)],
+                        ],
+                    ],
+                ],
+            ]);
+
+            if (! $evResp->ok()) {
+                throw new \RuntimeException("MA send initial message failed: HTTP {$evResp->status()} {$evResp->body()}");
+            }
 
             $session->update([
                 'managed_agent_session_id' => $sessionId,
@@ -181,7 +196,7 @@ final class ClientResearchAgent
     private function httpFor($org): \Illuminate\Http\Client\PendingRequest
     {
         return Http::withHeaders([
-            'authorization'     => 'Bearer ' . $org->anthropic_api_key,
+            'x-api-key'         => $org->anthropic_api_key,
             'anthropic-beta'    => (string) config('services.anthropic.beta_ma'),
             'anthropic-version' => '2023-06-01',
             'content-type'      => 'application/json',
