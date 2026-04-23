@@ -101,7 +101,7 @@ export default function ResearchShow({ client, session, insights }: Props) {
         {/* Header */}
         <div className="mb-6 flex items-center gap-3">
           <button
-            onClick={() => router.visit(route('clients.edit', client.id))}
+            onClick={() => router.visit(route('clients.show', client.id))}
             className="rounded-[8px] p-1.5 text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#6b7280] dark:hover:bg-[#1f2937]"
           >
             <ArrowLeft size={18} />

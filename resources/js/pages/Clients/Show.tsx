@@ -37,16 +37,15 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
   const { t } = useTranslation();
 
   return (
-    <AppLayout title={client.name} actions={
-      <Link href={route('clients.edit', client.id)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]">
-        <Edit2 size={14} />{t('common.edit')}
-      </Link>
-    }>
+    <AppLayout title={client.name}>
       <Head title={client.name} />
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <Link href={route('clients.index')} className="inline-flex items-center gap-1 text-sm text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]">
           <ArrowLeft size={14} />{t('clients.title')}
+        </Link>
+        <Link href={route('clients.edit', client.id)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]">
+          <Edit2 size={14} />{t('common.edit')}
         </Link>
       </div>
 
