@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — AI + Team + Dashboard
 status: executing
-stopped_at: Phase 4 complete — Phase 5 (Dashboard + Onboarding) next
-last_updated: "2026-04-23T00:00:00Z"
-last_activity: 2026-04-23 — Phase 4 (Team Management) verified and complete (8/8 plans)
+stopped_at: Phase 5 Plan 00 complete — Wave 0 foundations (migrations + RED tests)
+last_updated: "2026-04-23T23:45:00.000Z"
+last_activity: 2026-04-23 -- Phase 5 Plan 00 executed
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 22
-  completed_plans: 21
-  percent: 57
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 27
+  completed_plans: 22
+  percent: 81
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** Agency teams can create, track, and complete client demands efficiently, with AI accelerating brief creation.
-**Current focus:** Milestone v1.1 — Phase 5: Dashboard + Onboarding
+**Current focus:** Phase null — dashboard-onboarding
 
 ## Current Position
 
-Phase: 5 — Dashboard + Onboarding
-Plan: Not started
-Status: Phase 4 complete — ready to begin Phase 5 planning
-Last activity: 2026-04-23 — Phase 4 (Team Management) verified complete (8/8 plans, 18/18 must-haves, 5 human UAT items pending)
+Phase: 05 (dashboard-onboarding) — EXECUTING
+Plan: 2 of 5 (Plan 00 complete)
+Status: Executing Phase 05
+Last activity: 2026-04-23 -- Phase 05 Plan 00 complete
 
 Progress: [████░░░░░░] 43% (v1.0 complete: 2/5 phases; v1.1 Phase 3 complete)
 
@@ -84,6 +84,8 @@ Progress: [████░░░░░░] 43% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 MA: PollClientResearchSessionJob is self-rescheduling — delays 30s while running, 60s on complete/failed
 - v1.1 Observability: SpanEmitter is silent no-op when OTEL SDK absent or OTEL_EXPORTER_OTLP_ENDPOINT unset — zero runtime overhead
 - v1.1 Dashboard widget: DashboardPlanningWidget uses localStorage key pattern `planning_reminder_dismissed:{clientId}:{YYYY-MM}` + forceUpdate(n=>n+1) for dismiss re-render
+- v1.1 Dashboard: ActivityLog placed in Wave 0 (not Wave 1) — downstream plans 05-01/05-02 depend on it; timestamps=false, user_id nullable+nullOnDelete
+- v1.1 Dashboard: recharts ^3.8.1 chosen (resolved from "Recharts or react-chartjs-2" decision) — installed in Wave 0
 
 ### Pending Todos
 
@@ -115,7 +117,7 @@ Progress: [████░░░░░░] 43% (v1.0 complete: 2/5 phases; v1.1 
 
 ## Session Continuity
 
-Last session: 2026-04-22
-Stopped at: Phase 3 complete — all 13 plans verified
+Last session: 2026-04-23
+Stopped at: Phase 5 Plan 00 complete — activity_logs migration, priority column, ActivityLog model, recharts, 10 RED tests
 Resume file: None
-Next: Begin Phase 4 planning (Real-time Collaboration — Laravel Reverb + Echo)
+Next: Execute Phase 5 Plan 01 — DashboardController completo + preferences route fix (BLOCKER-02)

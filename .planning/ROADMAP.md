@@ -67,7 +67,7 @@
 |-------|----------------|--------|-----------|
 | 3. AI Integration | 13/13 | Complete | 2026-04-22 |
 | 4. Team Management | 8/8 | Complete | 2026-04-23 |
-| 5. Dashboard + Onboarding | 0/5 | Not started | - |
+| 5. Dashboard + Onboarding | 1/5 | In progress | - |
 
 ---
 
@@ -140,7 +140,7 @@ Plans:
   5. A first-time user with no clients or demands sees an onboarding checklist guiding them through: add a client, create a first demand — and can dismiss or mark it complete at any step
 **Plans:** 5 plans
 Plans:
-- [ ] 05-00-PLAN.md — Wave 0: migrations (activity_logs + priority) + migrate + recharts install + test scaffolds RED
+- [x] 05-00-PLAN.md — Wave 0: migrations (activity_logs + priority) + migrate + recharts install + test scaffolds RED
 - [ ] 05-01-PLAN.md — DashboardController completo + ActivityLog model + preferences route fix (BLOCKER-02)
 - [ ] 05-02-PLAN.md — DemandObserver + ClientObserver + AppServiceProvider (activity logging)
 - [ ] 05-03-PLAN.md — Componentes React: DashboardStatusCard, DashboardSectionCard, ActivityFeed, OnboardingChecklist
