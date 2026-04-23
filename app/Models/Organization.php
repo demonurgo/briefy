@@ -10,7 +10,15 @@ class Organization extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'logo', 'settings'];
+    protected $fillable = [
+        'name', 'slug', 'logo', 'settings',
+        'anthropic_api_key_encrypted',
+        'anthropic_key_valid',
+        'anthropic_managed_agents_ok',
+        'anthropic_key_checked_at',
+        'client_research_agent_id',
+        'client_research_environment_id',
+    ];
 
     protected $casts = [
         'settings'                   => 'array',
