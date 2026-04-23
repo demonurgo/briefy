@@ -89,6 +89,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('clients.research.stream');
     Route::post('/clients/{client}/research/{session}/cancel', [\App\Http\Controllers\ClientResearchController::class, 'cancel'])
         ->name('clients.research.cancel');
+    Route::delete('/clients/{client}/research/{session}', [\App\Http\Controllers\ClientResearchController::class, 'destroy'])
+        ->name('clients.research.destroy');
 
     // Client AI Memory — approve/dismiss suggested insights (D-38 / Plan 12)
     Route::post('/client-ai-memory/{memory}/approve', [\App\Http\Controllers\ClientAiMemoryController::class, 'approve'])

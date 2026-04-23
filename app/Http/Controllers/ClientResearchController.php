@@ -174,6 +174,23 @@ class ClientResearchController extends Controller
         });
     }
 
+    /** DELETE /clients/{client}/research/{session} */
+    public function destroy(Client $client, ClientResearchSession $session): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorizeClient($client);
+        abort_if($session->client_id !== $client->id, 404);
+
+        // If session is still running, cancel it on MA first.
+        if (in_array($session->status, ['queued', 'running', 'idle'])) {
+            $this->agent->cancel($session);
+        }
+
+        $session->delete();
+
+        return redirect()->route('clients.show', $client)
+            ->with('success', 'Pesquisa excluída.');
+    }
+
     /** POST /clients/{client}/research/{session}/cancel */
     public function cancel(Client $client, ClientResearchSession $session): \Illuminate\Http\RedirectResponse
     {

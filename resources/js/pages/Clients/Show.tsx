@@ -1,7 +1,8 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Brain, CheckCircle2, Edit2, Loader2, Plus, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Brain, CheckCircle2, Edit2, Loader2, Plus, Trash2, XCircle } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientAvatar } from '@/Components/ClientAvatar';
 
@@ -35,6 +36,14 @@ function sessionLabel(status: string) {
 
 export default function ClientsShow({ client, demands, sessions = [] }: { client: Client; demands: Demand[]; sessions?: Session[] }) {
   const { t } = useTranslation();
+  const [deletingSessionId, setDeletingSessionId] = useState<number | null>(null);
+
+  const deleteSession = (sessionId: number) => {
+    router.delete(route('clients.research.destroy', [client.id, sessionId]), {
+      preserveScroll: true,
+      onSuccess: () => setDeletingSessionId(null),
+    });
+  };
 
   return (
     <AppLayout title={client.name}>
@@ -97,13 +106,13 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
               </div>
               <ul className="divide-y divide-[#f3f4f6] dark:divide-[#1f2937]">
                 {sessions.map(s => (
-                  <li key={s.id}>
+                  <li key={s.id} className="group flex items-center gap-2 px-5 py-3 hover:bg-[#f9fafb] dark:hover:bg-[#0b0f14] transition-colors">
                     <Link
                       href={route('clients.research.show', [client.id, s.id])}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-[#f9fafb] transition-colors dark:hover:bg-[#0b0f14]"
+                      className="flex flex-1 items-center gap-3 min-w-0"
                     >
                       <SessionStatusIcon status={s.status} />
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0">
                         <p className="text-xs font-medium text-[#111827] dark:text-[#f9fafb]">
                           {sessionLabel(s.status)}
                         </p>
@@ -116,6 +125,23 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                         </p>
                       </div>
                     </Link>
+                    {deletingSessionId === s.id ? (
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => deleteSession(s.id)} className="rounded-[6px] bg-red-500 px-2 py-1 text-[10px] font-medium text-white hover:bg-red-600">
+                          Confirmar
+                        </button>
+                        <button onClick={() => setDeletingSessionId(null)} className="rounded-[6px] border border-[#e5e7eb] px-2 py-1 text-[10px] text-[#6b7280] dark:border-[#1f2937]">
+                          {t('common.cancel')}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeletingSessionId(s.id)}
+                        className="shrink-0 rounded-[6px] border border-[#e5e7eb] p-1 text-[#9ca3af] hover:border-red-400 hover:text-red-500 transition-colors dark:border-[#1f2937] opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
