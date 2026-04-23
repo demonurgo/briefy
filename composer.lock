@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< Updated upstream
     "content-hash": "164d3f0a2c6f53bedb6ba8516f557d32",
-=======
-    "content-hash": "8879adfdf41a84b6a4410ef58d3b8475",
->>>>>>> Stashed changes
     "packages": [
         {
             "name": "anthropic-ai/sdk",
@@ -3842,7 +3838,6 @@
             "time": "2024-10-02T11:20:13+00:00"
         },
         {
-<<<<<<< Updated upstream
             "name": "php-http/guzzle7-adapter",
             "version": "1.1.0",
             "source": {
@@ -4011,8 +4006,6 @@
             "time": "2024-03-15T13:55:21+00:00"
         },
         {
-=======
->>>>>>> Stashed changes
             "name": "phpoption/phpoption",
             "version": "1.9.5",
             "source": {
