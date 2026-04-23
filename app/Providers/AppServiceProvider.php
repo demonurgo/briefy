@@ -5,7 +5,9 @@ namespace App\Providers;
 
 use App\Models\Client;
 use App\Models\Demand;
+use App\Models\DemandComment;
 use App\Observers\ClientObserver;
+use App\Observers\DemandCommentObserver;
 use App\Observers\DemandObserver;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Activity logging observers (Phase 5 — D-25)
         Demand::observe(DemandObserver::class);
+        DemandComment::observe(DemandCommentObserver::class);
         Client::observe(ClientObserver::class);
     }
 }
