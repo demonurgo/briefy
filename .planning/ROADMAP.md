@@ -66,7 +66,7 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 3. AI Integration | 13/13 | Complete | 2026-04-22 |
-| 4. Team Management | 0/? | Not started | - |
+| 4. Team Management | 0/8 | Not started | - |
 | 5. Dashboard + Onboarding | 0/? | Not started | - |
 
 ---
@@ -114,7 +114,16 @@ Plans:
   4. Any user can edit their own profile: display name, avatar photo upload, and locale/theme preferences
   5. Role-based access is enforced: only admins and owners can invite/remove members, manage clients, and delete others' content
   6. Settings page is organized into clear sections: Profile, Organization, Team, AI Key — replacing the current scattered layout
-**Plans:** TBD
+**Plans:** 8 plans
+Plans:
+- [ ] 04-01-PLAN.md — Schema migrations (organization_user pivot + column rename + invitations + avatar + role enum) + intervention/image install
+- [ ] 04-02-PLAN.md — Model updates (User pivot API, Organization, Invitation) + all 39 controller reference updates + RegisteredUserController + HandleInertiaRequests
+- [ ] 04-03-PLAN.md — Wave 0 test scaffolds (7 test files in RED state)
+- [ ] 04-04-PLAN.md — Invitation backend (InvitationController + TeamController + SettingsController + ProfileController + routes)
+- [ ] 04-05-PLAN.md — EnsureRole middleware + collaborator restrictions in DemandController/ClientController
+- [ ] 04-06-PLAN.md — Invite/Accept.tsx (guest invitation acceptance page)
+- [ ] 04-07-PLAN.md — UserAvatar component + OrgSwitcher in AppLayout header
+- [ ] 04-08-PLAN.md — Settings/Index.tsx unified page (4 sections + sticky sub-nav + scroll-spy)
 **UI hint:** yes
 
 ---
@@ -170,4 +179,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-23 — Phase 4 redefined as Team Management (roles, invites, profiles); Real-time deferred to v1.2*
+*Last updated: 2026-04-23 — Phase 4 redefined as Team Management (roles, invites, profiles); Real-time deferred to v1.2; Phase 4 planned with 8 plans*
