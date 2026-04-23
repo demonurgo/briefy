@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Archive, Calendar, CheckCircle2, Loader2, Trash2, User } from 'lucide-react';
+import { Archive, Calendar, Loader2, Trash2, User } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -26,16 +26,16 @@ function TrashZone({ visible }: { visible: boolean }) {
   return (
     <div
       ref={setNodeRef}
-      className={`fixed bottom-6 left-6 z-50 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium shadow-lg transition-all duration-200 ${
+      className={`fixed bottom-1/3 left-6 z-50 flex flex-col items-center justify-center gap-2 rounded-[16px] w-28 h-28 text-xs font-semibold shadow-xl transition-all duration-200 ${
         visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
       } ${
         isOver
-          ? 'bg-red-500 text-white shadow-red-200'
-          : 'bg-white dark:bg-[#111827] border border-[#e5e7eb] dark:border-[#1f2937] text-[#9ca3af]'
+          ? 'bg-red-500 text-white scale-110 shadow-red-300'
+          : 'bg-red-50 border-2 border-dashed border-red-300 text-red-400 dark:bg-red-950/30 dark:border-red-700 dark:text-red-400'
       }`}
     >
-      <Trash2 size={16} className={isOver ? 'text-white' : 'text-[#9ca3af]'} />
-      {isOver ? 'Mover para a lixeira' : 'Lixeira'}
+      <Trash2 size={28} />
+      <span>{isOver ? 'Soltar aqui' : 'Lixeira'}</span>
     </div>
   );
 }
@@ -45,16 +45,16 @@ function ArchiveZone({ visible }: { visible: boolean }) {
   return (
     <div
       ref={setNodeRef}
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium shadow-lg transition-all duration-200 ${
+      className={`fixed bottom-1/3 right-6 z-50 flex flex-col items-center justify-center gap-2 rounded-[16px] w-28 h-28 text-xs font-semibold shadow-xl transition-all duration-200 ${
         visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
       } ${
         isOver
-          ? 'bg-[#10b981] text-white shadow-emerald-200'
-          : 'bg-white dark:bg-[#111827] border border-[#e5e7eb] dark:border-[#1f2937] text-[#9ca3af]'
+          ? 'bg-[#6b7280] text-white scale-110 shadow-gray-300'
+          : 'bg-[#f9fafb] border-2 border-dashed border-[#d1d5db] text-[#9ca3af] dark:bg-[#1f2937] dark:border-[#374151] dark:text-[#6b7280]'
       }`}
     >
-      <CheckCircle2 size={16} className={isOver ? 'text-white' : 'text-[#9ca3af]'} />
-      {isOver ? 'Marcar como concluída' : 'Concluída'}
+      <Archive size={28} />
+      <span>{isOver ? 'Soltar aqui' : 'Arquivar'}</span>
     </div>
   );
 }
