@@ -50,7 +50,7 @@ export default function SettingsAi({ organization }: Props) {
         setChangingKey(false);
         setTestStatus(null);
         setTestResult(null);
-        router.reload({ only: [] });
+        router.reload();
       },
     });
   };
