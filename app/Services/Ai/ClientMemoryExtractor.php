@@ -6,10 +6,13 @@ use App\Models\AiConversation;
 use App\Models\Client as ClientModel;
 use App\Models\ClientAiMemory;
 use App\Services\Ai\Schemas\MemoryInsightSchema;
+use App\Services\Ai\Telemetry\SpanEmitter;
 use Illuminate\Support\Facades\Log;
 
 class ClientMemoryExtractor
 {
+    public function __construct(private SpanEmitter $emitter) {}
+
     // PII patterns for Brazil + generic email/phone. Applied before DB write (Dimension 10 / T-03-61).
     private const PII_PATTERNS = [
         '/\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/',              // CPF
@@ -63,20 +66,43 @@ You extract durable insights about a marketing-agency client from a chat transcr
 Call record_insights EXACTLY once. Include only insights that are likely true for this client in general (tone, recurring patterns, preferences, things-to-avoid, terminology). Do NOT record ephemeral statements or one-off comments. Do NOT record personal data about individual people (no names of non-client individuals, no emails, no phone numbers, no CPF/CNPJ). Confidence 0-1; use <0.6 for weak signals (they will be filtered).
 SYS;
 
+        $model  = (string) config('services.anthropic.model_cheap');
+        $orgId  = (int) $client->organization_id;
+        $attrs  = ['client_id' => $client->id, 'model' => $model];
+
         try {
-            $response = $anthropic->messages()->create(
-                maxTokens: 1024,
-                messages: [['role' => 'user', 'content' => "Client: {$client->name}\n\nTranscript:\n\n{$transcript}"]],
-                model: (string) config('services.anthropic.model_cheap'),
-                system: $system,
-                tools: [[
-                    'name'         => 'record_insights',
-                    'description'  => 'Record durable client-voice insights extracted from the conversation.',
-                    'input_schema' => MemoryInsightSchema::toolSchema(),
-                ]],
-                tool_choice: ['type' => 'tool', 'name' => 'record_insights'],
-                temperature: 0.2,
+            $startedAt = microtime(true);
+            $response  = $this->emitter->emit(
+                'memory_extract',
+                $orgId,
+                $attrs,
+                fn () => $anthropic->messages()->create(
+                    maxTokens: 1024,
+                    messages: [['role' => 'user', 'content' => "Client: {$client->name}\n\nTranscript:\n\n{$transcript}"]],
+                    model: $model,
+                    system: $system,
+                    tools: [[
+                        'name'         => 'record_insights',
+                        'description'  => 'Record durable client-voice insights extracted from the conversation.',
+                        'input_schema' => MemoryInsightSchema::toolSchema(),
+                    ]],
+                    tool_choice: ['type' => 'tool', 'name' => 'record_insights'],
+                    temperature: 0.2,
+                ),
             );
+            $durationMs = (microtime(true) - $startedAt) * 1000;
+
+            $usage = $response->usage ?? null;
+            if ($usage) {
+                $this->emitter->recordUsage(
+                    'memory_extract',
+                    $orgId,
+                    $attrs,
+                    inputTokens:  (int) ($usage->inputTokens  ?? $usage->input_tokens  ?? 0),
+                    outputTokens: (int) ($usage->outputTokens ?? $usage->output_tokens ?? 0),
+                    durationMs:   $durationMs,
+                );
+            }
 
             $toolUse = collect($response->content ?? [])->firstWhere('type', 'tool_use');
             if (! $toolUse) {

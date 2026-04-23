@@ -3,6 +3,7 @@
 namespace App\Services\Ai;
 
 use App\Models\AiConversation;
+use App\Services\Ai\Telemetry\SpanEmitter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -10,6 +11,8 @@ final class ConversationCompactor
 {
     /** Number of recent turns to keep after compaction. */
     public const KEEP_RECENT_TURNS = 10;
+
+    public function __construct(private SpanEmitter $emitter) {}
 
     /**
      * Compact older messages in a conversation into a single seed summary message.
@@ -46,14 +49,37 @@ final class ConversationCompactor
             ->map(fn ($m) => strtoupper($m->role) . ": {$m->content}")
             ->implode("\n---\n");
 
+        $model = (string) config('services.anthropic.model_cheap');
+        $orgId = (int) ($conversation->organization_id ?? 0);
+        $attrs = ['conversation_id' => $conversation->id, 'model' => $model];
+
         try {
-            $resp = $anthropic->messages()->create(
-                maxTokens: 800,
-                messages: [['role' => 'user', 'content' => "Resuma a conversa abaixo em até 400 tokens, preservando fatos referenciados e decisões tomadas. Escreva em português do Brasil.\n\n{$transcript}"]],
-                model: (string) config('services.anthropic.model_cheap'),
-                system: 'You summarise conversations into compact seed-messages for context continuity. Preserve names, dates, client-specific preferences, and any decisions made.',
-                temperature: 0.3,
+            $startedAt = microtime(true);
+            $resp      = $this->emitter->emit(
+                'compact',
+                $orgId,
+                $attrs,
+                fn () => $anthropic->messages()->create(
+                    maxTokens: 800,
+                    messages: [['role' => 'user', 'content' => "Resuma a conversa abaixo em até 400 tokens, preservando fatos referenciados e decisões tomadas. Escreva em português do Brasil.\n\n{$transcript}"]],
+                    model: $model,
+                    system: 'You summarise conversations into compact seed-messages for context continuity. Preserve names, dates, client-specific preferences, and any decisions made.',
+                    temperature: 0.3,
+                ),
             );
+            $durationMs = (microtime(true) - $startedAt) * 1000;
+
+            $usage = $resp->usage ?? null;
+            if ($usage) {
+                $this->emitter->recordUsage(
+                    'compact',
+                    $orgId,
+                    $attrs,
+                    inputTokens:  (int) ($usage->inputTokens  ?? $usage->input_tokens  ?? 0),
+                    outputTokens: (int) ($usage->outputTokens ?? $usage->output_tokens ?? 0),
+                    durationMs:   $durationMs,
+                );
+            }
 
             $summary = $resp->content[0]->text ?? '(resumo indisponível)';
 

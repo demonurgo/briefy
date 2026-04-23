@@ -5,11 +5,14 @@ namespace App\Services\Ai;
 use App\Models\Client as ClientModel;
 use App\Services\Ai\AnthropicClientInterface;
 use App\Services\Ai\Schemas\MonthlyPlanSchema;
+use App\Services\Ai\Telemetry\SpanEmitter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class MonthlyPlanGenerator
 {
+    public function __construct(private SpanEmitter $emitter) {}
+
     public function generate(ClientModel $client, int $year, int $month, AnthropicClientInterface $anthropic): array
     {
         $expectedCount = (int) $client->monthly_posts;
@@ -30,7 +33,10 @@ class MonthlyPlanGenerator
             '{{month:02d}}'          => sprintf('%02d', $month),
         ]);
 
-        $attempts = 0;
+        $model   = (string) config('services.anthropic.model_complex');
+        $orgId   = (int) $client->organization_id;
+        $attrs   = ['client_id' => $client->id, 'model' => $model];
+        $attempts  = 0;
         $lastError = null;
 
         while ($attempts < 3) {
@@ -41,19 +47,39 @@ class MonthlyPlanGenerator
                     $userMsg .= "\n\nTENTATIVA ANTERIOR FALHOU a validação do schema: " . json_encode($lastError);
                 }
 
-                $response = $anthropic->messages()->create(
-                    maxTokens: 4096,
-                    messages: [['role' => 'user', 'content' => $userMsg]],
-                    model: (string) config('services.anthropic.model_complex'),  // Opus 4.7
-                    system: $system,
-                    tools: [[
-                        'name' => 'submit_plan',
-                        'description' => "Submit exactly {$expectedCount} items for the month.",
-                        'input_schema' => MonthlyPlanSchema::toolSchema($expectedCount),
-                    ]],
-                    toolChoice: ['type' => 'tool', 'name' => 'submit_plan'],
-                    temperature: 0.4,
+                $startedAt = microtime(true);
+                $response  = $this->emitter->emit(
+                    'monthly_plan',
+                    $orgId,
+                    $attrs,
+                    fn () => $anthropic->messages()->create(
+                        maxTokens: 4096,
+                        messages: [['role' => 'user', 'content' => $userMsg]],
+                        model: $model,  // Opus 4.7
+                        system: $system,
+                        tools: [[
+                            'name'         => 'submit_plan',
+                            'description'  => "Submit exactly {$expectedCount} items for the month.",
+                            'input_schema' => MonthlyPlanSchema::toolSchema($expectedCount),
+                        ]],
+                        toolChoice: ['type' => 'tool', 'name' => 'submit_plan'],
+                        temperature: 0.4,
+                    ),
                 );
+                $durationMs = (microtime(true) - $startedAt) * 1000;
+
+                // Record token usage if available.
+                $usage = $response->usage ?? null;
+                if ($usage) {
+                    $this->emitter->recordUsage(
+                        'monthly_plan',
+                        $orgId,
+                        $attrs,
+                        inputTokens:  (int) ($usage->inputTokens  ?? $usage->input_tokens  ?? 0),
+                        outputTokens: (int) ($usage->outputTokens ?? $usage->output_tokens ?? 0),
+                        durationMs:   $durationMs,
+                    );
+                }
 
                 $toolUse = collect($response->content ?? [])->firstWhere('type', 'tool_use');
                 if (! $toolUse) {
