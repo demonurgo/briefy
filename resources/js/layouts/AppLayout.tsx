@@ -199,12 +199,12 @@ export default function AppLayout({ children, title, actions }: Props) {
             <div ref={orgSwitcherRef} className="relative hidden sm:block">
               <button
                 onClick={() => setOrgSwitcherOpen(v => !v)}
-                className="flex items-center gap-2 max-w-[160px] rounded-[8px] px-2 py-1 text-sm text-[#6b7280] dark:text-[#9ca3af] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
+                className="flex items-center gap-2 max-w-[240px] rounded-[8px] px-2 py-1 text-sm text-[#6b7280] dark:text-[#9ca3af] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
                 aria-label="Trocar organização"
                 aria-expanded={orgSwitcherOpen}
               >
                 <UserAvatar name={auth?.user?.name ?? ''} avatar={auth?.user?.avatar} size="sm" />
-                <span className="truncate max-w-[100px] text-[#111827] dark:text-[#f9fafb]">
+                <span className="truncate max-w-[180px] text-[#111827] dark:text-[#f9fafb]">
                   {auth?.user?.organization?.name ?? auth?.user?.name}
                 </span>
                 <ChevronDown size={14} className={`shrink-0 transition-transform ${orgSwitcherOpen ? 'rotate-180' : ''}`} />

@@ -1,5 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,8 +15,6 @@ import AppLayout from '@/Layouts/AppLayout';
 import { UserAvatar } from '@/Components/UserAvatar';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
 import Dropdown from '@/Components/Dropdown';
-import TextInput from '@/Components/TextInput';
-import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -106,14 +104,11 @@ function RoleBadge({ role }: { role: 'owner' | 'admin' | 'collaborator' }) {
 const SECTION_CARD = 'rounded-[12px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] p-6';
 const SECTION_HEADING = 'text-sm font-semibold text-[#111827] dark:text-[#f9fafb] mb-4';
 
-// ── Tab definitions ────────────────────────────────────────────────────────
+// ── Input class helpers ────────────────────────────────────────────────────
 
-const TABS = [
-  { id: 'profile', label: 'Perfil' },
-  { id: 'organization', label: 'Organização' },
-  { id: 'team', label: 'Equipe' },
-  { id: 'ai', label: 'IA' },
-];
+const INPUT = 'w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm text-[#111827] placeholder-[#9ca3af] transition-colors focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb] dark:placeholder-[#6b7280] dark:focus:border-[#a78bfa] dark:focus:ring-[#a78bfa]/20';
+const INPUT_DISABLED = 'w-full rounded-[8px] border border-[#e5e7eb] bg-[#f9fafb] px-3.5 py-2.5 text-sm text-[#9ca3af] dark:border-[#1f2937] dark:bg-[#0b0f14] dark:text-[#6b7280] cursor-not-allowed';
+const LABEL = 'mb-1.5 block text-sm font-medium text-[#111827] dark:text-[#f9fafb]';
 
 // ── Main component ─────────────────────────────────────────────────────────
 
@@ -123,10 +118,6 @@ export default function SettingsIndex({ members, pending_invites, organization, 
   const user = auth.user;
   const userOrg = user.organization;
 
-  // ── Navigation state ────────────────────────────────────────────────────
-  const [activeSection, setActiveSection] = useState('profile');
-
-  // ── Profile state ────────────────────────────────────────────────────────
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -159,28 +150,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
     client_research_environment_id: userOrg.client_research_environment_id ?? '',
   });
 
-  // ── Scroll-spy IntersectionObserver ─────────────────────────────────────
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    TABS.forEach(tab => {
-      const el = document.getElementById(tab.id);
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveSection(tab.id); },
-        { threshold: 0.3, rootMargin: '-56px 0px 0px 0px' },
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-    return () => observers.forEach(o => o.disconnect());
-  }, []);
-
   // ── Handlers ─────────────────────────────────────────────────────────────
-
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    setActiveSection(id);
-  };
 
   const handleFileSelect = (file: File) => {
     if (!file) return;
@@ -266,48 +236,16 @@ export default function SettingsIndex({ members, pending_invites, organization, 
   return (
     <AppLayout title="Configurações">
       <Head title="Configurações" />
-      <div className="mx-auto max-w-2xl">
-
-        {/* Mobile select fallback */}
-        <select
-          className="sm:hidden w-full mb-4 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] px-3 py-2 text-sm text-[#111827] dark:text-[#f9fafb]"
-          value={activeSection}
-          onChange={e => scrollTo(e.target.value)}
-        >
-          {TABS.map(tab => <option key={tab.id} value={tab.id}>{tab.label}</option>)}
-        </select>
-
-        {/* Sticky sub-nav */}
-        <nav
-          role="tablist"
-          className="hidden sm:flex gap-1 border-b border-[#e5e7eb] dark:border-[#1f2937] mb-8 sticky top-14 bg-[#f9fafb] dark:bg-[#0b0f14] z-30 -mx-4 md:-mx-6 px-4 md:px-6"
-        >
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeSection === tab.id}
-              onClick={() => scrollTo(tab.id)}
-              className={`text-sm px-1 py-3 border-b-2 -mb-px transition-colors ${
-                activeSection === tab.id
-                  ? 'border-[#7c3aed] text-[#7c3aed] font-semibold'
-                  : 'border-transparent font-normal text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-
+      <div className="mx-auto max-w-4xl">
         <div className="space-y-8">
 
           {/* ── #profile section ──────────────────────────────────────────── */}
           <section id="profile" className={SECTION_CARD}>
             <h2 className={SECTION_HEADING}>Perfil</h2>
 
-            {/* Avatar upload */}
-            <div className="flex flex-col sm:flex-row gap-6 mb-6">
-              <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-8">
+              {/* Avatar upload */}
+              <div className="flex flex-col items-center gap-2 sm:w-32 shrink-0">
                 <div
                   className="relative cursor-pointer"
                   onDragOver={e => e.preventDefault()}
@@ -319,7 +257,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {avatarLoading ? (
-                    <div className="h-16 w-16 rounded-full flex items-center justify-center bg-[#f3f4f6] dark:bg-[#1f2937]">
+                    <div className="h-20 w-20 rounded-full flex items-center justify-center bg-[#f3f4f6] dark:bg-[#1f2937]">
                       <Loader2 size={24} className="animate-spin text-[#7c3aed]" />
                     </div>
                   ) : (
@@ -344,7 +282,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                 >
                   Alterar foto
                 </button>
-                <p className="text-xs text-[#9ca3af]">JPG, PNG ou WebP. Máx. 2MB.</p>
+                <p className="text-xs text-[#9ca3af] text-center">JPG, PNG ou WebP. Máx. 20MB.</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -359,53 +297,58 @@ export default function SettingsIndex({ members, pending_invites, organization, 
 
               {/* Profile form */}
               <form onSubmit={handleProfileSave} className="flex-1 space-y-4">
-                <div>
-                  <InputLabel htmlFor="name" value="Nome" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                  <TextInput
-                    id="name"
-                    value={profileForm.data.name}
-                    onChange={e => profileForm.setData('name', e.target.value)}
-                    className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] text-sm focus:border-[#7c3aed] focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
-                  />
-                  <InputError message={profileForm.errors.name} className="mt-1" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="name" className={LABEL}>Nome</label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={profileForm.data.name}
+                      onChange={e => profileForm.setData('name', e.target.value)}
+                      className={INPUT}
+                    />
+                    <InputError message={profileForm.errors.name} className="mt-1" />
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className={LABEL}>E-mail</label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={user.email}
+                      readOnly
+                      className={INPUT_DISABLED}
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <InputLabel htmlFor="email" value="E-mail" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                  <TextInput
-                    id="email"
-                    type="email"
-                    value={user.email}
-                    readOnly
-                    className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-[#f9fafb] dark:bg-[#0b0f14] text-sm cursor-not-allowed opacity-75 dark:text-[#f9fafb]"
-                  />
-                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="locale" className={LABEL}>Idioma</label>
+                    <select
+                      id="locale"
+                      value={profileForm.data.locale}
+                      onChange={e => profileForm.setData('locale', e.target.value)}
+                      className={INPUT}
+                    >
+                      <option value="pt-BR">Português (Brasil)</option>
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <InputLabel htmlFor="locale" value="Idioma" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                  <select
-                    id="locale"
-                    value={profileForm.data.locale}
-                    onChange={e => profileForm.setData('locale', e.target.value)}
-                    className="w-full rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
-                  >
-                    <option value="pt-BR">Português (Brasil)</option>
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                  </select>
-                </div>
-
-                <div>
-                  <InputLabel htmlFor="theme" value="Tema" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                  <select
-                    id="theme"
-                    value={profileForm.data.theme}
-                    onChange={e => profileForm.setData('theme', e.target.value)}
-                    className="w-full rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
-                  >
-                    <option value="light">Claro</option>
-                    <option value="dark">Escuro</option>
-                  </select>
+                  <div>
+                    <label htmlFor="theme" className={LABEL}>Tema</label>
+                    <select
+                      id="theme"
+                      value={profileForm.data.theme}
+                      onChange={e => profileForm.setData('theme', e.target.value)}
+                      className={INPUT}
+                    >
+                      <option value="light">Claro</option>
+                      <option value="dark">Escuro</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Password change collapsible */}
@@ -419,42 +362,44 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                       Alterar senha →
                     </button>
                   ) : (
-                    <div className="space-y-3 border border-[#e5e7eb] dark:border-[#1f2937] rounded-[8px] p-4">
+                    <div className="space-y-4 border border-[#e5e7eb] dark:border-[#1f2937] rounded-[8px] p-4">
                       <div>
-                        <InputLabel htmlFor="current_password" value="Senha atual" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                        <TextInput
+                        <label htmlFor="current_password" className={LABEL}>Senha atual</label>
+                        <input
                           id="current_password"
                           type="password"
                           autoComplete="current-password"
                           value={profileForm.data.current_password}
                           onChange={e => profileForm.setData('current_password', e.target.value)}
-                          className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] text-sm focus:border-[#7c3aed] focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
+                          className={INPUT}
                         />
                         <InputError message={profileForm.errors.current_password} className="mt-1" />
                       </div>
-                      <div>
-                        <InputLabel htmlFor="password" value="Nova senha" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                        <TextInput
-                          id="password"
-                          type="password"
-                          autoComplete="new-password"
-                          value={profileForm.data.password}
-                          onChange={e => profileForm.setData('password', e.target.value)}
-                          className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] text-sm focus:border-[#7c3aed] focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
-                        />
-                        <InputError message={profileForm.errors.password} className="mt-1" />
-                      </div>
-                      <div>
-                        <InputLabel htmlFor="password_confirmation" value="Confirmar nova senha" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                        <TextInput
-                          id="password_confirmation"
-                          type="password"
-                          autoComplete="new-password"
-                          value={profileForm.data.password_confirmation}
-                          onChange={e => profileForm.setData('password_confirmation', e.target.value)}
-                          className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] text-sm focus:border-[#7c3aed] focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
-                        />
-                        <InputError message={profileForm.errors.password_confirmation} className="mt-1" />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="password" className={LABEL}>Nova senha</label>
+                          <input
+                            id="password"
+                            type="password"
+                            autoComplete="new-password"
+                            value={profileForm.data.password}
+                            onChange={e => profileForm.setData('password', e.target.value)}
+                            className={INPUT}
+                          />
+                          <InputError message={profileForm.errors.password} className="mt-1" />
+                        </div>
+                        <div>
+                          <label htmlFor="password_confirmation" className={LABEL}>Confirmar nova senha</label>
+                          <input
+                            id="password_confirmation"
+                            type="password"
+                            autoComplete="new-password"
+                            value={profileForm.data.password_confirmation}
+                            onChange={e => profileForm.setData('password_confirmation', e.target.value)}
+                            className={INPUT}
+                          />
+                          <InputError message={profileForm.errors.password_confirmation} className="mt-1" />
+                        </div>
                       </div>
                       <button
                         type="button"
@@ -487,14 +432,15 @@ export default function SettingsIndex({ members, pending_invites, organization, 
           <section id="organization" className={SECTION_CARD}>
             <h2 className={SECTION_HEADING}>Organização</h2>
             <form onSubmit={handleOrgSave} className="space-y-4">
-              <div>
-                <InputLabel htmlFor="org-name" value="Nome da organização" className="mb-1 text-xs text-[#374151] dark:text-[#d1d5db]" />
-                <TextInput
+              <div className="sm:max-w-sm">
+                <label htmlFor="org-name" className={LABEL}>Nome da organização</label>
+                <input
                   id="org-name"
+                  type="text"
                   value={orgForm.data.name}
                   onChange={e => orgForm.setData('name', e.target.value)}
                   disabled={!can_manage_team}
-                  className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] text-sm focus:border-[#7c3aed] focus:ring-[#7c3aed]/20 dark:text-[#f9fafb] disabled:opacity-60 disabled:cursor-not-allowed"
+                  className={can_manage_team ? INPUT : INPUT_DISABLED}
                 />
                 <InputError message={orgForm.errors.name} className="mt-1" />
                 {!can_manage_team && (
@@ -529,19 +475,19 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                   </h3>
                   <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1">
-                      <TextInput
+                      <input
                         type="email"
                         placeholder="email@exemplo.com"
                         value={inviteForm.data.email}
                         onChange={e => inviteForm.setData('email', e.target.value)}
-                        className="w-full rounded-[8px] border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] text-sm focus:border-[#7c3aed] focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
+                        className={INPUT}
                       />
                       <InputError message={inviteForm.errors.email} className="mt-1" />
                     </div>
                     <select
                       value={inviteForm.data.role}
                       onChange={e => inviteForm.setData('role', e.target.value)}
-                      className="rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:text-[#f9fafb]"
+                      className="rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] px-3.5 py-2.5 text-sm text-[#111827] dark:text-[#f9fafb] transition-colors focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:focus:border-[#a78bfa]"
                     >
                       <option value="collaborator">Colaborador</option>
                       <option value="admin">Admin</option>
@@ -733,7 +679,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                           setTestResult(null);
                         }}
                         placeholder="sk-ant-api03-..."
-                        className="w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 font-mono text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
+                        className={`${INPUT} font-mono`}
                       />
                       <InputError message={aiForm.errors.anthropic_api_key} className="mt-1.5" />
                       <p className="mt-1 text-xs text-[#9ca3af]">{t('settings.ai.keyHint')}</p>
@@ -805,31 +751,27 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                 </div>
                 <p className="mb-4 text-xs text-[#6b7280]">{t('settings.ai.managedAgents.hint')}</p>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-[#374151] dark:text-[#d1d5db]">
-                      {t('settings.ai.managedAgents.agentIdLabel')}
-                    </label>
+                    <label className={LABEL}>{t('settings.ai.managedAgents.agentIdLabel')}</label>
                     <input
                       type="text"
                       value={aiForm.data.client_research_agent_id}
                       onChange={e => aiForm.setData('client_research_agent_id', e.target.value)}
                       placeholder="agt_..."
-                      className="w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-2 font-mono text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
+                      className={`${INPUT} font-mono`}
                     />
                     <p className="mt-1 text-xs text-[#9ca3af]">{t('settings.ai.managedAgents.agentIdHint')}</p>
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-[#374151] dark:text-[#d1d5db]">
-                      {t('settings.ai.managedAgents.envIdLabel')}
-                    </label>
+                    <label className={LABEL}>{t('settings.ai.managedAgents.envIdLabel')}</label>
                     <input
                       type="text"
                       value={aiForm.data.client_research_environment_id}
                       onChange={e => aiForm.setData('client_research_environment_id', e.target.value)}
                       placeholder="env_... (opcional)"
-                      className="w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-2 font-mono text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
+                      className={`${INPUT} font-mono`}
                     />
                   </div>
                 </div>
@@ -846,7 +788,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
           </section>
 
         </div>{/* end space-y-8 */}
-      </div>{/* end max-w-2xl */}
+      </div>{/* end max-w-4xl */}
 
       {/* Remove member confirmation modal */}
       <CostConfirmModal
