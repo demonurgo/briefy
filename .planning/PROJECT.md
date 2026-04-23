@@ -23,18 +23,21 @@ Agency teams can create, track, and complete client demands efficiently, with AI
 - ✓ User can add/rename/download/delete files on demands — Phase 2
 - ✓ User can add/edit/delete comments on demands — Phase 2
 - ✓ Admin can delete files and comments from other users — Phase 2
+- ✓ User can generate an AI brief from demand metadata — Phase 3
+- ✓ User can chat with AI assistant about a specific demand — Phase 3
+- ✓ AI remembers client context across demands — Phase 3
+- ✓ Admin can invite team members by email with role assignment — Phase 4
+- ✓ Admin can manage team roster (view, change roles, remove members) — Phase 4
+- ✓ Any user can maintain their own profile with avatar upload — Phase 4
+- ✓ Role-based access enforced: only admins/owners can invite, remove, and manage clients — Phase 4
+- ✓ Unified settings page (/settings) with Profile, Organization, Team, AI sections — Phase 4
 
 ### Active
 
-<!-- Milestone v1.1: AI Integration + Real-time + Dashboard -->
+<!-- Milestone v1.1: AI Integration + Team + Dashboard -->
 
-- [ ] User can generate an AI brief from demand metadata
-- [ ] User can chat with AI assistant about a specific demand
-- [ ] AI remembers client context across demands
-- [ ] Team members see kanban updates in real-time without refresh
-- [ ] User receives in-app notifications for demand changes
-- [ ] Admin sees dashboard with demand metrics and team activity
-- [ ] New users are guided through onboarding on first login
+- [ ] Admin sees dashboard with demand metrics and team activity — Phase 5
+- [ ] New users are guided through onboarding on first login — Phase 5
 
 ### Out of Scope
 
