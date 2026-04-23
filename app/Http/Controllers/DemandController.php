@@ -55,6 +55,7 @@ class DemandController extends Controller
             'demands'        => $demands,
             'clients'        => $clients,
             'filters'        => $request->only('client_id', 'status', 'search'),
+            'autoCreate'     => $request->boolean('create'),
             'selectedDemand' => $selectedDemand,
             'teamMembers'    => $teamMembers,
             'isAdmin'        => auth()->user()->isAdmin(),

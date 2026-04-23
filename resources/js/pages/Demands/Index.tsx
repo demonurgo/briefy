@@ -1,5 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { LayoutGrid, List, Loader2, Search } from 'lucide-react';
@@ -36,15 +36,23 @@ interface Props {
   selectedDemand?: SelectedDemand | null;
   teamMembers?: TeamMember[];
   isAdmin?: boolean;
+  autoCreate?: boolean;
 }
 
 const STATUSES = ['todo', 'in_progress', 'awaiting_feedback', 'in_review', 'approved'];
 
-export default function DemandsIndex({ demands, clients, filters, selectedDemand, teamMembers = [], isAdmin = false }: Props) {
+export default function DemandsIndex({ demands, clients, filters, selectedDemand, teamMembers = [], isAdmin = false, autoCreate = false }: Props) {
   const { t } = useTranslation();
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
   const [search, setSearch] = useState(filters.search ?? '');
   const [loadingDemandId, setLoadingDemandId] = useState<number | null>(null);
+
+  // When navigating from client profile "Nova demanda", redirect to create page preserving client filter
+  useEffect(() => {
+    if (autoCreate && filters.client_id) {
+      router.visit(route('clients.demands.create', filters.client_id), { replace: true });
+    }
+  }, []);
 
   const openDemand = (id: number) => {
     setLoadingDemandId(id);
