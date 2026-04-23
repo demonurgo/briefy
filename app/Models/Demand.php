@@ -29,4 +29,15 @@ class Demand extends Model
     public function files(): HasMany { return $this->hasMany(DemandFile::class); }
     public function comments(): HasMany { return $this->hasMany(DemandComment::class)->orderBy('created_at'); }
     public function planningSuggestions(): HasMany { return $this->hasMany(PlanningSuggestion::class); }
+
+    /**
+     * AI conversations scoped to this demand.
+     * Aliased to `conversations` for frontend clarity (Plan 09).
+     */
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(AiConversation::class, 'context_id')
+            ->where('context_type', 'demand')
+            ->orderBy('created_at');
+    }
 }

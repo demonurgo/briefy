@@ -175,6 +175,11 @@
     "uploadFile": "Upload file",
     "addLink": "Add link",
     "writeComment": "Write a comment...",
-    "send": "Send"
+    "send": "Send",
+    "tabs": {
+      "comments": "Comments",
+      "files": "Files",
+      "brief": "Brief"
+    }
   }
 }
