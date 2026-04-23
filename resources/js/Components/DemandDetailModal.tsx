@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/react';
-import { ChevronDown, Download, Edit2, FileText, Link2, MessageSquare, Paperclip, Pencil, Plus, Save, Send, Trash2, X } from 'lucide-react';
+import { ChevronDown, Download, FileText, Link2, MessageSquare, Paperclip, Pencil, Plus, Save, Send, Trash2, X } from 'lucide-react';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { AiIcon } from '@/Components/AiIcon';
 import BriefTab from '@/Components/BriefTab';
@@ -69,7 +69,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   const { t } = useTranslation();
   const { auth } = usePage<{ auth: { user: User & { organization?: { has_anthropic_key: boolean } } }; [key: string]: unknown }>().props;
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [showFileForm, setShowFileForm] = useState(false);
   const [fileType, setFileType] = useState<'upload' | 'link'>('upload');
   const [editingFileId, setEditingFileId] = useState<number | null>(null);
@@ -217,13 +217,6 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                       ? t('ai.brief.regenerate')
                       : t('ai.brief.generate')
                   }
-                </button>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#1f2937]"
-                >
-                  <Edit2 size={14} />
-                  {t('common.edit')}
                 </button>
                 {isAdmin && (
                   <button
