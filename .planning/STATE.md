@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 3 — AI Integration
-Plan: 03-05 (Plans 01 and 04 complete)
+Plan: 03-06 (Plans 01, 04, 05 complete)
 Status: In progress
-Last activity: 2026-04-23 — Plan 04 (Brief streaming) complete
+Last activity: 2026-04-23 — Plan 05 (Chat streaming) complete
 
 Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
 
@@ -47,6 +47,12 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 RT: Frontend subscribes to `private-organization.{org_id}` channel via laravel-echo + pusher-js
 - v1.1 Dashboard: Recharts or react-chartjs-2 for charts (lightweight, no heavy dependencies)
 - v1.1 Onboarding: Check for 0 clients or 0 demands; store `onboarding_dismissed` in user preferences JSON column
+- v1.1 Chat: ChatStreamer accepts AnthropicClientInterface (not \Anthropic\Client) — same BYOK factory pattern as BriefStreamer
+- v1.1 Chat: ChatStreamer is NOT final — allows anonymous test double subclasses
+- v1.1 Chat: Two-block system prompt — stable cached prefix (ephemeral) + volatile comments tail outside cache (80% cache hits on turns 2..N)
+- v1.1 Chat: User message persisted BEFORE eventStream() opens — survives client disconnect (AI-SPEC pattern b)
+- v1.1 Chat: Job stubs (ExtractClientMemoryJob, CompactConversationJob) in app/Jobs/ — dispatch() works, full impl Plan 07
+- v1.1 Testing: pgsql-schema.sql must be non-empty for RefreshDatabase to load test DB — regenerate with php artisan schema:dump
 
 ### Pending Todos
 
@@ -75,5 +81,5 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 ## Session Continuity
 
 Last session: 2026-04-23
-Stopped at: Completed 03-04-PLAN.md (Brief streaming) — Plan 05 (Chat streaming) is next
+Stopped at: Completed 03-05-PLAN.md (Chat streaming) — Plan 06 (Monthly plan generation) is next
 Resume file: None
