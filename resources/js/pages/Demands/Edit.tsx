@@ -49,7 +49,7 @@ export default function DemandsEdit({ demand, teamMembers }: { demand: Demand; t
           {demand.client.name}
         </Link>
         <span>/</span>
-        <Link href={route('demands.show', demand.id)} className="max-w-[12rem] truncate hover:text-[#111827] dark:hover:text-[#f9fafb]">
+        <Link href={route('demands.index', { client_id: demand.client.id, demand: demand.id })} className="max-w-[12rem] truncate hover:text-[#111827] dark:hover:text-[#f9fafb]">
           {demand.title}
         </Link>
         <span>/</span>
@@ -65,7 +65,7 @@ export default function DemandsEdit({ demand, teamMembers }: { demand: Demand; t
             setData={setData}
             onSubmit={submit}
             submitLabel={t('common.save')}
-            onCancel={() => router.visit(route('demands.show', demand.id))}
+            onCancel={() => router.visit(route('demands.index', { client_id: demand.client.id, demand: demand.id }))}
             teamMembers={teamMembers}
           />
         </div>

@@ -122,7 +122,7 @@ export default function ClientsShow({ client, demands }: { client: Client; deman
                 {demands.map(demand => (
                   <li key={demand.id}>
                     <Link
-                      href={route('demands.show', demand.id)}
+                      href={route('demands.index', { client_id: client.id, demand: demand.id })}
                       className="flex items-center gap-3 px-6 py-3.5 hover:bg-[#f9fafb] transition-colors dark:hover:bg-[#0b0f14]"
                     >
                       <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[demand.status]}`}>
