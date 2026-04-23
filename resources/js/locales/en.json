@@ -197,7 +197,8 @@
       "maUnavailableBanner": "Managed Agents is not enabled on this Anthropic account. Chat, Brief and Planning continue to work; automatic client research (🤖 Get to know this client with AI) will be disabled.",
       "status": {
         "configured": "Key configured",
-        "missing": "No key configured"
+        "missing": "No key configured",
+        "valid": "Key valid"
       },
       "managedAgents": {
         "title": "Research Agent (Managed Agents)",
@@ -207,7 +208,8 @@
         "agentIdLabel": "Agent ID",
         "agentIdHint": "Find it at console.anthropic.com → Agents → select your agent → copy the ID (starts with agt_)",
         "envIdLabel": "Environment ID (optional)"
-      }
+      },
+      "changeKey": "Change key"
     }
   },
   "demands": {

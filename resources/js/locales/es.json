@@ -197,7 +197,8 @@
       "maUnavailableBanner": "Managed Agents no está habilitado en esta cuenta Anthropic. Chat, Brief y Planificación continúan funcionando; la investigación automática de clientes (🤖 Conocer este cliente con IA) quedará deshabilitada.",
       "status": {
         "configured": "Clave configurada",
-        "missing": "Sin clave configurada"
+        "missing": "Sin clave configurada",
+        "valid": "Clave válida"
       },
       "managedAgents": {
         "title": "Agente de Investigación (Managed Agents)",
@@ -207,7 +208,8 @@
         "agentIdLabel": "Agent ID",
         "agentIdHint": "Encuéntralo en console.anthropic.com → Agents → selecciona tu agente → copia el ID (comienza con agt_)",
         "envIdLabel": "Environment ID (opcional)"
-      }
+      },
+      "changeKey": "Cambiar clave"
     }
   },
   "demands": {
