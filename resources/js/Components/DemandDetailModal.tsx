@@ -1,6 +1,6 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useEffect, useRef, useState } from 'react';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/react';
 import { ChevronDown, Download, FileText, Link2, MessageSquare, Paperclip, Pencil, Plus, Save, Send, Trash2, X } from 'lucide-react';
@@ -69,7 +69,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   const { t } = useTranslation();
   const { auth } = usePage<{ auth: { user: User & { organization?: { has_anthropic_key: boolean } } }; [key: string]: unknown }>().props;
 
-  const [isEditing, setIsEditing] = useState(true);
+  const [confirmClose, setConfirmClose] = useState(false);
   const [showFileForm, setShowFileForm] = useState(false);
   const [fileType, setFileType] = useState<'upload' | 'link'>('upload');
   const [editingFileId, setEditingFileId] = useState<number | null>(null);
@@ -97,33 +97,33 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
     assigned_to: demand.assignee ? String(demand.assignee.id) : '',
   });
 
-  // Keep form in sync when demand reloads (e.g. after comment/file actions)
-  useEffect(() => {
-    if (!isEditing) {
-      editForm.setData({
-        title: demand.title,
-        description: demand.description ?? '',
-        objective: demand.objective ?? '',
-        tone: demand.tone ?? '',
-        channel: demand.channel ?? '',
-        deadline: demand.deadline ? demand.deadline.substring(0, 10) : '',
-        assigned_to: demand.assignee ? String(demand.assignee.id) : '',
-      });
-    }
-  }, [demand]);
+  const isDirty = editForm.isDirty;
+
+  const handleClose = () => {
+    if (isDirty) { setConfirmClose(true); return; }
+    onClose();
+  };
+
+  const saveAndClose = () => {
+    editForm.put(route('demands.inline.update', demand.id), {
+      preserveScroll: true,
+      only: ['selectedDemand'],
+      onSuccess: () => { setConfirmClose(false); onClose(); },
+    });
+  };
+
+  const discardAndClose = () => {
+    editForm.reset();
+    setConfirmClose(false);
+    onClose();
+  };
 
   const submitEdit = (e: React.FormEvent) => {
     e.preventDefault();
     editForm.put(route('demands.inline.update', demand.id), {
       preserveScroll: true,
       only: ['selectedDemand'],
-      onSuccess: () => setIsEditing(false),
     });
-  };
-
-  const cancelEdit = () => {
-    editForm.reset();
-    setIsEditing(false);
   };
 
   const submitComment = (e: React.FormEvent) => {
@@ -158,7 +158,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" onClick={handleClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
         className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[16px] bg-[#f9fafb] shadow-2xl dark:bg-[#0b0f14]"
@@ -167,82 +167,67 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between gap-4 border-b border-[#e5e7eb] bg-white px-6 py-4 dark:border-[#1f2937] dark:bg-[#111827]">
           <div className="min-w-0 flex-1">
-            {isEditing ? (
-              <input
-                autoFocus
-                type="text"
-                value={editForm.data.title}
-                onChange={e => editForm.setData('title', e.target.value)}
-                className="w-full rounded-[8px] border border-[#7c3aed] bg-white px-3 py-1.5 text-base font-semibold text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:bg-[#0b0f14] dark:text-[#f9fafb]"
-              />
-            ) : (
-              <h2 className="truncate text-base font-semibold text-[#111827] dark:text-[#f9fafb]">{demand.title}</h2>
-            )}
-            <div className="mt-1.5">
+            <input
+              type="text"
+              value={editForm.data.title}
+              onChange={e => editForm.setData('title', e.target.value)}
+              className="w-full rounded-[8px] border border-transparent bg-transparent px-1 py-1 text-base font-semibold text-[#111827] hover:border-[#e5e7eb] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:text-[#f9fafb] dark:hover:border-[#1f2937] dark:focus:border-[#7c3aed]"
+            />
+            <div className="mt-1">
               <InlineStatusPicker demand={demand} />
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={submitEdit}
-                  disabled={editForm.processing}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors disabled:opacity-60"
-                >
-                  <Save size={14} />
-                  {t('common.save')}
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:bg-[#f3f4f6] transition-colors dark:border-[#1f2937] dark:hover:bg-[#1f2937]"
-                >
-                  {t('common.cancel')}
-                </button>
-              </>
-            ) : (
-              <>
-                {/* "Gerar Brief" / "Regenerar" header button — visible on all tabs (D-02) */}
-                <button
-                  type="button"
-                  onClick={() => hasKey && setGeneratingBrief(true)}
-                  disabled={!hasKey || generatingBrief}
-                  title={!hasKey ? t('ai.brief.errors.serviceUnavailable') : undefined}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 transition-colors"
-                >
-                  <AiIcon size={16} variant="dark" spinning={generatingBrief} />
-                  {generatingBrief
-                    ? t('ai.brief.generating')
-                    : demand.ai_analysis?.brief
-                      ? t('ai.brief.regenerate')
-                      : t('ai.brief.generate')
-                  }
-                </button>
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      if (!confirmDelete) { setConfirmDelete(true); return; }
-                      router.delete(route('demands.destroy', demand.id), {
-                        onSuccess: onClose,
-                        onFinish: () => setConfirmDelete(false),
-                      });
-                    }}
-                    onBlur={() => setTimeout(() => setConfirmDelete(false), 200)}
-                    className={`inline-flex items-center gap-1 rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      confirmDelete
-                        ? 'bg-red-500 text-white hover:bg-red-600'
-                        : 'border border-[#e5e7eb] text-[#9ca3af] hover:border-red-400 hover:text-red-500 dark:border-[#1f2937]'
-                    }`}
-                  >
-                    <Trash2 size={13} />
-                    {confirmDelete ? 'Confirmar exclusão' : ''}
-                  </button>
-                )}
-                <button onClick={onClose} className="rounded-[8px] p-1.5 text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#6b7280] transition-colors dark:hover:bg-[#1f2937]">
-                  <X size={18} />
-                </button>
-              </>
+            {/* Save button — only visible when form is dirty */}
+            {isDirty && (
+              <button
+                onClick={submitEdit}
+                disabled={editForm.processing}
+                className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors disabled:opacity-60"
+              >
+                <Save size={14} />
+                {t('common.save')}
+              </button>
             )}
+            {/* Gerar Brief */}
+            <button
+              type="button"
+              onClick={() => hasKey && setGeneratingBrief(true)}
+              disabled={!hasKey || generatingBrief}
+              title={!hasKey ? t('ai.brief.errors.serviceUnavailable') : undefined}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 transition-colors"
+            >
+              <AiIcon size={16} variant="dark" spinning={generatingBrief} />
+              {generatingBrief
+                ? t('ai.brief.generating')
+                : demand.ai_analysis?.brief
+                  ? t('ai.brief.regenerate')
+                  : t('ai.brief.generate')
+              }
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  if (!confirmDelete) { setConfirmDelete(true); return; }
+                  router.delete(route('demands.destroy', demand.id), {
+                    onSuccess: handleClose,
+                    onFinish: () => setConfirmDelete(false),
+                  });
+                }}
+                onBlur={() => setTimeout(() => setConfirmDelete(false), 200)}
+                className={`inline-flex items-center gap-1 rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  confirmDelete
+                    ? 'bg-red-500 text-white hover:bg-red-600'
+                    : 'border border-[#e5e7eb] text-[#9ca3af] hover:border-red-400 hover:text-red-500 dark:border-[#1f2937]'
+                }`}
+              >
+                <Trash2 size={13} />
+                {confirmDelete ? 'Confirmar exclusão' : ''}
+              </button>
+            )}
+            <button onClick={handleClose} className="rounded-[8px] p-1.5 text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#6b7280] transition-colors dark:hover:bg-[#1f2937]">
+              <X size={18} />
+            </button>
           </div>
         </div>
 
@@ -251,8 +236,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
 
           {/* Left column — 50% width: metadata + edit form */}
           <div className="overflow-y-auto border-r border-[#e5e7eb] dark:border-[#1f2937] md:col-span-1 no-scrollbar">
-            {isEditing ? (
-              <form onSubmit={submitEdit} className="space-y-4 p-5">
+            <form onSubmit={submitEdit} className="space-y-4 p-5">
                 {/* 1. Objetivo (textarea) */}
                 <div>
                   <label className={labelClass}>{t('demands.objective')}</label>
@@ -296,53 +280,6 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                   <p key={i} className="text-xs text-red-500">{msg}</p>
                 ))}
               </form>
-            ) : (
-              <div className="p-5 space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-[#9ca3af]">{t('demands.client')}</span>
-                  <Link href={route('clients.show', demand.client.id)} onClick={onClose} className="font-medium text-[#7c3aed] dark:text-[#a78bfa]">{demand.client.name}</Link>
-                </div>
-                {/* Canal + Prazo side by side in view mode */}
-                <div className="grid grid-cols-2 gap-3">
-                  {demand.channel && (
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-[#9ca3af] mb-0.5">{t('demands.channel')}</p>
-                      <span className="font-medium capitalize text-[#111827] dark:text-[#f9fafb]">{demand.channel}</span>
-                    </div>
-                  )}
-                  {demand.deadline && (
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-[#9ca3af] mb-0.5">{t('demands.deadline')}</p>
-                      <span className="font-medium text-[#111827] dark:text-[#f9fafb]">{new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  )}
-                </div>
-                {demand.assignee && (
-                  <div className="flex justify-between">
-                    <span className="text-[#9ca3af]">{t('demands.assignedTo')}</span>
-                    <span className="font-medium text-[#111827] dark:text-[#f9fafb]">{demand.assignee.name}</span>
-                  </div>
-                )}
-                {demand.tone && (
-                  <div className="flex justify-between">
-                    <span className="text-[#9ca3af]">{t('demands.tone')}</span>
-                    <span className="font-medium text-[#111827] dark:text-[#f9fafb]">{demand.tone}</span>
-                  </div>
-                )}
-                {demand.objective && (
-                  <div className="border-t border-[#e5e7eb] pt-3 dark:border-[#1f2937]">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">{t('demands.objective')}</p>
-                    <p className="whitespace-pre-wrap text-[#6b7280]">{demand.objective}</p>
-                  </div>
-                )}
-                {demand.description && (
-                  <div className="border-t border-[#e5e7eb] pt-3 dark:border-[#1f2937]">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">{t('demands.description')}</p>
-                    <p className="whitespace-pre-wrap text-[#6b7280]">{demand.description}</p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* ── Right column: 4-tab panel — 50% width ──────────────────────── */}
@@ -504,6 +441,38 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
           </div>
 
         </div>
+
+        {/* Confirm-close overlay when form has unsaved changes */}
+        {confirmClose && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[16px] bg-black/40 backdrop-blur-sm">
+            <div className="mx-4 w-full max-w-sm rounded-[14px] bg-white p-6 shadow-2xl dark:bg-[#111827]">
+              <h3 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb]">Salvar mudanças?</h3>
+              <p className="mt-1 text-sm text-[#6b7280]">Você tem alterações não salvas. Deseja salvá-las antes de fechar?</p>
+              <div className="mt-5 flex gap-2">
+                <button
+                  onClick={saveAndClose}
+                  disabled={editForm.processing}
+                  className="flex-1 rounded-[10px] bg-[#7c3aed] py-2 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:opacity-60"
+                >
+                  {editForm.processing ? 'Salvando...' : 'Salvar e fechar'}
+                </button>
+                <button
+                  onClick={discardAndClose}
+                  className="flex-1 rounded-[10px] border border-[#e5e7eb] py-2 text-sm font-medium text-[#6b7280] hover:border-red-400 hover:text-red-500 dark:border-[#1f2937]"
+                >
+                  Descartar
+                </button>
+                <button
+                  onClick={() => setConfirmClose(false)}
+                  className="rounded-[10px] border border-[#e5e7eb] px-3 py-2 text-sm text-[#9ca3af] hover:border-[#7c3aed] hover:text-[#7c3aed] dark:border-[#1f2937]"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
