@@ -13,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // BYOK factory — singleton so the same instance is reused per request.
+        // Do NOT bind Anthropic\Client as a global singleton (keys are per-org).
+        $this->app->singleton(\App\Services\Ai\AnthropicClientFactory::class);
     }
 
     /**
