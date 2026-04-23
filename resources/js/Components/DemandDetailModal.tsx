@@ -151,8 +151,8 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
 
   // ── Tab definitions ────────────────────────────────────────────────────────
   const tabs = [
-    { key: 'comments', label: t('demands.tabs.comments'), icon: <MessageSquare size={16} /> },
     { key: 'files',    label: t('demands.tabs.files'),    icon: <Paperclip size={16} /> },
+    { key: 'comments', label: t('demands.tabs.comments'), icon: <MessageSquare size={16} /> },
     { key: 'brief',    label: t('demands.tabs.brief'),    icon: <FileText size={16} /> },
     { key: 'chat',     label: t('ai.chat.tab'),           icon: <AiIcon size={20} alt={t('ai.assistantIcon')} /> },
   ];
@@ -254,42 +254,50 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
         </div>
 
         {/* ── Body ────────────────────────────────────────────────────────── */}
-        <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden md:grid-cols-3">
+        <div className="grid flex-1 grid-cols-1 gap-0 overflow-hidden md:grid-cols-2">
 
-          {/* Left column: metadata details + edit form */}
+          {/* Left column — 50% width: metadata + edit form */}
           <div className="overflow-y-auto border-r border-[#e5e7eb] dark:border-[#1f2937] md:col-span-1 no-scrollbar">
             {isEditing ? (
               <form onSubmit={submitEdit} className="space-y-4 p-5">
-                <div>
-                  <label className={labelClass}>{t('demands.description')}</label>
-                  <textarea value={editForm.data.description} onChange={e => editForm.setData('description', e.target.value)}
-                    rows={4} className={inputClass + ' resize-none'} />
-                </div>
+                {/* 1. Objetivo (textarea) */}
                 <div>
                   <label className={labelClass}>{t('demands.objective')}</label>
-                  <input type="text" value={editForm.data.objective} onChange={e => editForm.setData('objective', e.target.value)} className={inputClass} />
+                  <textarea value={editForm.data.objective} onChange={e => editForm.setData('objective', e.target.value)}
+                    rows={4} className={inputClass + ' resize-none'} />
                 </div>
-                <div>
-                  <label className={labelClass}>{t('demands.tone')}</label>
-                  <input type="text" value={editForm.data.tone} onChange={e => editForm.setData('tone', e.target.value)} className={inputClass} placeholder="Ex: Formal, Descontraído..." />
+                {/* 2. Canal + Prazo side by side */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>{t('demands.channel')}</label>
+                    <select value={editForm.data.channel} onChange={e => editForm.setData('channel', e.target.value)} className={inputClass}>
+                      <option value="">Selecione...</option>
+                      {CHANNELS.map(ch => <option key={ch} value={ch} className="capitalize">{ch}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>{t('demands.deadline')}</label>
+                    <input type="date" value={editForm.data.deadline} onChange={e => editForm.setData('deadline', e.target.value)} className={inputClass} />
+                  </div>
                 </div>
-                <div>
-                  <label className={labelClass}>{t('demands.channel')}</label>
-                  <select value={editForm.data.channel} onChange={e => editForm.setData('channel', e.target.value)} className={inputClass}>
-                    <option value="">Selecione...</option>
-                    {CHANNELS.map(ch => <option key={ch} value={ch} className="capitalize">{ch}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>{t('demands.deadline')}</label>
-                  <input type="date" value={editForm.data.deadline} onChange={e => editForm.setData('deadline', e.target.value)} className={inputClass} />
-                </div>
+                {/* 3. Responsável */}
                 <div>
                   <label className={labelClass}>{t('demands.assignedTo')}</label>
                   <select value={editForm.data.assigned_to} onChange={e => editForm.setData('assigned_to', e.target.value)} className={inputClass}>
                     <option value="">Nenhum</option>
                     {teamMembers.map(m => <option key={m.id} value={String(m.id)}>{m.name}</option>)}
                   </select>
+                </div>
+                {/* 4. Tom */}
+                <div>
+                  <label className={labelClass}>{t('demands.tone')}</label>
+                  <input type="text" value={editForm.data.tone} onChange={e => editForm.setData('tone', e.target.value)} className={inputClass} placeholder="Ex: Formal, Descontraído..." />
+                </div>
+                {/* 5. Descrição (last) */}
+                <div>
+                  <label className={labelClass}>{t('demands.description')}</label>
+                  <textarea value={editForm.data.description} onChange={e => editForm.setData('description', e.target.value)}
+                    rows={4} className={inputClass + ' resize-none'} />
                 </div>
                 {Object.values(editForm.errors).map((msg, i) => (
                   <p key={i} className="text-xs text-red-500">{msg}</p>
@@ -301,22 +309,25 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                   <span className="text-[#9ca3af]">{t('demands.client')}</span>
                   <Link href={route('clients.show', demand.client.id)} onClick={onClose} className="font-medium text-[#7c3aed] dark:text-[#a78bfa]">{demand.client.name}</Link>
                 </div>
-                {demand.deadline && (
-                  <div className="flex justify-between">
-                    <span className="text-[#9ca3af]">{t('demands.deadline')}</span>
-                    <span className="font-medium text-[#111827] dark:text-[#f9fafb]">{new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                )}
+                {/* Canal + Prazo side by side in view mode */}
+                <div className="grid grid-cols-2 gap-3">
+                  {demand.channel && (
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-[#9ca3af] mb-0.5">{t('demands.channel')}</p>
+                      <span className="font-medium capitalize text-[#111827] dark:text-[#f9fafb]">{demand.channel}</span>
+                    </div>
+                  )}
+                  {demand.deadline && (
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-[#9ca3af] mb-0.5">{t('demands.deadline')}</p>
+                      <span className="font-medium text-[#111827] dark:text-[#f9fafb]">{new Date(demand.deadline).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  )}
+                </div>
                 {demand.assignee && (
                   <div className="flex justify-between">
                     <span className="text-[#9ca3af]">{t('demands.assignedTo')}</span>
                     <span className="font-medium text-[#111827] dark:text-[#f9fafb]">{demand.assignee.name}</span>
-                  </div>
-                )}
-                {demand.channel && (
-                  <div className="flex justify-between">
-                    <span className="text-[#9ca3af]">{t('demands.channel')}</span>
-                    <span className="font-medium capitalize text-[#111827] dark:text-[#f9fafb]">{demand.channel}</span>
                   </div>
                 )}
                 {demand.tone && (
@@ -328,7 +339,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                 {demand.objective && (
                   <div className="border-t border-[#e5e7eb] pt-3 dark:border-[#1f2937]">
                     <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">{t('demands.objective')}</p>
-                    <p className="text-[#6b7280]">{demand.objective}</p>
+                    <p className="whitespace-pre-wrap text-[#6b7280]">{demand.objective}</p>
                   </div>
                 )}
                 {demand.description && (
@@ -341,8 +352,8 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
             )}
           </div>
 
-          {/* ── Right column: 4-tab panel ──────────────────────────────────── */}
-          <div className="flex flex-col overflow-hidden md:col-span-2">
+          {/* ── Right column: 4-tab panel — 50% width ──────────────────────── */}
+          <div className="flex flex-col overflow-hidden md:col-span-1">
             <TabGroup as="div" className="flex h-full flex-col overflow-hidden">
 
               {/* Tab bar */}
