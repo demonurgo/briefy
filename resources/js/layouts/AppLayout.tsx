@@ -1,11 +1,12 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Bell } from 'lucide-react';
+import { Bell, ChevronDown, Check, Plus } from 'lucide-react';
 import { BottomNav } from '@/Components/BottomNav';
 import { Sidebar } from '@/Components/Sidebar';
 import { ThemeToggle } from '@/Components/ThemeToggle';
 import { FlashMessage } from '@/Components/FlashMessage';
+import { UserAvatar } from '@/Components/UserAvatar';
 
 interface Notification {
   id: number;
@@ -19,7 +20,19 @@ interface Notification {
 
 interface PageProps {
   [key: string]: unknown;
-  auth: { user: { id: number; name: string; email: string } };
+  auth: {
+    user: {
+      id: number;
+      name: string;
+      email: string;
+      avatar: string | null;
+      role: string;
+      current_organization_id: number;
+      organization: { id: number; name: string; slug: string; logo: string | null } | null;
+      organizations: Array<{ id: number; name: string; slug: string; logo: string | null; role: string }>;
+    };
+    organization: { id: number; name: string; slug: string; logo?: string; has_anthropic_key: boolean; anthropic_api_key_mask: string | null } | null;
+  };
   unread_notifications: number;
 }
 
@@ -37,6 +50,8 @@ export default function AppLayout({ children, title, actions }: Props) {
   const [notes, setNotes] = useState<Notification[]>([]);
   const bellRef = useRef<HTMLDivElement>(null);
   const prevUnread = useRef(unread_notifications);
+  const [orgSwitcherOpen, setOrgSwitcherOpen] = useState(false);
+  const orgSwitcherRef = useRef<HTMLDivElement>(null);
 
   // Play a soft notification sound using Web Audio API
   const playNotificationSound = () => {
@@ -75,6 +90,17 @@ export default function AppLayout({ children, title, actions }: Props) {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) setBellOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Close org switcher on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (orgSwitcherRef.current && !orgSwitcherRef.current.contains(e.target as Node)) {
+        setOrgSwitcherOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -169,9 +195,60 @@ export default function AppLayout({ children, title, actions }: Props) {
               )}
             </div>
 
-            <span className="hidden sm:block text-sm text-[#6b7280] dark:text-[#9ca3af] max-w-32 truncate">
-              {auth?.user?.name}
-            </span>
+            {/* OrgSwitcher */}
+            <div ref={orgSwitcherRef} className="relative hidden sm:block">
+              <button
+                onClick={() => setOrgSwitcherOpen(v => !v)}
+                className="flex items-center gap-2 max-w-[160px] rounded-[8px] px-2 py-1 text-sm text-[#6b7280] dark:text-[#9ca3af] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
+                aria-label="Trocar organização"
+                aria-expanded={orgSwitcherOpen}
+              >
+                <UserAvatar name={auth?.user?.name ?? ''} avatar={auth?.user?.avatar} size="sm" />
+                <span className="truncate max-w-[100px] text-[#111827] dark:text-[#f9fafb]">
+                  {auth?.user?.organization?.name ?? auth?.user?.name}
+                </span>
+                <ChevronDown size={14} className={`shrink-0 transition-transform ${orgSwitcherOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {orgSwitcherOpen && (
+                <div className="absolute right-0 top-10 z-50 w-56 rounded-[12px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] shadow-lg">
+                  <div className="py-1">
+                    {(auth?.user?.organizations ?? []).map((org) => (
+                      <button
+                        key={org.id}
+                        onClick={() => {
+                          setOrgSwitcherOpen(false);
+                          if (org.id !== auth?.user?.current_organization_id) {
+                            router.patch(route('settings.current-org'), { organization_id: org.id });
+                          }
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#111827] dark:text-[#f9fafb] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
+                      >
+                        {/* Org initials circle */}
+                        <div className="h-6 w-6 rounded-full bg-[#7c3aed]/10 text-[#7c3aed] dark:bg-[#7c3aed]/20 flex items-center justify-center text-[10px] font-semibold shrink-0">
+                          {org.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="flex-1 truncate text-left">{org.name}</span>
+                        {org.id === auth?.user?.current_organization_id && (
+                          <Check size={14} className="shrink-0 text-[#7c3aed]" />
+                        )}
+                      </button>
+                    ))}
+
+                    <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] mt-1 pt-1">
+                      <button
+                        disabled
+                        title="Em breve"
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#7c3aed] opacity-50 cursor-not-allowed"
+                      >
+                        <Plus size={14} />
+                        Criar nova organização
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
