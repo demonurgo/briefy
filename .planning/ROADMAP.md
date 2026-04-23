@@ -43,7 +43,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 3. AI Integration | 0/? | Not started | - |
+| 3. AI Integration | 1/13 | In progress | - |
 | 4. Real-time Collaboration | 0/? | Not started | - |
 | 5. Dashboard + Onboarding | 0/? | Not started | - |
 
@@ -61,7 +61,21 @@
   3. User opens the AI chat tab on a demand, types a question, and receives a response that references the demand's metadata, files list, and past comments — without the user having to re-explain context
   4. AI responses stream progressively character by character rather than appearing all at once after a delay
   5. AI incorporates client-specific memory (tone preferences, past patterns) on subsequent demands for the same client, and updates that memory after each interaction
-**Plans:** TBD
+**Plans:** 13 plans
+Plans:
+- [x] 03-01-PLAN.md - BYOK infrastructure (encrypted API key, AnthropicClientFactory, /settings/ai page, Inertia shared props)
+- [ ] 03-02-PLAN.md - Schema migrations (monthly_plan, client_research_sessions, compacted_at) + BLOCKING migrate
+- [ ] 03-03-PLAN.md - AGPL-3.0 license + per-file headers script + README BYOK + npm deps
+- [ ] 03-04-PLAN.md - Brief streaming (AiBriefController + BriefStreamer + inline edit)
+- [ ] 03-05-PLAN.md - Chat streaming (AiChatController + ChatStreamer + conversation lifecycle)
+- [ ] 03-06-PLAN.md - Monthly plan generation (Opus 4.7 + tool-use + 7-action controller)
+- [ ] 03-07-PLAN.md - Memory extraction + compaction jobs (Haiku 4.5 + PII + confidence gates)
+- [ ] 03-08-PLAN.md - Shared frontend (AiIcon, useAiStream, useTypewriter, AiMarkdown, i18n)
+- [ ] 03-09-PLAN.md - DemandDetailModal 4-tab refactor + BriefTab + ChatTab
+- [ ] 03-10-PLAN.md - ClientForm monthly plan section + Clients/Index badges
+- [ ] 03-11-PLAN.md - /planejamento page + Dashboard widget + Sidebar nav
+- [ ] 03-12-PLAN.md - Client Research Managed Agent (hackathon prize track)
+- [ ] 03-13-PLAN.md - AI Usage Meter + Observability (Redis + OTEL, optional)
 **UI hint:** yes
 
 ---
@@ -129,4 +143,4 @@
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-22 — v1.1 roadmap initialized (Phases 3–5)*
+*Last updated: 2026-04-23 — Plan 03-01 complete (BYOK infrastructure)*

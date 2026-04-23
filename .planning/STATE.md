@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 3 — AI Integration
-Plan: Planned (13 plans in 4 waves)
-Status: Ready to execute
-Last activity: 2026-04-22 — Phase 3 plans created and verified (2 revision iterations; 12/12 REQ-IDs covered; 40/40 decisions mapped)
+Plan: 03-02 (Plan 01 complete)
+Status: In progress
+Last activity: 2026-04-23 — Plan 01 (BYOK infrastructure) complete
 
-Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 Phase 3 planned, execution pending)
+Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
 
 ## Performance Metrics
 
@@ -32,9 +32,13 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 - Phase 2: Inline PATCH routes (no redirect) for modal edits — extend to AI actions
 - Phase 2: `useEffect` sync for KanbanBoard — reuse pattern for real-time broadcast updates (Phase 4)
 - Phase 2: Deadline `substring(0,10)` for date inputs — established convention
-- v1.1 AI: Use Anthropic PHP SDK (`anthropics/anthropic-sdk-php`) direct API calls — no Prism abstraction
+- v1.1 AI: Use Anthropic PHP SDK (`anthropic-ai/sdk` on Packagist, v0.16.0) direct API calls — no Prism abstraction
 - v1.1 AI: Streaming via Laravel streaming response + React EventSource/fetch for SSE
 - v1.1 AI: `ai_memory` table already exists — load client memory before each AI call, update after
+- v1.1 BYOK: AnthropicClientInterface + AnthropicClientFactory (forOrganization) — per-org key resolution, abort 402 if no key
+- v1.1 BYOK: Tests bind AnthropicClientInterface fake via $app->instance() — no subclassing of final SDK classes (H5)
+- v1.1 BYOK: dontFlash lives in bootstrap/app.php (Laravel 11+) — no Handler.php in this project
+- v1.1 BYOK: MA probe uses GET /v1/agents?limit=0 — zero tokens consumed, checks HTTP status only
 - v1.1 RT: Laravel Reverb for WebSockets — `php artisan reverb:install`
 - v1.1 RT: Frontend subscribes to `private-organization.{org_id}` channel via laravel-echo + pusher-js
 - v1.1 Dashboard: Recharts or react-chartjs-2 for charts (lightweight, no heavy dependencies)
@@ -42,8 +46,8 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 
 ### Pending Todos
 
-- Configure Anthropic API key in `.env` before starting Phase 3
-- Confirm `anthropics/anthropic-sdk-php` is installed (`composer require anthropics/anthropic-sdk-php`)
+- Configure Anthropic API key in `.env` (ANTHROPIC_API_KEY) for dev/test fallback (forTesting())
+- anthropic-ai/sdk ^0.16.0 confirmed installed in vendor/ (Wave 0)
 - Run `php artisan reverb:install` before starting Phase 4
 
 ### Blockers/Concerns
@@ -66,6 +70,6 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 
 ## Session Continuity
 
-Last session: 2026-04-22
-Stopped at: v1.1 roadmap created — ready to run `/gsd-plan-phase 3`
+Last session: 2026-04-23
+Stopped at: Completed 03-01-PLAN.md (BYOK infrastructure) — Plan 02 is next
 Resume file: None
