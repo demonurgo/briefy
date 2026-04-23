@@ -10,6 +10,8 @@
         "anthropic-ai/sdk": "^0.16.0",
         "echolabsdev/prism": "^0.100.1",
         "inertiajs/inertia-laravel": "^2.0",
+        "intervention/image": "^3",
+        "intervention/image-laravel": "^1",
         "laravel/framework": "^13.0",
         "laravel/reverb": "^1.10",
         "laravel/sanctum": "^4.0",
