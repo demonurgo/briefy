@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — AI + Real-time + Dashboard
 status: executing
-stopped_at: Completed 03-07-PLAN.md (Memory extraction + compaction) — Plan 08 next
-last_updated: "2026-04-23T02:34:00Z"
+stopped_at: Completed 03-08-PLAN.md (Shared AI frontend hooks) — Plan 09 next
+last_updated: "2026-04-23T02:38:00Z"
 last_activity: 2026-04-23 — Plan 07 (Memory extraction + compaction) complete
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 14
-  completed_plans: 8
-  percent: 57
+  completed_plans: 9
+  percent: 64
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 3 — AI Integration
-Plan: 03-08 (Plans 01, 04, 05, 06, 07 complete)
+Plan: 03-09 (Plans 01, 04, 05, 06, 07, 08 complete)
 Status: In progress
-Last activity: 2026-04-23 — Plan 07 (Memory extraction + compaction) complete
+Last activity: 2026-04-23 — Plan 08 (Shared AI frontend hooks + i18n) complete
 
 Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
 
@@ -79,6 +79,9 @@ Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 Planning: MonthlyPlanSchema toolSchema() enforces minItems/maxItems=$expectedCount — two-gate validation with Laravel validator rules
 - v1.1 Planning: CostConfirmModal shared component (D-34) at resources/js/Components/CostConfirmModal.tsx — reused by Plan 11 + 12
 - v1.1 Planning: AiIcon component at resources/js/Components/AiIcon.tsx — dark/light SVG pair wrapper for all AI UI (D-15)
+- v1.1 Frontend: useAiStream covers only POST delta-frame streams; GET custom-event SSE stays on native EventSource (v1.2 consolidation backlog per WARNING 8)
+- v1.1 Frontend: AiMarkdown uses per-element className overrides on react-markdown components — no @tailwindcss/typography plugin
+- v1.1 i18n: All AI, planning, clients.monthlyPlan/badges keys added to all 3 locales in Plan 08 — no merge conflicts in downstream plans
 
 ### Pending Todos
 
@@ -107,5 +110,5 @@ Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 
 ## Session Continuity
 
 Last session: 2026-04-23
-Stopped at: Completed 03-07-PLAN.md (Memory extraction + compaction) — Plan 08 next
+Stopped at: Completed 03-08-PLAN.md (Shared AI frontend hooks) — Plan 09 next
 Resume file: None
