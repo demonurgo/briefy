@@ -139,7 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             $r->user()->update([
                 'preferences' => array_merge(
                     $r->user()->preferences ?? [],
-                    $r->only(['locale', 'theme'])
+                    $r->only(['locale', 'theme', 'onboarding_dismissed'])
                 ),
             ]);
             return back()->with('success', 'Preferências salvas.');
