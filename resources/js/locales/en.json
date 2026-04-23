@@ -1,6 +1,92 @@
 {
   "nav": { "dashboard": "Dashboard", "clients": "Clients", "demands": "Demands", "planning": "Planning", "settings": "Settings", "more": "More" },
-  "common": { "save": "Save", "cancel": "Cancel", "delete": "Delete", "create": "Create", "edit": "Edit", "loading": "Loading...", "confirm": "Confirm", "search": "Search", "noResults": "No results found", "actions": "Actions", "view": "View", "all": "All", "dismiss": "Dismiss", "continue": "Continue", "saving": "Saving...", "costConfirm": { "prefix": "This operation will cost approximately", "suffix": "Continue?", "continue": "Continue" } },
+  "common": { "save": "Save", "cancel": "Cancel", "delete": "Delete", "create": "Create", "edit": "Edit", "loading": "Loading...", "confirm": "Confirm", "search": "Search", "noResults": "No results found", "actions": "Actions", "view": "View", "all": "All", "dismiss": "Dismiss", "continue": "Continue", "saving": "Saving...", "costConfirm": { "prefix": "This operation will cost approximately", "suffix": "Continue?", "continue": "Continue" }, "tryAgain": "Try again", "resend": "Resend" },
+  "ai": {
+    "assistantIcon": "AI Assistant",
+    "brief": {
+      "generate": "✨ Generate Brief",
+      "regenerate": "✨ Regenerate",
+      "regenerateConfirm": "Regenerate?",
+      "generating": "Generating…",
+      "saveEdit": "Save changes",
+      "empty": {
+        "heading": "No brief generated yet",
+        "body": "Use AI to create a structured brief from this demand's data.",
+        "cta": "Generate Brief with AI"
+      },
+      "errors": {
+        "streamFailed": "Brief generation was interrupted. Please try again.",
+        "empty": "The brief cannot be empty.",
+        "serviceUnavailable": "Service unavailable"
+      }
+    },
+    "chat": {
+      "tab": "AI Chat",
+      "newConversation": "New conversation",
+      "newConversationConfirm": "Are you sure? Start new conversation",
+      "responding": "AI is responding…",
+      "placeholder": "Ask something about this demand…",
+      "empty": {
+        "heading": "Chat with AI about this demand",
+        "body": "AI already has access to this demand's metadata, files and comments. Ask a question to get started."
+      },
+      "compactedBanner": "This conversation is getting long. Older messages have been summarized.",
+      "compactedCta": "Start new conversation",
+      "startedAt": "Conversation started on {{date}}",
+      "errors": {
+        "streamFailed": "Response was interrupted. Please send your message again.",
+        "rateLimit": "Too many requests in a row. Wait a few seconds and try again.",
+        "serviceUnavailable": "AI service unavailable. Contact your administrator."
+      }
+    }
+  },
+  "planning": {
+    "title": "Monthly planning",
+    "generate": "Generate Planning",
+    "generateModalTitle": "Generate monthly planning",
+    "generating": "Generating planning…",
+    "convert": "Convert to demand",
+    "converting": "Converting…",
+    "reject": "Reject",
+    "rejected": "Item rejected. Undo",
+    "undo": "Undo",
+    "redesign": "Redesign",
+    "applyRedesign": "Apply",
+    "applyingRedesign": "Applying…",
+    "redesignPlaceholder": "Describe what you want to change (tone, angle, format…)",
+    "redesignEmpty": "Describe what you want to change before applying.",
+    "bulkConvert": "Convert {{count}} selected",
+    "bulkCount": "{{count}} selected",
+    "bulkConvertSuccess": "{{count}} demands created.",
+    "viewDemands": "View demands",
+    "openFromWidget": "View planning",
+    "allClients": "All clients",
+    "filterPlaceholder": "Select a client",
+    "noQuotaWarning": "Configure the client's monthly plan to generate planning.",
+    "convertError": "Could not convert this item to a demand. Please try again.",
+    "empty": {
+      "noClientSelected": {
+        "heading": "Select a client to view their planning",
+        "body": "Planning is generated per client and month. Use the filter above."
+      },
+      "noPlans": {
+        "heading": "No planning for {{clientName}} yet",
+        "body": "Generate a monthly plan and AI will suggest content to fill the client's quota."
+      },
+      "noQuota": {
+        "heading": "Configure this client's monthly plan",
+        "body": "Go to Clients, edit \"{{clientName}}\" and set \"Posts per month\" to generate planning.",
+        "cta": "Edit client"
+      }
+    },
+    "reminder": {
+      "title": "Time to plan: {{clientName}}",
+      "dueTomorrow": "{{clientName}}'s monthly planning is due tomorrow.",
+      "dueToday": "{{clientName}}'s monthly planning is due today.",
+      "overdue": "{{clientName}}'s monthly planning is {{days}} days overdue.",
+      "moreClients": "+{{count}} more"
+    }
+  },
   "demand": {
     "statuses": { "todo": "To do", "in_progress": "In progress", "awaiting_feedback": "Awaiting feedback", "in_review": "In review", "approved": "Approved" },
     "types": { "demand": "Demand", "planning": "Planning" }
@@ -22,7 +108,29 @@
     "avatar": "Avatar",
     "demandsCount": "{{count}} demand",
     "demandsCount_other": "{{count}} demands",
-    "confirmDelete": "Are you sure you want to delete this client?"
+    "confirmDelete": "Are you sure you want to delete this client?",
+    "monthlyPlan": {
+      "sectionTitle": "Monthly Content Plan",
+      "sectionSubtitle": "Configure the monthly quota to generate AI-powered planning. Optional.",
+      "monthlyPostsLabel": "Posts per month",
+      "monthlyPostsPlaceholder": "E.g.: 20",
+      "monthlyPostsHint": "Total content pieces to be planned per month.",
+      "monthlyPostsRange": "Use a value between 0 and 200.",
+      "notesLabel": "Channel distribution (optional)",
+      "notesPlaceholder": "E.g.: 8 Instagram, 5 LinkedIn, 7 Facebook",
+      "notesHint": "Free-form field. AI will consider this distribution when generating the plan.",
+      "planningDayLabel": "Planning day",
+      "planningDayPlaceholder": "E.g.: 25",
+      "planningDayHint": "Day of the month when you usually do planning. A reminder will appear on the dashboard one day before.",
+      "planningDayRange": "Use a day between 1 and 31.",
+      "knowWithAi": "🤖 Get to know this client with AI",
+      "knowWithAiDisabledTooltip": "Configure your Anthropic key in Settings → AI to enable automatic research.",
+      "knowWithAiStarted": "Research started. Follow along on the client card.",
+      "researchingBadge": "🔍 Researching — ~{{minutes}} min remaining"
+    },
+    "badges": {
+      "postsPerMonth": "{{count}} posts/month"
+    }
   },
   "settings": {
     "ai": {

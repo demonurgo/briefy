@@ -1,6 +1,92 @@
 {
   "nav": { "dashboard": "Panel", "clients": "Clientes", "demands": "Demandas", "planning": "Planificación", "settings": "Configuración", "more": "Más" },
-  "common": { "save": "Guardar", "cancel": "Cancelar", "delete": "Eliminar", "create": "Crear", "edit": "Editar", "loading": "Cargando...", "confirm": "Confirmar", "search": "Buscar", "noResults": "No se encontraron resultados", "actions": "Acciones", "view": "Ver", "all": "Todos", "dismiss": "Cerrar", "continue": "Continuar", "saving": "Guardando...", "costConfirm": { "prefix": "Esta operación costará aproximadamente", "suffix": "¿Continuar?", "continue": "Continuar" } },
+  "common": { "save": "Guardar", "cancel": "Cancelar", "delete": "Eliminar", "create": "Crear", "edit": "Editar", "loading": "Cargando...", "confirm": "Confirmar", "search": "Buscar", "noResults": "No se encontraron resultados", "actions": "Acciones", "view": "Ver", "all": "Todos", "dismiss": "Cerrar", "continue": "Continuar", "saving": "Guardando...", "costConfirm": { "prefix": "Esta operación costará aproximadamente", "suffix": "¿Continuar?", "continue": "Continuar" }, "tryAgain": "Intentar de nuevo", "resend": "Reenviar" },
+  "ai": {
+    "assistantIcon": "Asistente IA",
+    "brief": {
+      "generate": "✨ Generar Brief",
+      "regenerate": "✨ Regenerar",
+      "regenerateConfirm": "¿Regenerar?",
+      "generating": "Generando…",
+      "saveEdit": "Guardar cambios",
+      "empty": {
+        "heading": "Aún no se ha generado ningún brief",
+        "body": "Usa la IA para crear un brief estructurado a partir de los datos de esta demanda.",
+        "cta": "Generar Brief con IA"
+      },
+      "errors": {
+        "streamFailed": "La generación del brief fue interrumpida. Intenta de nuevo.",
+        "empty": "El brief no puede estar vacío.",
+        "serviceUnavailable": "Servicio no disponible"
+      }
+    },
+    "chat": {
+      "tab": "Chat IA",
+      "newConversation": "Nueva conversación",
+      "newConversationConfirm": "¿Estás seguro? Iniciar nueva conversación",
+      "responding": "La IA está respondiendo…",
+      "placeholder": "Pregunta algo sobre esta demanda…",
+      "empty": {
+        "heading": "Conversa con la IA sobre esta demanda",
+        "body": "La IA ya tiene acceso a los metadatos, archivos y comentarios de esta demanda. Haz una pregunta para empezar."
+      },
+      "compactedBanner": "Esta conversación está larga. Los mensajes antiguos han sido resumidos.",
+      "compactedCta": "Iniciar nueva conversación",
+      "startedAt": "Conversación iniciada el {{date}}",
+      "errors": {
+        "streamFailed": "La respuesta fue interrumpida. Envía tu mensaje de nuevo.",
+        "rateLimit": "Demasiadas solicitudes seguidas. Espera unos segundos e inténtalo de nuevo.",
+        "serviceUnavailable": "Servicio de IA no disponible. Contacta al administrador."
+      }
+    }
+  },
+  "planning": {
+    "title": "Planificación mensual",
+    "generate": "Generar Planificación",
+    "generateModalTitle": "Generar planificación mensual",
+    "generating": "Generando planificación…",
+    "convert": "Convertir en tarea",
+    "converting": "Convirtiendo…",
+    "reject": "Rechazar",
+    "rejected": "Elemento rechazado. Deshacer",
+    "undo": "Deshacer",
+    "redesign": "Rediseñar",
+    "applyRedesign": "Aplicar",
+    "applyingRedesign": "Aplicando…",
+    "redesignPlaceholder": "Describe lo que deseas cambiar (tono, ángulo, formato…)",
+    "redesignEmpty": "Describe lo que deseas cambiar antes de aplicar.",
+    "bulkConvert": "Convertir {{count}} seleccionados",
+    "bulkCount": "{{count}} seleccionados",
+    "bulkConvertSuccess": "{{count}} tareas creadas.",
+    "viewDemands": "Ver tareas",
+    "openFromWidget": "Ver planificación",
+    "allClients": "Todos los clientes",
+    "filterPlaceholder": "Selecciona un cliente",
+    "noQuotaWarning": "Configura el plan mensual del cliente para generar la planificación.",
+    "convertError": "No se pudo convertir este elemento en una tarea. Intenta de nuevo.",
+    "empty": {
+      "noClientSelected": {
+        "heading": "Selecciona un cliente para ver sus planificaciones",
+        "body": "Las planificaciones se generan por cliente y mes. Usa el filtro de arriba."
+      },
+      "noPlans": {
+        "heading": "Aún no hay planificación para {{clientName}}",
+        "body": "Genera una planificación mensual y la IA sugerirá contenidos para cubrir la cuota del cliente."
+      },
+      "noQuota": {
+        "heading": "Configura el plan mensual de este cliente",
+        "body": "Ve a Clientes, edita \"{{clientName}}\" y define \"Publicaciones por mes\" para generar planificaciones.",
+        "cta": "Editar cliente"
+      }
+    },
+    "reminder": {
+      "title": "Hora de planificar: {{clientName}}",
+      "dueTomorrow": "La planificación mensual de {{clientName}} vence mañana.",
+      "dueToday": "La planificación mensual de {{clientName}} vence hoy.",
+      "overdue": "La planificación mensual de {{clientName}} venció hace {{days}} días.",
+      "moreClients": "+{{count}} más"
+    }
+  },
   "demand": {
     "statuses": { "todo": "Por hacer", "in_progress": "En progreso", "awaiting_feedback": "Esperando feedback", "in_review": "En revisión", "approved": "Aprobado" },
     "types": { "demand": "Demanda", "planning": "Planificación" }
@@ -22,7 +108,29 @@
     "avatar": "Avatar",
     "demandsCount": "{{count}} demanda",
     "demandsCount_other": "{{count}} demandas",
-    "confirmDelete": "¿Está seguro de que desea eliminar este cliente?"
+    "confirmDelete": "¿Está seguro de que desea eliminar este cliente?",
+    "monthlyPlan": {
+      "sectionTitle": "Plan de Contenido Mensual",
+      "sectionSubtitle": "Configura la cuota mensual para generar planificaciones con IA. Opcional.",
+      "monthlyPostsLabel": "Publicaciones por mes",
+      "monthlyPostsPlaceholder": "Ej: 20",
+      "monthlyPostsHint": "Total de contenidos que se planificarán por mes.",
+      "monthlyPostsRange": "Usa un valor entre 0 y 200.",
+      "notesLabel": "Distribución por canal (opcional)",
+      "notesPlaceholder": "Ej: 8 Instagram, 5 LinkedIn, 7 Facebook",
+      "notesHint": "Campo libre. La IA considerará esta distribución al generar la planificación.",
+      "planningDayLabel": "Día de planificación",
+      "planningDayPlaceholder": "Ej: 25",
+      "planningDayHint": "Día del mes en que sueles hacer la planificación. Un recordatorio aparecerá en el panel un día antes.",
+      "planningDayRange": "Usa un día entre 1 y 31.",
+      "knowWithAi": "🤖 Conocer este cliente con IA",
+      "knowWithAiDisabledTooltip": "Configura tu clave Anthropic en Configuración → IA para habilitar la investigación automática.",
+      "knowWithAiStarted": "Investigación iniciada. Síguelo en la tarjeta del cliente.",
+      "researchingBadge": "🔍 Investigando — ~{{minutes}} min restantes"
+    },
+    "badges": {
+      "postsPerMonth": "{{count}} publicaciones/mes"
+    }
   },
   "settings": {
     "ai": {
