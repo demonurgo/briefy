@@ -1,4 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { formatDate } from '@/utils/date';
 import { useEffect, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
@@ -96,7 +97,7 @@ function DemandCard({ demand, isDragging = false, onDemandClick, loadingId }: { 
         {demand.deadline && (
           <span className="flex items-center gap-1 text-xs text-[#9ca3af]">
             <Calendar size={11} />
-            {new Date(demand.deadline).toLocaleDateString('pt-BR')}
+            {formatDate(demand.deadline)}
           </span>
         )}
         {demand.assignee && (

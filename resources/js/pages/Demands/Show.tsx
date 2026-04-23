@@ -1,4 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { formatDate } from '@/utils/date';
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
@@ -189,7 +190,7 @@ export default function DemandsShow({ demand, isAdmin }: { demand: Demand; isAdm
                 <div className="flex items-center justify-between">
                   <span className="text-[#9ca3af]">{t('demands.deadline')}</span>
                   <span className="font-medium text-[#111827] dark:text-[#f9fafb]">
-                    {new Date(demand.deadline).toLocaleDateString('pt-BR')}
+                    {formatDate(demand.deadline)}
                   </span>
                 </div>
               )}

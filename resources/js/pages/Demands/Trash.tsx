@@ -1,4 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { formatDate } from '@/utils/date';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { RotateCcw, Trash2 } from 'lucide-react';
@@ -72,7 +73,7 @@ export default function DemandsTrash({ demands }: Props) {
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-[#9ca3af]">
                       {d.client && <span>{d.client.name}</span>}
                       {d.channel && <><span>·</span><span className="capitalize">{d.channel}</span></>}
-                      {d.deadline && <><span>·</span><span>{new Date(d.deadline).toLocaleDateString('pt-BR')}</span></>}
+                      {d.deadline && <><span>·</span><span>{formatDate(d.deadline)}</span></>}
                     </div>
                   </div>
                   <span className={`shrink-0 text-xs font-medium ${urgent ? 'text-red-500' : 'text-[#9ca3af]'}`}>

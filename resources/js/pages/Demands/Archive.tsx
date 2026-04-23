@@ -1,4 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { formatDate } from '@/utils/date';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
@@ -99,7 +100,7 @@ export default function DemandsArchive({ demands, clients, filters }: Props) {
                   <div className="mt-0.5 flex items-center gap-2 text-xs text-[#9ca3af]">
                     {d.client && <span>{d.client.name}</span>}
                     {d.assignee && <><span>·</span><span>{d.assignee.name}</span></>}
-                    {d.deadline && <><span>·</span><span>{new Date(d.deadline).toLocaleDateString('pt-BR')}</span></>}
+                    {d.deadline && <><span>·</span><span>{formatDate(d.deadline)}</span></>}
                   </div>
                 </div>
                 {d.channel && (

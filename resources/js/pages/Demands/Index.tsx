@@ -1,4 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { formatDate } from '@/utils/date';
 import { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
@@ -167,7 +168,7 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
                   <td className="hidden px-4 py-3 text-[#6b7280] sm:table-cell">{d.client?.name ?? '—'}</td>
                   <td className="px-4 py-3"><StatusBadge status={d.status} /></td>
                   <td className="hidden px-4 py-3 text-[#6b7280] md:table-cell">
-                    {d.deadline ? new Date(d.deadline).toLocaleDateString('pt-BR') : <span className="text-[#d1d5db]">{t('demands.noDeadline')}</span>}
+                    {d.deadline ? formatDate(d.deadline) : <span className="text-[#d1d5db]">{t('demands.noDeadline')}</span>}
                   </td>
                   <td className="hidden px-4 py-3 text-[#6b7280] lg:table-cell">{d.assignee?.name ?? '—'}</td>
                 </tr>
