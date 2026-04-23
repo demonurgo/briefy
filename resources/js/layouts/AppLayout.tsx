@@ -108,7 +108,7 @@ export default function AppLayout({ children, title, actions }: Props) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f9fafb] dark:bg-[#0b0f14]">
+    <div className="flex min-h-screen bg-[#f9fafb] dark:bg-[#0b0f14]" style={{ minHeight: '540px', minWidth: '360px' }}>
       <Sidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(v => !v)} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
