@@ -15,6 +15,10 @@ export default function ClientsCreate() {
     brand_references: '',
     briefing: '',
     avatar: null as File | null,
+    monthly_posts: null as number | null,
+    monthly_plan_notes: '',
+    planning_day: null as number | null,
+    social_handles: {} as Record<string, string>,
   });
 
   const submit = (e: React.FormEvent) => {
@@ -35,6 +39,7 @@ export default function ClientsCreate() {
             onSubmit={submit}
             submitLabel={t('common.create')}
             onCancel={() => router.visit(route('clients.index'))}
+            isEditMode={false}
           />
         </div>
       </div>

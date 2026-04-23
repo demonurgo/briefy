@@ -1,6 +1,8 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
+import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import InputError from '@/Components/InputError';
+import { AiIcon } from '@/Components/AiIcon';
 
 const CHANNELS = ['instagram', 'facebook', 'linkedin', 'tiktok', 'twitter', 'youtube', 'email', 'whatsapp', 'website'];
 
@@ -17,6 +19,11 @@ interface FormData {
   brand_references: string;
   briefing: string;
   avatar: File | null;
+  // Phase 3 — monthly plan + social handles
+  monthly_posts?: number | null;
+  monthly_plan_notes?: string;
+  planning_day?: number | null;
+  social_handles?: Record<string, string>;
 }
 
 interface Props {
@@ -27,16 +34,31 @@ interface Props {
   onSubmit: (e: React.FormEvent) => void;
   submitLabel: string;
   onCancel: () => void;
+  /** Pass the full client object in edit mode so the MA launch button can use the id */
+  client?: { id: number } | null;
+  isEditMode?: boolean;
 }
 
-export function ClientForm({ data, errors, processing, setData, onSubmit, submitLabel, onCancel }: Props) {
+export function ClientForm({ data, errors, processing, setData, onSubmit, submitLabel, onCancel, client, isEditMode = false }: Props) {
   const { t } = useTranslation();
+  const page = usePage<any>();
 
   const toggleChannel = (channel: string) => {
     const channels = data.channels.includes(channel)
       ? data.channels.filter(c => c !== channel)
       : [...data.channels, channel];
     setData('channels', channels);
+  };
+
+  const hasKey: boolean = page.props.auth?.organization?.has_anthropic_key ?? false;
+  const hasSources: boolean = Object.values(data.social_handles ?? {}).some(Boolean);
+  const maDisabled = !hasKey || !hasSources;
+
+  const handleLaunch = () => {
+    if (!client?.id) return;
+    router.post(route('clients.research.launch', client.id), {}, {
+      preserveScroll: true,
+    });
   };
 
   return (
@@ -144,6 +166,98 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
         />
         <InputError message={errors.avatar} className="mt-1.5" />
       </div>
+
+      {/* === Plano de Conteúdo Mensal — D-16/D-17 === */}
+      <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] pt-6 mt-6">
+        <h3 className="mb-1 text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">
+          {t('clients.monthlyPlan.sectionTitle')}
+        </h3>
+        <p className="mb-4 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.sectionSubtitle')}</p>
+
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>{t('clients.monthlyPlan.monthlyPostsLabel')}</label>
+            <input
+              type="number" min={0} max={200} step={1}
+              value={data.monthly_posts ?? ''}
+              onChange={e => setData('monthly_posts', e.target.value === '' ? null : Number(e.target.value))}
+              placeholder={t('clients.monthlyPlan.monthlyPostsPlaceholder')}
+              className={inputClass}
+            />
+            <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.monthlyPostsHint')}</p>
+            <InputError message={errors.monthly_posts} className="mt-1.5" />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('clients.monthlyPlan.notesLabel')}</label>
+            <textarea
+              rows={3}
+              value={data.monthly_plan_notes ?? ''}
+              onChange={e => setData('monthly_plan_notes', e.target.value)}
+              placeholder={t('clients.monthlyPlan.notesPlaceholder')}
+              className={textareaClass}
+            />
+            <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.notesHint')}</p>
+            <InputError message={errors.monthly_plan_notes} className="mt-1.5" />
+          </div>
+
+          <div>
+            <label className={labelClass}>{t('clients.monthlyPlan.planningDayLabel')}</label>
+            <input
+              type="number" min={1} max={31} step={1}
+              value={data.planning_day ?? ''}
+              onChange={e => setData('planning_day', e.target.value === '' ? null : Number(e.target.value))}
+              placeholder={t('clients.monthlyPlan.planningDayPlaceholder')}
+              className={`${inputClass} max-w-[120px]`}
+            />
+            <p className="mt-1 text-xs text-[#9ca3af]">{t('clients.monthlyPlan.planningDayHint')}</p>
+            <InputError message={errors.planning_day} className="mt-1.5" />
+          </div>
+        </div>
+      </div>
+
+      {/* === Presença Digital / Social handles (for "Conhecer com IA") === */}
+      <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] pt-6 mt-6">
+        <h3 className="mb-1 text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">
+          {t('clients.socialHandles.title', 'Presença Digital')}
+        </h3>
+        <p className="mb-4 text-xs text-[#9ca3af]">
+          {t('clients.socialHandles.subtitle', 'Usados pela IA ao pesquisar o cliente. Pelo menos um é necessário para ativar a pesquisa automática.')}
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {(['website', 'instagram', 'linkedin', 'facebook', 'tiktok'] as const).map(platform => (
+            <div key={platform}>
+              <label className={labelClass}>{platform}</label>
+              <input
+                type="text"
+                value={data.social_handles?.[platform] ?? ''}
+                onChange={e => setData('social_handles', { ...(data.social_handles ?? {}), [platform]: e.target.value })}
+                placeholder={platform === 'website' ? 'https://exemplo.com.br' : '@nome'}
+                className={inputClass}
+              />
+            </div>
+          ))}
+        </div>
+        <InputError message={errors.social_handles} className="mt-1.5" />
+      </div>
+
+      {/* === "🤖 Conhecer este cliente com IA" — only in edit mode + only when social_handles has something === */}
+      {isEditMode && (
+        <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] pt-6 mt-6">
+          <button
+            type="button"
+            onClick={handleLaunch}
+            disabled={maDisabled}
+            title={maDisabled ? (hasKey ? 'Adicione pelo menos um social handle ou website.' : t('clients.monthlyPlan.knowWithAiDisabledTooltip')) : undefined}
+            className="inline-flex items-center gap-2 rounded-[8px] border border-[#7c3aed] px-4 py-2 text-sm font-medium text-[#7c3aed] hover:bg-[#7c3aed]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <AiIcon size={16} />
+            {t('clients.monthlyPlan.knowWithAi')}
+          </button>
+          <p className="mt-2 text-xs text-[#9ca3af]">A pesquisa leva 20-40 min e popula a memória do cliente automaticamente.</p>
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
