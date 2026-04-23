@@ -67,7 +67,7 @@
 |-------|----------------|--------|-----------|
 | 3. AI Integration | 13/13 | Complete | 2026-04-22 |
 | 4. Team Management | 8/8 | Complete | 2026-04-23 |
-| 5. Dashboard + Onboarding | 0/? | Not started | - |
+| 5. Dashboard + Onboarding | 0/5 | Not started | - |
 
 ---
 
@@ -138,7 +138,13 @@ Plans:
   3. Any user sees a personal summary card showing their own assigned demands counted by status
   4. Dashboard displays a recent activity feed showing the last 10–15 demand actions (status changes, comments, assignments) across the organization
   5. A first-time user with no clients or demands sees an onboarding checklist guiding them through: add a client, create a first demand — and can dismiss or mark it complete at any step
-**Plans:** TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 05-00-PLAN.md — Wave 0: migrations (activity_logs + priority) + migrate + recharts install + test scaffolds RED
+- [ ] 05-01-PLAN.md — DashboardController completo + ActivityLog model + preferences route fix (BLOCKER-02)
+- [ ] 05-02-PLAN.md — DemandObserver + ClientObserver + AppServiceProvider (activity logging)
+- [ ] 05-03-PLAN.md — Componentes React: DashboardStatusCard, DashboardSectionCard, ActivityFeed, OnboardingChecklist
+- [ ] 05-04-PLAN.md — Dashboard.tsx completo (view pessoal + view gerencial + charts Recharts)
 **UI hint:** yes
 
 ---
@@ -179,4 +185,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-23 — Phase 4 redefined as Team Management (roles, invites, profiles); Real-time deferred to v1.2; Phase 4 planned with 8 plans*
+*Last updated: 2026-04-23 — Phase 5 planned with 5 plans (Wave 0 + 4 feature plans in 2 waves)*
