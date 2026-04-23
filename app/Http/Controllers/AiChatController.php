@@ -26,7 +26,7 @@ class AiChatController extends Controller
         $this->authorizeDemand($demand);
 
         $conversation = AiConversation::create([
-            'organization_id' => auth()->user()->organization_id,
+            'organization_id' => auth()->user()->current_organization_id,
             'user_id'         => auth()->id(),
             'context_type'    => 'demand',
             'context_id'      => $demand->id,
@@ -54,7 +54,7 @@ class AiChatController extends Controller
 
         // T-03-40: triple-check demand + conversation scoping before any write.
         abort_if(
-            $conversation->organization_id !== auth()->user()->organization_id
+            $conversation->organization_id !== auth()->user()->current_organization_id
             || $conversation->context_type !== 'demand'
             || $conversation->context_id !== $demand->id,
             403,
@@ -80,6 +80,6 @@ class AiChatController extends Controller
 
     private function authorizeDemand(Demand $demand): void
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
     }
 }

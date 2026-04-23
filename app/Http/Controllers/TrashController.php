@@ -13,7 +13,7 @@ class TrashController extends Controller
     /** GET /lixeira */
     public function index(Request $request): Response
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
 
         $demands = Demand::onlyTrashed()
             ->where('organization_id', $orgId)
@@ -40,7 +40,7 @@ class TrashController extends Controller
     /** POST /demands/{demand}/trash — soft delete (move to trash) */
     public function trash(Demand $demand): RedirectResponse
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
         $demand->delete();
         return back()->with('success', 'Demanda movida para a lixeira.');
     }
@@ -49,7 +49,7 @@ class TrashController extends Controller
     public function restore(int $id): RedirectResponse
     {
         $demand = Demand::onlyTrashed()
-            ->where('organization_id', auth()->user()->organization_id)
+            ->where('organization_id', auth()->user()->current_organization_id)
             ->findOrFail($id);
         $demand->restore();
         return back()->with('success', 'Demanda restaurada.');
@@ -60,7 +60,7 @@ class TrashController extends Controller
     {
         abort_unless(auth()->user()->isAdmin(), 403);
         $demand = Demand::onlyTrashed()
-            ->where('organization_id', auth()->user()->organization_id)
+            ->where('organization_id', auth()->user()->current_organization_id)
             ->findOrFail($id);
         $demand->files->each(fn ($f) => \Storage::disk('public')->delete($f->path_or_url));
         $demand->forceDelete();

@@ -58,6 +58,6 @@ class AiBriefController extends Controller
 
     private function authorizeDemand(Demand $demand): void
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
     }
 }

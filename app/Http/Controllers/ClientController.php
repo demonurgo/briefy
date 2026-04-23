@@ -15,7 +15,7 @@ class ClientController extends Controller
 {
     public function index(Request $request): Response
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
 
         $clients = Client::where('organization_id', $orgId)
             ->withCount('demands')
@@ -57,7 +57,7 @@ class ClientController extends Controller
     public function store(StoreClientRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $data['organization_id'] = auth()->user()->organization_id;
+        $data['organization_id'] = auth()->user()->current_organization_id;
 
         if ($request->hasFile('avatar')) {
             $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
@@ -147,6 +147,6 @@ class ClientController extends Controller
 
     private function authorizeClient(Client $client): void
     {
-        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($client->organization_id !== auth()->user()->current_organization_id, 403);
     }
 }

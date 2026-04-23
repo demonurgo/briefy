@@ -33,11 +33,11 @@ class AiUsageMeter
 
         try {
             $user = $request->user();
-            if (! $user || ! $user->organization_id) {
+            if (! $user || ! $user->current_organization_id) {
                 return $response;
             }
 
-            $orgId = (int) $user->organization_id;
+            $orgId = (int) $user->current_organization_id;
             $date  = now()->format('Y-m-d');
             $key   = "ai:http_calls:{$orgId}:{$date}";
 

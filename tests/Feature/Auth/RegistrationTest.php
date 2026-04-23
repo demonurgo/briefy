@@ -25,9 +25,15 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard'));
         $user = User::where('email', 'test@example.com')->first();
-        $this->assertNotNull($user->organization_id);
-        $this->assertSame('admin', $user->role);
-        $org = Organization::find($user->organization_id);
+        $this->assertNotNull($user->current_organization_id);
+        $this->assertSame('owner', $user->role);
+        // Verify pivot row was created
+        $this->assertDatabaseHas('organization_user', [
+            'user_id'         => $user->id,
+            'organization_id' => $user->current_organization_id,
+            'role'            => 'owner',
+        ]);
+        $org = Organization::find($user->current_organization_id);
         $this->assertArrayHasKey('auto_analyze_deliverable', $org->settings);
     }
 

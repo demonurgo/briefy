@@ -33,24 +33,38 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
 
+        // Eager-load organizations once per request to avoid N+1 in the map below.
+        if ($user && ! $user->relationLoaded('organizations')) {
+            $user->load('organizations');
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->role,
+                    'avatar' => $user->avatar,
+                    'role' => $user->getCurrentRoleAttribute(),
                     'preferences' => $user->preferences,
-                    'organization' => $user->organization ? array_merge(
-                        $user->organization->only(['id', 'name', 'slug', 'logo']),
+                    'current_organization_id' => $user->current_organization_id,
+                    'organization' => $user->currentOrganization ? array_merge(
+                        $user->currentOrganization->only(['id', 'name', 'slug', 'logo']),
                         [
-                            'has_anthropic_key'       => $user->organization->hasAnthropicKey(),
-                            'anthropic_api_key_mask'  => $user->organization->anthropic_api_key_mask,
-                            'key_valid'               => (bool) ($user->organization->anthropic_key_valid ?? false),          // M3
-                            'managed_agents_enabled'  => (bool) ($user->organization->anthropic_managed_agents_ok ?? false),  // M3
-                            'last_key_check_at'       => optional($user->organization->anthropic_key_checked_at)->toIso8601String(), // M3
+                            'has_anthropic_key'       => $user->currentOrganization->hasAnthropicKey(),
+                            'anthropic_api_key_mask'  => $user->currentOrganization->anthropic_api_key_mask,
+                            'key_valid'               => (bool) ($user->currentOrganization->anthropic_key_valid ?? false),          // M3
+                            'managed_agents_enabled'  => (bool) ($user->currentOrganization->anthropic_managed_agents_ok ?? false),  // M3
+                            'last_key_check_at'       => optional($user->currentOrganization->anthropic_key_checked_at)->toIso8601String(), // M3
                         ]
                     ) : null,
+                    'organizations' => $user->organizations->map(fn ($o) => [
+                        'id'   => $o->id,
+                        'name' => $o->name,
+                        'slug' => $o->slug,
+                        'logo' => $o->logo,
+                        'role' => $o->pivot->role,
+                    ]),
                 ] : null,
             ],
             'locale' => $user?->getLocale() ?? 'pt-BR',
@@ -62,10 +76,10 @@ class HandleInertiaRequests extends Middleware
                 ? BriefyNotification::where('user_id', $user->id)->whereNull('read_at')->count()
                 : 0,
             'trash_count' => $user
-                ? \App\Models\Demand::onlyTrashed()->where('organization_id', $user->organization_id)->count()
+                ? \App\Models\Demand::onlyTrashed()->where('organization_id', $user->current_organization_id)->count()
                 : 0,
             'archive_count' => $user
-                ? \App\Models\Demand::where('organization_id', $user->organization_id)->whereNotNull('archived_at')->count()
+                ? \App\Models\Demand::where('organization_id', $user->current_organization_id)->whereNotNull('archived_at')->count()
                 : 0,
         ]);
     }

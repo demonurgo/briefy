@@ -6,6 +6,7 @@ use App\Http\Requests\RedesignItemRequest;
 use App\Jobs\GenerateMonthlyPlanJob;
 use App\Models\Client;
 use App\Models\Demand;
+use App\Models\Organization;
 use App\Models\PlanningSuggestion;
 use App\Services\Ai\AnthropicClientFactory;
 use App\Services\Ai\ItemRedesigner;
@@ -29,7 +30,7 @@ class MonthlyPlanningController extends Controller
     /** GET /planejamento */
     public function index(Request $request): Response
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
 
         $planningDemands = Demand::where('organization_id', $orgId)
             ->where('type', 'planning')
@@ -41,7 +42,8 @@ class MonthlyPlanningController extends Controller
         $clients = Client::where('organization_id', $orgId)->orderBy('name')
             ->get(['id', 'name', 'monthly_posts', 'monthly_plan_notes']);
 
-        $teamMembers = \App\Models\User::where('organization_id', $orgId)->get(['id', 'name']);
+        $org = Organization::find($orgId);
+        $teamMembers = $org ? $org->users()->get(['users.id', 'users.name']) : collect();
 
         return Inertia::render('Planejamento/Index', [
             'plannings'   => $planningDemands,
@@ -62,9 +64,9 @@ class MonthlyPlanningController extends Controller
         ]);
 
         $client = Client::findOrFail($request->client_id);
-        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($client->organization_id !== auth()->user()->current_organization_id, 403);
 
-        $org = auth()->user()->organization;
+        $org = auth()->user()->currentOrganization;
         if (! $org->hasAnthropicKey()) {
             return back()->with('error', __('app.ai_key_missing'));
         }
@@ -77,7 +79,7 @@ class MonthlyPlanningController extends Controller
 
         // Create demand immediately so the user sees it in the list while the job runs.
         $planningDemand = Demand::create([
-            'organization_id' => auth()->user()->organization_id,
+            'organization_id' => auth()->user()->current_organization_id,
             'client_id'       => $client->id,
             'created_by'      => auth()->id(),
             'title'           => "Planejamento {$monthLabel}",
@@ -105,9 +107,9 @@ class MonthlyPlanningController extends Controller
         $this->authorizeSuggestion($suggestion);
         abort_if($suggestion->status !== 'pending', 422, 'Item já foi convertido ou rejeitado.');
 
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
         $request->validate([
-            'assigned_to' => ['nullable', Rule::exists('users', 'id')->where('organization_id', $orgId)],
+            'assigned_to' => ['nullable', Rule::exists('users', 'id')->where('current_organization_id', $orgId)],
         ]);
 
         DB::transaction(function () use ($request, $suggestion) {
@@ -137,11 +139,11 @@ class MonthlyPlanningController extends Controller
     /** POST /planning-suggestions/convert-bulk */
     public function convertBulk(Request $request): RedirectResponse
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
         $request->validate([
             'ids'         => ['required', 'array', 'min:1', 'max:100'],
             'ids.*'       => ['integer', 'exists:planning_suggestions,id'],
-            'assigned_to' => ['nullable', Rule::exists('users', 'id')->where('organization_id', $orgId)],
+            'assigned_to' => ['nullable', Rule::exists('users', 'id')->where('current_organization_id', $orgId)],
         ]);
 
         $count = 0;
@@ -149,7 +151,7 @@ class MonthlyPlanningController extends Controller
             $suggestions = PlanningSuggestion::whereIn('id', $request->ids)
                 ->with('demand')->get();
             foreach ($suggestions as $s) {
-                if ($s->demand->organization_id !== auth()->user()->organization_id) continue;
+                if ($s->demand->organization_id !== auth()->user()->current_organization_id) continue;
                 if ($s->status !== 'pending') continue;
                 $new = Demand::create([
                     'organization_id' => $s->demand->organization_id,
@@ -176,7 +178,7 @@ class MonthlyPlanningController extends Controller
     public function redesign(RedesignItemRequest $request, PlanningSuggestion $suggestion): JsonResponse|RedirectResponse
     {
         $this->authorizeSuggestion($suggestion);
-        $org = auth()->user()->organization;
+        $org = auth()->user()->currentOrganization;
         if (! $org->hasAnthropicKey()) {
             return response()->json(['ok' => false, 'message' => __('app.ai_key_missing')], 422);
         }
@@ -225,7 +227,7 @@ class MonthlyPlanningController extends Controller
     {
         $request->validate(['client_id' => ['required', 'integer', 'exists:clients,id']]);
         $client = Client::findOrFail($request->client_id);
-        abort_if($client->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($client->organization_id !== auth()->user()->current_organization_id, 403);
 
         $posts = (int) $client->monthly_posts;
         $cost = $estimator->monthlyPlan($posts);
@@ -240,14 +242,14 @@ class MonthlyPlanningController extends Controller
     /** POST /planejamento/{demand}/regenerate */
     public function regenerate(Request $request, Demand $demand): RedirectResponse
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
         abort_if($demand->type !== 'planning', 422);
 
         $request->validate([
             'instructions' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $org = auth()->user()->organization;
+        $org = auth()->user()->currentOrganization;
         if (! $org->hasAnthropicKey()) {
             return back()->with('error', __('app.ai_key_missing'));
         }
@@ -281,7 +283,7 @@ class MonthlyPlanningController extends Controller
     /** DELETE /planejamento/{demand} */
     public function destroyPlan(Demand $demand): RedirectResponse
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
         abort_if($demand->type !== 'planning', 422);
 
         $demand->planningSuggestions()->delete();
@@ -293,7 +295,7 @@ class MonthlyPlanningController extends Controller
     private function authorizeSuggestion(PlanningSuggestion $suggestion): void
     {
         abort_if(
-            $suggestion->demand->organization_id !== auth()->user()->organization_id,
+            $suggestion->demand->organization_id !== auth()->user()->current_organization_id,
             403,
         );
     }

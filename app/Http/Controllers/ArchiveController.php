@@ -13,7 +13,7 @@ class ArchiveController extends Controller
     /** GET /concluidas */
     public function index(Request $request): Response
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
 
         $demands = Demand::where('organization_id', $orgId)
             ->whereNotNull('archived_at')
@@ -45,7 +45,7 @@ class ArchiveController extends Controller
     /** POST /demands/{demand}/archive */
     public function archive(Demand $demand): RedirectResponse
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
         $demand->update(['archived_at' => now()]);
         return back()->with('success', 'Demanda arquivada.');
     }
@@ -53,7 +53,7 @@ class ArchiveController extends Controller
     /** POST /concluidas/{demand}/unarchive */
     public function unarchive(Demand $demand): RedirectResponse
     {
-        abort_if($demand->organization_id !== auth()->user()->organization_id, 403);
+        abort_if($demand->organization_id !== auth()->user()->current_organization_id, 403);
         $demand->update(['archived_at' => null]);
         return back()->with('success', 'Demanda movida de volta para o kanban.');
     }

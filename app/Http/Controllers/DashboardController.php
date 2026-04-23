@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        $orgId = auth()->user()->organization_id;
+        $orgId = auth()->user()->current_organization_id;
 
         $planningReminderClients = Client::where('organization_id', $orgId)
             ->whereNotNull('planning_day')
