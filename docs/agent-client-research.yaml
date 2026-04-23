@@ -64,7 +64,8 @@ system: |-
 tools:
   - type: agent_toolset_20260401
 
-  - name: record_insights
+  - type: custom
+    name: record_insights
     description: >
       Call this tool ONCE when you have finished your research and
       collected 10-15 insights. Pass the complete insights array.
