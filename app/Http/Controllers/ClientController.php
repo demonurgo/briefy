@@ -31,10 +31,14 @@ class ClientController extends Controller
                         'id'     => $latest->id,
                         'status' => $latest->status,
                         'started_at' => optional($latest->started_at)->toIso8601String(),
-                        // Heuristic: 30-min target; remaining = max(0, 30 - elapsed)
                         'estimated_remaining_minutes' => $latest->started_at
                             ? max(0, 30 - (int) $latest->started_at->diffInMinutes(now()))
                             : 30,
+                    ] : null,
+                    'latest_research' => $latest ? [
+                        'id'           => $latest->id,
+                        'status'       => $latest->status,
+                        'completed_at' => optional($latest->completed_at)->toIso8601String(),
                     ] : null,
                 ]);
             });
@@ -74,9 +78,21 @@ class ClientController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        $sessions = $client->researchSessions()
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn ($s) => [
+                'id'           => $s->id,
+                'status'       => $s->status,
+                'started_at'   => optional($s->started_at)->toIso8601String(),
+                'completed_at' => optional($s->completed_at)->toIso8601String(),
+                'progress_summary' => $s->progress_summary,
+            ]);
+
         return Inertia::render('Clients/Show', [
-            'client'  => $client,
-            'demands' => $demands,
+            'client'   => $client,
+            'demands'  => $demands,
+            'sessions' => $sessions,
         ]);
     }
 
