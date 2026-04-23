@@ -109,6 +109,7 @@ class ClientController extends Controller
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse
     {
         $this->authorizeClient($client);
+        abort_unless(auth()->user()->isAdminOrOwner(), 403, 'Apenas admins podem editar clientes.');
         $data = $request->validated();
 
         if ($request->hasFile('avatar')) {
@@ -138,6 +139,7 @@ class ClientController extends Controller
     public function destroy(Client $client): RedirectResponse
     {
         $this->authorizeClient($client);
+        abort_unless(auth()->user()->isAdminOrOwner(), 403, 'Apenas admins podem excluir clientes.');
         if ($client->avatar) Storage::disk('public')->delete($client->avatar);
         $client->delete();
 
