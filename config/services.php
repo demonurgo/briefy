@@ -44,4 +44,10 @@ return [
         'model_cheap'      => env('ANTHROPIC_MODEL_CHEAP',   'claude-haiku-4-5'),
     ],
 
+    'otel' => [
+        'enabled'      => env('OTEL_EXPORTER_OTLP_ENDPOINT') !== null && extension_loaded('curl'),
+        'endpoint'     => env('OTEL_EXPORTER_OTLP_ENDPOINT'),
+        'service_name' => env('OTEL_SERVICE_NAME', 'briefy-ai'),
+    ],
+
 ];
