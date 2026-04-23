@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.1
+milestone_name: — AI + Real-time + Dashboard
+status: executing
+stopped_at: Completed 03-07-PLAN.md (Memory extraction + compaction) — Plan 08 next
+last_updated: "2026-04-23T02:34:00Z"
+last_activity: 2026-04-23 — Plan 07 (Memory extraction + compaction) complete
+progress:
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 14
+  completed_plans: 8
+  percent: 57
+---
+
 # Project State
 
 ## Project Reference
@@ -10,15 +26,16 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 3 — AI Integration
-Plan: 03-07 (Plans 01, 04, 05, 06 complete)
+Plan: 03-08 (Plans 01, 04, 05, 06, 07 complete)
 Status: In progress
-Last activity: 2026-04-23 — Plan 06 (Monthly plan generation) complete
+Last activity: 2026-04-23 — Plan 07 (Memory extraction + compaction) complete
 
-Progress: [████░░░░░░] 42% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
+Progress: [█████░░░░░] 57% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: ~12 (estimated, phases 1-2)
 - v1.0 phases: 2 phases shipped
 
@@ -51,7 +68,12 @@ Progress: [████░░░░░░] 42% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 Chat: ChatStreamer is NOT final — allows anonymous test double subclasses
 - v1.1 Chat: Two-block system prompt — stable cached prefix (ephemeral) + volatile comments tail outside cache (80% cache hits on turns 2..N)
 - v1.1 Chat: User message persisted BEFORE eventStream() opens — survives client disconnect (AI-SPEC pattern b)
-- v1.1 Chat: Job stubs (ExtractClientMemoryJob, CompactConversationJob) in app/Jobs/ — dispatch() works, full impl Plan 07
+- v1.1 Chat: Job stubs (ExtractClientMemoryJob, CompactConversationJob) in app/Jobs/ — dispatch() works, full impl Plan 07 (DONE)
+- v1.1 Memory: ClientMemoryExtractor NOT final — anonymous subclass test doubles; accepts AnthropicClientInterface (BYOK pattern)
+- v1.1 Memory: 4-gate pipeline — schema, confidence ≥0.6, PII scrub (CPF/CNPJ/email/BR phone), idempotent upsert by insight_hash
+- v1.1 Memory: client_id for upsert always from $demand->client — never from tool output (T-03-62)
+- v1.1 Memory: CompactConversationJob re-checks threshold before acting (guard against double-dispatch)
+- v1.1 Memory: AiConversation.organization() BelongsTo added (was missing, needed by jobs for BYOK key resolution)
 - v1.1 Testing: pgsql-schema.sql must be non-empty for RefreshDatabase to load test DB — regenerate with php artisan schema:dump
 - v1.1 Planning: MonthlyPlanGenerator + ItemRedesigner accept AnthropicClientInterface (not \Anthropic\Client) — consistent H5 pattern
 - v1.1 Planning: MonthlyPlanSchema toolSchema() enforces minItems/maxItems=$expectedCount — two-gate validation with Laravel validator rules
@@ -85,5 +107,5 @@ Progress: [████░░░░░░] 42% (v1.0 complete: 2/5 phases; v1.1 
 ## Session Continuity
 
 Last session: 2026-04-23
-Stopped at: Completed 03-06-PLAN.md (Monthly plan generation) — Plan 07 (Memory extraction + compaction jobs) is next
+Stopped at: Completed 03-07-PLAN.md (Memory extraction + compaction) — Plan 08 next
 Resume file: None

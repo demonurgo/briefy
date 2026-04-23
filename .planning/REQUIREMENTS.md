@@ -14,7 +14,7 @@ Requirements for milestone v1.1 (AI + Real-time + Dashboard). Continues from v1.
 - [ ] **AI-03**: User can regenerate the AI brief with a one-click action
 - [x] **AI-04**: User can chat with an AI assistant within a demand, asking questions and receiving contextual responses
 - [x] **AI-05**: AI chat has access to full demand context (metadata, files list, past comments) as system prompt
-- [ ] **AI-06**: AI stores and retrieves client-specific memory (preferences, tone, past patterns) per organization via the existing `ai_memory` table
+- [x] **AI-06**: AI stores and retrieves client-specific memory (preferences, tone, past patterns) per organization via the existing `ai_memory` table
 - [x] **AI-07**: AI responses stream progressively (character by character) instead of appearing all at once
 
 ### Monthly Planning (AI)
