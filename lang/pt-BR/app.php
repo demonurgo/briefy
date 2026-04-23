@@ -30,6 +30,7 @@ return [
     'ai_stream_failed'   => 'A geração do brief foi interrompida. Tente novamente.',
     'ai_key_missing'     => 'Configure sua chave Anthropic em Configurações → IA.',
     'ai_chat_stream_failed' => 'A resposta foi interrompida. Envie sua mensagem novamente.',
+    'planning_generating'         => 'Planejamento sendo gerado em background. Você receberá uma notificação quando estiver pronto.',
     'planning_generated'          => 'Planejamento gerado com sucesso.',
     'planning_generation_failed'  => 'Não foi possível gerar o planejamento. Tente novamente.',
     'planning_converted'          => 'Item convertido em demanda.',

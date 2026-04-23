@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RedesignItemRequest;
+use App\Jobs\GenerateMonthlyPlanJob;
 use App\Models\Client;
 use App\Models\Demand;
 use App\Models\PlanningSuggestion;
@@ -66,41 +67,30 @@ class MonthlyPlanningController extends Controller
             return back()->with('error', __('app.planning_quota_missing'));
         }
 
-        try {
-            $anthropic = $this->clientFactory->forOrganization($org);
-            $plan = $this->generator->generate($client, (int) $request->year, (int) $request->month, $anthropic);
+        $monthLabel = \Carbon\Carbon::create((int) $request->year, (int) $request->month, 1)
+            ->locale('pt-BR')->isoFormat('MMMM YYYY');
 
-            DB::transaction(function () use ($client, $request, $plan) {
-                $monthLabel = \Carbon\Carbon::create((int) $request->year, (int) $request->month, 1)
-                    ->locale('pt-BR')->isoFormat('MMMM YYYY');
+        // Create demand immediately so the user sees it in the list while the job runs.
+        $planningDemand = Demand::create([
+            'organization_id' => auth()->user()->organization_id,
+            'client_id'       => $client->id,
+            'created_by'      => auth()->id(),
+            'title'           => "Planejamento {$monthLabel}",
+            'description'     => $client->monthly_plan_notes ?: null,
+            'type'            => 'planning',
+            'status'          => 'todo',
+            'ai_analysis'     => ['status' => 'generating'],
+        ]);
 
-                $planningDemand = Demand::create([
-                    'organization_id' => auth()->user()->organization_id,
-                    'client_id'       => $client->id,
-                    'created_by'      => auth()->id(),
-                    'title'           => "Planejamento {$monthLabel}",
-                    'description'     => $client->monthly_plan_notes ?: null,
-                    'type'            => 'planning',
-                    'status'          => 'todo',
-                ]);
+        GenerateMonthlyPlanJob::dispatch(
+            $planningDemand->id,
+            $client->id,
+            (int) $request->year,
+            (int) $request->month,
+            auth()->id(),
+        );
 
-                foreach ($plan['items'] as $item) {
-                    PlanningSuggestion::create([
-                        'demand_id'   => $planningDemand->id,
-                        'date'        => $item['date'],
-                        'title'       => $item['title'],
-                        'description' => $item['description'],
-                        'channel'     => $item['channel'],
-                        'status'      => 'pending',
-                    ]);
-                }
-            });
-
-            return back()->with('success', __('app.planning_generated'));
-        } catch (\Throwable $e) {
-            report($e);
-            return back()->with('error', __('app.planning_generation_failed'));
-        }
+        return back()->with('success', __('app.planning_generating'));
     }
 
     /** POST /planning-suggestions/{suggestion}/convert */

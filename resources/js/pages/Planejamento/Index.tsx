@@ -1,5 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
@@ -16,6 +16,7 @@ interface PlanningDemand {
   client: { id: number; name: string };
   created_at: string;
   planning_suggestions: Suggestion[];
+  ai_analysis: { status?: string } | null;
 }
 
 interface ClientLite {
@@ -72,6 +73,14 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
     setLocalSuggestions(prev => ({ ...prev, [next.id]: next }));
   };
   const resolveSuggestion = (s: Suggestion): Suggestion => localSuggestions[s.id] ?? s;
+
+  // --- Auto-poll while any demand is generating ---
+  const hasGenerating = plannings.some(p => p.ai_analysis?.status === 'generating');
+  useEffect(() => {
+    if (!hasGenerating) return;
+    const id = setInterval(() => router.reload({ only: ['plannings'] }), 5000);
+    return () => clearInterval(id);
+  }, [hasGenerating]);
 
   // --- Generation modal state ---
   const [generateOpen, setGenerateOpen] = useState(false);
@@ -131,7 +140,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
   const groups = groupByMonth(plannings);
 
   return (
-    <AppLayout title={t('planning.title')}>
+    <AppLayout>
       <Head title={t('planning.title')} />
 
       {/* Sticky page header */}
@@ -207,9 +216,16 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
                     <span className="text-sm font-medium text-[#6b7280] dark:text-[#9ca3af]">
                       {planning.client.name}
                     </span>
-                    <span className="text-xs text-[#9ca3af] dark:text-[#6b7280]">
-                      · {planning.planning_suggestions.length} {planning.planning_suggestions.length === 1 ? 'item' : 'itens'}
-                    </span>
+                    {planning.ai_analysis?.status === 'generating' ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#7c3aed]/10 px-2 py-0.5 text-[11px] font-medium text-[#7c3aed]">
+                        <AiIcon size={12} variant="dark" spinning />
+                        Gerando com IA...
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[#9ca3af] dark:text-[#6b7280]">
+                        · {planning.planning_suggestions.length} {planning.planning_suggestions.length === 1 ? 'item' : 'itens'}
+                      </span>
+                    )}
                   </div>
                   {/* Cards grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

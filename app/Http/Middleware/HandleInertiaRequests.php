@@ -3,6 +3,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\BriefyNotification;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -57,6 +58,9 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+            'unread_notifications' => $user
+                ? BriefyNotification::where('user_id', $user->id)->whereNull('read_at')->count()
+                : 0,
         ]);
     }
 }

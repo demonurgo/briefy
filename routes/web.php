@@ -98,6 +98,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->middleware(['throttle:3,1', 'ai.meter'])
             ->name('ai.test');
     });
+
+    // Notifications
+    Route::get('/notifications', function () {
+        $notes = \App\Models\BriefyNotification::where('user_id', auth()->id())
+            ->orderByDesc('created_at')->limit(20)->get();
+        return response()->json($notes);
+    })->name('notifications.index');
+    Route::post('/notifications/{notification}/read', function (\App\Models\BriefyNotification $notification) {
+        abort_if($notification->user_id !== auth()->id(), 403);
+        $notification->update(['read_at' => now()]);
+        return response()->json(['ok' => true]);
+    })->name('notifications.read');
+    Route::post('/notifications/read-all', function () {
+        \App\Models\BriefyNotification::where('user_id', auth()->id())
+            ->whereNull('read_at')->update(['read_at' => now()]);
+        return response()->json(['ok' => true]);
+    })->name('notifications.read-all');
 });
 
 require __DIR__.'/auth.php';
