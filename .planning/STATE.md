@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 3 — AI Integration
-Plan: 03-06 (Plans 01, 04, 05 complete)
+Plan: 03-07 (Plans 01, 04, 05, 06 complete)
 Status: In progress
-Last activity: 2026-04-23 — Plan 05 (Chat streaming) complete
+Last activity: 2026-04-23 — Plan 06 (Monthly plan generation) complete
 
-Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
+Progress: [████░░░░░░] 42% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
 
 ## Performance Metrics
 
@@ -53,6 +53,10 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 Chat: User message persisted BEFORE eventStream() opens — survives client disconnect (AI-SPEC pattern b)
 - v1.1 Chat: Job stubs (ExtractClientMemoryJob, CompactConversationJob) in app/Jobs/ — dispatch() works, full impl Plan 07
 - v1.1 Testing: pgsql-schema.sql must be non-empty for RefreshDatabase to load test DB — regenerate with php artisan schema:dump
+- v1.1 Planning: MonthlyPlanGenerator + ItemRedesigner accept AnthropicClientInterface (not \Anthropic\Client) — consistent H5 pattern
+- v1.1 Planning: MonthlyPlanSchema toolSchema() enforces minItems/maxItems=$expectedCount — two-gate validation with Laravel validator rules
+- v1.1 Planning: CostConfirmModal shared component (D-34) at resources/js/Components/CostConfirmModal.tsx — reused by Plan 11 + 12
+- v1.1 Planning: AiIcon component at resources/js/Components/AiIcon.tsx — dark/light SVG pair wrapper for all AI UI (D-15)
 
 ### Pending Todos
 
@@ -81,5 +85,5 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 ## Session Continuity
 
 Last session: 2026-04-23
-Stopped at: Completed 03-05-PLAN.md (Chat streaming) — Plan 06 (Monthly plan generation) is next
+Stopped at: Completed 03-06-PLAN.md (Monthly plan generation) — Plan 07 (Memory extraction + compaction jobs) is next
 Resume file: None

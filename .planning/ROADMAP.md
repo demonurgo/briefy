@@ -43,7 +43,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 3. AI Integration | 3/13 | In progress | - |
+| 3. AI Integration | 4/13 | In progress | - |
 | 4. Real-time Collaboration | 0/? | Not started | - |
 | 5. Dashboard + Onboarding | 0/? | Not started | - |
 
@@ -68,7 +68,7 @@ Plans:
 - [ ] 03-03-PLAN.md - AGPL-3.0 license + per-file headers script + README BYOK + npm deps
 - [x] 03-04-PLAN.md - Brief streaming (AiBriefController + BriefStreamer + inline edit)
 - [x] 03-05-PLAN.md - Chat streaming (AiChatController + ChatStreamer + conversation lifecycle)
-- [ ] 03-06-PLAN.md - Monthly plan generation (Opus 4.7 + tool-use + 7-action controller)
+- [x] 03-06-PLAN.md - Monthly plan generation (Opus 4.7 + tool-use + 7-action controller)
 - [ ] 03-07-PLAN.md - Memory extraction + compaction jobs (Haiku 4.5 + PII + confidence gates)
 - [ ] 03-08-PLAN.md - Shared frontend (AiIcon, useAiStream, useTypewriter, AiMarkdown, i18n)
 - [ ] 03-09-PLAN.md - DemandDetailModal 4-tab refactor + BriefTab + ChatTab
@@ -143,4 +143,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-23 — Plan 03-05 complete (Chat streaming: ChatStreamer + AiChatController + SSE routes + job stubs)*
+*Last updated: 2026-04-23 — Plan 03-06 complete (Monthly plan generation: MonthlyPlanGenerator + 8-action controller + CostEstimator + CostConfirmModal + AiIcon)*
