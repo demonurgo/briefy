@@ -51,9 +51,10 @@ class MonthlyPlanningController extends Controller
     public function generate(Request $request): RedirectResponse
     {
         $request->validate([
-            'client_id' => ['required', 'exists:clients,id'],
-            'year'      => ['required', 'integer', 'min:2024', 'max:2030'],
-            'month'     => ['required', 'integer', 'min:1', 'max:12'],
+            'client_id'    => ['required', 'exists:clients,id'],
+            'year'         => ['required', 'integer', 'min:2024', 'max:2030'],
+            'month'        => ['required', 'integer', 'min:1', 'max:12'],
+            'instructions' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $client = Client::findOrFail($request->client_id);
@@ -88,6 +89,7 @@ class MonthlyPlanningController extends Controller
             (int) $request->year,
             (int) $request->month,
             auth()->id(),
+            $request->input('instructions'),
         );
 
         return back()->with('success', __('app.planning_generating'));

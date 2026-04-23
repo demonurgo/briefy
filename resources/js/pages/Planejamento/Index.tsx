@@ -112,6 +112,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
   const [generateOpen, setGenerateOpen] = useState(false);
   const [genClientId, setGenClientId] = useState<string>(filters.client_id ?? (clients[0]?.id?.toString() ?? ''));
   const [genMonth, setGenMonth] = useState<string>(nextMonthDefault());
+  const [genInstructions, setGenInstructions] = useState('');
   const [generating, setGenerating] = useState(false);
   const [costOpen, setCostOpen] = useState(false);
   const [estimatedCost, setEstimatedCost] = useState<number>(0);
@@ -129,7 +130,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
     const [year, month] = genMonth.split('-');
     router.post(
       route('planejamento.generate'),
-      { client_id: genClientId, year: Number(year), month: Number(month) },
+      { client_id: genClientId, year: Number(year), month: Number(month), instructions: genInstructions || null },
       {
         preserveScroll: true,
         onFinish: () => {
@@ -253,7 +254,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
                       </span>
                     )}
                     <div className="ml-auto flex items-center gap-1.5">
-                      {planning.ai_analysis?.status !== 'generating' && (
+                      {planning.ai_analysis?.status !== 'generating' && planning.planning_suggestions.length > 0 && (
                         <button
                           onClick={() => { setRegenerateTarget(planning); setRegenerateInstructions(''); }}
                           className="inline-flex items-center gap-1 rounded-[7px] border border-[#e5e7eb] dark:border-[#1f2937] px-2.5 py-1 text-xs text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors"
@@ -349,6 +350,20 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
                   value={genMonth}
                   onChange={e => setGenMonth(e.target.value)}
                   className="w-full rounded-[8px] border border-[#e5e7eb] bg-white dark:bg-[#0b0f14] dark:border-[#1f2937] px-3 py-2 text-sm text-[#111827] dark:text-[#f9fafb] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20"
+                />
+              </div>
+
+              {/* Instructions / insights */}
+              <div>
+                <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-[#9ca3af]">
+                  Instruções para a IA <span className="normal-case font-normal text-[#9ca3af]">(opcional)</span>
+                </label>
+                <textarea
+                  value={genInstructions}
+                  onChange={e => setGenInstructions(e.target.value)}
+                  placeholder="Ex: Incluir Dia das Mães (11/05), Dia dos Namorados (12/06), evitar temas políticos, focar em educação financeira..."
+                  rows={3}
+                  className="w-full resize-none rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm text-[#111827] dark:text-[#f9fafb] placeholder-[#9ca3af] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20"
                 />
               </div>
 
