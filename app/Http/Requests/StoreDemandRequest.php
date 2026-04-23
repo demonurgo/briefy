@@ -20,6 +20,7 @@ class StoreDemandRequest extends FormRequest
             'status'      => 'sometimes|in:todo,in_progress,awaiting_feedback,in_review,approved',
             'type'        => 'sometimes|in:demand,planning',
             'assigned_to' => 'nullable|exists:users,id',
+            'priority'    => 'nullable|in:high,medium,low',
         ];
     }
 }

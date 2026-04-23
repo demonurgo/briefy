@@ -13,7 +13,7 @@ class Demand extends Model
     use HasFactory, SoftDeletes;
     protected $fillable = [
         'organization_id', 'client_id', 'type', 'title', 'description',
-        'objective', 'tone', 'channel', 'deadline', 'status',
+        'objective', 'tone', 'channel', 'deadline', 'status', 'priority',
         'recurrence_day', 'ai_analysis', 'created_by', 'assigned_to',
     ];
 
@@ -22,6 +22,7 @@ class Demand extends Model
         'archived_at' => 'datetime',
         'ai_analysis' => 'array',
         'recurrence_day' => 'integer',
+        'priority' => 'string',
     ];
 
     public function client(): BelongsTo { return $this->belongsTo(Client::class); }
