@@ -17,7 +17,7 @@ interface Demand {
 }
 
 interface PageProps {
-  auth: { organization: { has_anthropic_key: boolean } };
+  auth: { user: { organization?: { has_anthropic_key: boolean } } };
   [key: string]: unknown;
 }
 
@@ -39,7 +39,7 @@ interface BriefTabProps {
 export default function BriefTab({ demand, generating, onGeneratingChange }: BriefTabProps) {
   const { t } = useTranslation();
   const { auth } = usePage<PageProps>().props;
-  const hasKey = (auth?.organization as { has_anthropic_key?: boolean } | null)?.has_anthropic_key ?? false;
+  const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
 
   const existingBrief = demand.ai_analysis?.brief ?? '';
   const [isEditing, setIsEditing] = useState(false);

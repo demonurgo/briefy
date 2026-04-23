@@ -67,7 +67,7 @@ interface Props { demand: Demand; isAdmin: boolean; teamMembers: TeamMember[]; o
 
 export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Props) {
   const { t } = useTranslation();
-  const { auth } = usePage<{ auth: { user: User; organization?: { has_anthropic_key: boolean } }; [key: string]: unknown }>().props;
+  const { auth } = usePage<{ auth: { user: User & { organization?: { has_anthropic_key: boolean } } }; [key: string]: unknown }>().props;
 
   const [isEditing, setIsEditing] = useState(false);
   const [showFileForm, setShowFileForm] = useState(false);
@@ -80,7 +80,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   /** Shared state for Brief generation — owned here so header button can trigger from any tab */
   const [generatingBrief, setGeneratingBrief] = useState(false);
 
-  const hasKey = auth?.organization?.has_anthropic_key ?? false;
+  const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
 
   const commentForm = useForm({ body: '' });
   const fileForm = useForm<{ type: string; name: string; file: File | null; path_or_url: string }>(
