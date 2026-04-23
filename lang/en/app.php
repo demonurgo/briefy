@@ -26,4 +26,7 @@ return [
     'ai_key_valid'       => 'Key is valid and functional. Managed Agents enabled.',
     'ai_key_valid_no_ma' => 'Key works for Chat/Brief/Planning. Managed Agents not enabled.',
     'ai_key_invalid'     => 'Invalid key or no credit.',
+    'brief_updated'      => 'Brief updated.',
+    'ai_stream_failed'   => 'Brief generation was interrupted. Please try again.',
+    'ai_key_missing'     => 'Configure your Anthropic key in Settings → AI.',
 ];

@@ -26,4 +26,7 @@ return [
     'ai_key_valid'       => 'Chave válida e funcional. Managed Agents habilitado.',
     'ai_key_valid_no_ma' => 'Chave válida para Chat/Brief/Planejamento. Managed Agents não habilitado.',
     'ai_key_invalid'     => 'Chave inválida ou sem saldo.',
+    'brief_updated'      => 'Brief atualizado.',
+    'ai_stream_failed'   => 'A geração do brief foi interrompida. Tente novamente.',
+    'ai_key_missing'     => 'Configure sua chave Anthropic em Configurações → IA.',
 ];

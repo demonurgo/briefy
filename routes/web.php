@@ -34,6 +34,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [PlanningController::class, 'index'])->name('index');
     });
 
+    // AI — Brief generation (SSE) + inline edit
+    Route::post('/demands/{demand}/brief/generate', [\App\Http\Controllers\AiBriefController::class, 'generate'])
+        ->name('demands.brief.generate');
+    Route::patch('/demands/{demand}/brief', [\App\Http\Controllers\AiBriefController::class, 'saveEdit'])
+        ->name('demands.brief.edit');
+
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', fn() => Inertia::render('Settings/Index'))->name('index');
         Route::get('/team', [TeamController::class, 'index'])->name('team');
