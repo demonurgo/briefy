@@ -29,16 +29,6 @@ interface Props {
   filters: { client_id?: string };
 }
 
-interface PageProps {
-  auth: {
-    user: {
-      organization: {
-        has_anthropic_key: boolean;
-      } | null;
-    } | null;
-  };
-}
-
 // Returns the next month in YYYY-MM format
 function nextMonthDefault(): string {
   const d = new Date();
@@ -59,8 +49,9 @@ function groupByMonth(plannings: PlanningDemand[]): Array<{ label: string; items
 
 export default function PlanejamentoIndex({ plannings, clients, filters }: Props) {
   const { t } = useTranslation();
-  const { auth } = usePage<PageProps>().props;
-  const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { auth } = usePage().props as any;
+  const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
 
   // --- Selection state ---
   const [selected, setSelected] = useState<Set<number>>(new Set());
