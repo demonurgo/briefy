@@ -15,6 +15,8 @@ interface Props {
     key_valid: boolean;
     managed_agents_enabled: boolean;
     last_key_check_at: string | null;
+    client_research_agent_id: string | null;
+    client_research_environment_id: string | null;
   };
 }
 
@@ -29,7 +31,11 @@ export default function SettingsAi({ organization }: Props) {
   const { t } = useTranslation();
   const [testStatus, setTestStatus] = useState<null | 'testing' | 'valid' | 'invalid'>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
-  const form = useForm({ anthropic_api_key: '' });
+  const form = useForm({
+    anthropic_api_key: '',
+    client_research_agent_id: organization.client_research_agent_id ?? '',
+    client_research_environment_id: organization.client_research_environment_id ?? '',
+  });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,12 +157,60 @@ export default function SettingsAi({ organization }: Props) {
             )}
           </div>
 
-          {/* MA availability notice — shown only when chat works but MA does not */}
-          {testResult?.chat_ok && !testResult.managed_agents_ok && (
+          {/* MA availability notice — shown only when chat works but MA does not and no agent ID configured */}
+          {testResult?.chat_ok && !testResult.managed_agents_ok && !form.data.client_research_agent_id && (
             <div className="rounded-[8px] border border-[#f59e0b]/30 bg-[#f59e0b]/10 p-3 text-xs text-[#b45309] dark:text-[#f59e0b]">
               {t('settings.ai.maUnavailableBanner')}
             </div>
           )}
+
+          {/* Managed Agents — Agent ID configuration */}
+          <div className="border-t border-[#e5e7eb] pt-5 dark:border-[#1f2937]">
+            <div className="mb-3 flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">
+                {t('settings.ai.managedAgents.title')}
+              </h2>
+              {(organization.managed_agents_enabled || form.data.client_research_agent_id) ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  <Check size={10} /> {t('settings.ai.managedAgents.enabled')}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#f59e0b]/10 px-2 py-0.5 text-[11px] font-medium text-[#b45309] dark:text-[#f59e0b]">
+                  {t('settings.ai.managedAgents.disabled')}
+                </span>
+              )}
+            </div>
+            <p className="mb-3 text-xs text-[#6b7280]">{t('settings.ai.managedAgents.hint')}</p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#374151] dark:text-[#d1d5db]">
+                  {t('settings.ai.managedAgents.agentIdLabel')}
+                </label>
+                <input
+                  type="text"
+                  value={form.data.client_research_agent_id}
+                  onChange={e => form.setData('client_research_agent_id', e.target.value)}
+                  placeholder="agt_..."
+                  className="w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-2 font-mono text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
+                />
+                <p className="mt-1 text-xs text-[#9ca3af]">{t('settings.ai.managedAgents.agentIdHint')}</p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#374151] dark:text-[#d1d5db]">
+                  {t('settings.ai.managedAgents.envIdLabel')}
+                </label>
+                <input
+                  type="text"
+                  value={form.data.client_research_environment_id}
+                  onChange={e => form.setData('client_research_environment_id', e.target.value)}
+                  placeholder="env_... (opcional)"
+                  className="w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-2 font-mono text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* M3 — last key check timestamp */}
           {organization.last_key_check_at && (

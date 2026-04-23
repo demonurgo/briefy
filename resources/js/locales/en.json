@@ -198,6 +198,15 @@
       "status": {
         "configured": "Key configured",
         "missing": "No key configured"
+      },
+      "managedAgents": {
+        "title": "Research Agent (Managed Agents)",
+        "enabled": "Enabled",
+        "disabled": "Not configured",
+        "hint": "Paste the agent ID created in the Anthropic console (console.anthropic.com → Agents). With the Agent ID configured, the \"Know this client with AI\" feature will be enabled.",
+        "agentIdLabel": "Agent ID",
+        "agentIdHint": "Find it at console.anthropic.com → Agents → select your agent → copy the ID (starts with agt_)",
+        "envIdLabel": "Environment ID (optional)"
       }
     }
   },

@@ -42,7 +42,7 @@
       "empty": {
         "heading": "Nenhum brief gerado ainda",
         "body": "Use a IA para criar um brief estruturado a partir dos dados desta demanda.",
-        "cta": "Gerar Brief com IA"
+        "cta": "Gerar Brief"
       },
       "errors": {
         "streamFailed": "A geração do brief foi interrompida. Tente novamente.",
@@ -198,6 +198,15 @@
       "status": {
         "configured": "Chave configurada",
         "missing": "Nenhuma chave configurada"
+      },
+      "managedAgents": {
+        "title": "Agente de Pesquisa (Managed Agents)",
+        "enabled": "Habilitado",
+        "disabled": "Não configurado",
+        "hint": "Cole aqui o ID do agente criado no console Anthropic (console.anthropic.com → Agents). Com o Agent ID configurado, o recurso \"Conhecer este cliente com IA\" ficará habilitado.",
+        "agentIdLabel": "Agent ID",
+        "agentIdHint": "Encontre em console.anthropic.com → Agents → selecione seu agente → copie o ID (começa com agt_)",
+        "envIdLabel": "Environment ID (opcional)"
       }
     }
   },

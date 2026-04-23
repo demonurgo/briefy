@@ -21,13 +21,15 @@ class AiController extends Controller
 
         return Inertia::render('Settings/Ai', [
             'organization' => [
-                'id'                      => $user->organization->id,
-                'name'                    => $user->organization->name,
-                'has_anthropic_key'       => $user->organization->hasAnthropicKey(),
-                'anthropic_api_key_mask'  => $user->organization->anthropic_api_key_mask,
-                'key_valid'               => (bool) ($user->organization->anthropic_key_valid ?? false),
-                'managed_agents_enabled'  => (bool) ($user->organization->anthropic_managed_agents_ok ?? false),
-                'last_key_check_at'       => optional($user->organization->anthropic_key_checked_at)->toIso8601String(),
+                'id'                           => $user->organization->id,
+                'name'                         => $user->organization->name,
+                'has_anthropic_key'            => $user->organization->hasAnthropicKey(),
+                'anthropic_api_key_mask'       => $user->organization->anthropic_api_key_mask,
+                'key_valid'                    => (bool) ($user->organization->anthropic_key_valid ?? false),
+                'managed_agents_enabled'       => (bool) ($user->organization->anthropic_managed_agents_ok ?? false),
+                'last_key_check_at'            => optional($user->organization->anthropic_key_checked_at)->toIso8601String(),
+                'client_research_agent_id'     => $user->organization->client_research_agent_id,
+                'client_research_environment_id' => $user->organization->client_research_environment_id,
             ],
         ]);
     }
@@ -38,17 +40,35 @@ class AiController extends Controller
         abort_unless($user->isAdmin(), 403);  // H2
 
         $request->validate([
-            'anthropic_api_key' => ['nullable', 'string', 'starts_with:sk-ant-', 'min:30', 'max:200'],
+            'anthropic_api_key'              => ['nullable', 'string', 'starts_with:sk-ant-', 'min:30', 'max:200'],
+            'client_research_agent_id'       => ['nullable', 'string', 'max:100'],
+            'client_research_environment_id' => ['nullable', 'string', 'max:100'],
         ]);
 
-        // If a new key is provided, invalidate the stored health flags until next testKey.
-        $newKey = $request->input('anthropic_api_key') ?: null;
-        $user->organization->update([
-            'anthropic_api_key_encrypted' => $newKey,
-            'anthropic_key_valid'         => false,  // M3 — must re-test after rotation
-            'anthropic_managed_agents_ok' => false,
-            'anthropic_key_checked_at'    => null,
-        ]);
+        $newKey   = $request->input('anthropic_api_key') ?: null;
+        $agentId  = $request->input('client_research_agent_id') ?: null;
+        $envId    = $request->input('client_research_environment_id') ?: null;
+
+        $update = [
+            'client_research_agent_id'       => $agentId,
+            'client_research_environment_id' => $envId,
+        ];
+
+        if ($newKey !== null) {
+            // Key changed — invalidate health flags until next testKey.
+            $update['anthropic_api_key_encrypted'] = $newKey;
+            $update['anthropic_key_valid']         = false;
+            $update['anthropic_managed_agents_ok'] = (bool) $agentId; // trust manual agent ID
+            $update['anthropic_key_checked_at']    = null;
+        } elseif ($agentId !== null) {
+            // No key change but agent ID set — enable MA flag.
+            $update['anthropic_managed_agents_ok'] = true;
+        } elseif ($agentId === null && $request->has('client_research_agent_id')) {
+            // Agent ID explicitly cleared — disable MA flag.
+            $update['anthropic_managed_agents_ok'] = false;
+        }
+
+        $user->organization->update($update);
 
         return back()->with('success', __('app.ai_key_saved'));
     }
@@ -83,17 +103,24 @@ class AiController extends Controller
             $errorClass = class_basename($e);
         }
 
-        // Secondary probe: Managed Agents beta access. Cheap (no tokens consumed, list call).
+        // Secondary probe: Managed Agents beta access.
+        // If the org already has a manually-configured agent ID, trust it — the API probe
+        // endpoint may not be accessible even for accounts with MA console access.
+        $hasManualAgentId = (bool) $user->organization->client_research_agent_id;
         if ($chatOk) {
-            try {
-                $resp = Http::withHeaders([
-                    'authorization'     => "Bearer {$key}",
-                    'anthropic-beta'    => (string) config('services.anthropic.beta_ma'),
-                    'anthropic-version' => '2023-06-01',
-                ])->timeout(10)->get('https://api.anthropic.com/v1/agents', ['limit' => 0]);
-                $maOk = in_array($resp->status(), [200, 204], true);
-            } catch (\Throwable $e) {
-                $maOk = false;
+            if ($hasManualAgentId) {
+                $maOk = true;
+            } else {
+                try {
+                    $resp = Http::withHeaders([
+                        'authorization'     => "Bearer {$key}",
+                        'anthropic-beta'    => (string) config('services.anthropic.beta_ma'),
+                        'anthropic-version' => '2023-06-01',
+                    ])->timeout(10)->get('https://api.anthropic.com/v1/agents', ['limit' => 0]);
+                    $maOk = in_array($resp->status(), [200, 204], true);
+                } catch (\Throwable $e) {
+                    $maOk = false;
+                }
             }
         }
 

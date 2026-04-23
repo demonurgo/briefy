@@ -198,6 +198,15 @@
       "status": {
         "configured": "Clave configurada",
         "missing": "Sin clave configurada"
+      },
+      "managedAgents": {
+        "title": "Agente de Investigación (Managed Agents)",
+        "enabled": "Habilitado",
+        "disabled": "No configurado",
+        "hint": "Pega aquí el ID del agente creado en la consola Anthropic (console.anthropic.com → Agents). Con el Agent ID configurado, la función \"Conocer este cliente con IA\" estará habilitada.",
+        "agentIdLabel": "Agent ID",
+        "agentIdHint": "Encuéntralo en console.anthropic.com → Agents → selecciona tu agente → copia el ID (comienza con agt_)",
+        "envIdLabel": "Environment ID (opcional)"
       }
     }
   },
