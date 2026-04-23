@@ -1,11 +1,41 @@
 {
-  "nav": { "dashboard": "Dashboard", "clients": "Clients", "demands": "Demands", "planning": "Planning", "settings": "Settings", "more": "More" },
-  "common": { "save": "Save", "cancel": "Cancel", "delete": "Delete", "create": "Create", "edit": "Edit", "loading": "Loading...", "confirm": "Confirm", "search": "Search", "noResults": "No results found", "actions": "Actions", "view": "View", "all": "All", "dismiss": "Dismiss", "continue": "Continue", "saving": "Saving...", "costConfirm": { "prefix": "This operation will cost approximately", "suffix": "Continue?", "continue": "Continue" }, "tryAgain": "Try again", "resend": "Resend" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "demands": "Demands",
+    "planning": "Planning",
+    "settings": "Settings",
+    "more": "More"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "search": "Search",
+    "noResults": "No results found",
+    "actions": "Actions",
+    "view": "View",
+    "all": "All",
+    "dismiss": "Dismiss",
+    "continue": "Continue",
+    "saving": "Saving...",
+    "costConfirm": {
+      "prefix": "This operation will cost approximately",
+      "suffix": "Continue?",
+      "continue": "Continue"
+    },
+    "tryAgain": "Try again",
+    "resend": "Resend"
+  },
   "ai": {
     "assistantIcon": "AI Assistant",
     "brief": {
-      "generate": "✨ Generate Brief",
-      "regenerate": "✨ Regenerate",
+      "generate": "Generate Brief",
+      "regenerate": "Regenerate",
       "regenerateConfirm": "Regenerate?",
       "generating": "Generating…",
       "saveEdit": "Save changes",
@@ -89,10 +119,26 @@
     }
   },
   "demand": {
-    "statuses": { "todo": "To do", "in_progress": "In progress", "awaiting_feedback": "Awaiting feedback", "in_review": "In review", "approved": "Approved" },
-    "types": { "demand": "Demand", "planning": "Planning" }
+    "statuses": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "awaiting_feedback": "Awaiting feedback",
+      "in_review": "In review",
+      "approved": "Approved"
+    },
+    "types": {
+      "demand": "Demand",
+      "planning": "Planning"
+    }
   },
-  "auth": { "login": "Sign in", "logout": "Sign out", "register": "Create account", "email": "Email", "password": "Password", "name": "Name" },
+  "auth": {
+    "login": "Sign in",
+    "logout": "Sign out",
+    "register": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name"
+  },
   "clients": {
     "title": "Clients",
     "new": "New client",
@@ -149,7 +195,10 @@
       "testThrottled": "Too many attempts in a row. Wait 1 minute.",
       "lastCheck": "Last check: {{date}}",
       "maUnavailableBanner": "Managed Agents is not enabled on this Anthropic account. Chat, Brief and Planning continue to work; automatic client research (🤖 Get to know this client with AI) will be disabled.",
-      "status": { "configured": "Key configured", "missing": "No key configured" }
+      "status": {
+        "configured": "Key configured",
+        "missing": "No key configured"
+      }
     }
   },
   "demands": {

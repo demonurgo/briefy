@@ -1,11 +1,41 @@
 {
-  "nav": { "dashboard": "Painel", "clients": "Clientes", "demands": "Demandas", "planning": "Planejamento", "settings": "Configurações", "more": "Mais" },
-  "common": { "save": "Salvar", "cancel": "Cancelar", "delete": "Excluir", "create": "Criar", "edit": "Editar", "loading": "Carregando...", "confirm": "Confirmar", "search": "Buscar", "noResults": "Nenhum resultado encontrado", "actions": "Ações", "view": "Ver", "all": "Todos", "dismiss": "Fechar", "continue": "Continuar", "saving": "Salvando...", "costConfirm": { "prefix": "Essa operação custará", "suffix": "Continuar?", "continue": "Continuar" }, "tryAgain": "Tentar novamente", "resend": "Reenviar" },
+  "nav": {
+    "dashboard": "Painel",
+    "clients": "Clientes",
+    "demands": "Demandas",
+    "planning": "Planejamento",
+    "settings": "Configurações",
+    "more": "Mais"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "create": "Criar",
+    "edit": "Editar",
+    "loading": "Carregando...",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "noResults": "Nenhum resultado encontrado",
+    "actions": "Ações",
+    "view": "Ver",
+    "all": "Todos",
+    "dismiss": "Fechar",
+    "continue": "Continuar",
+    "saving": "Salvando...",
+    "costConfirm": {
+      "prefix": "Essa operação custará",
+      "suffix": "Continuar?",
+      "continue": "Continuar"
+    },
+    "tryAgain": "Tentar novamente",
+    "resend": "Reenviar"
+  },
   "ai": {
     "assistantIcon": "Assistente IA",
     "brief": {
-      "generate": "✨ Gerar Brief",
-      "regenerate": "✨ Regenerar",
+      "generate": "Gerar Brief",
+      "regenerate": "Regenerar",
       "regenerateConfirm": "Regenerar?",
       "generating": "Gerando…",
       "saveEdit": "Salvar alterações",
@@ -89,10 +119,26 @@
     }
   },
   "demand": {
-    "statuses": { "todo": "A fazer", "in_progress": "Em andamento", "awaiting_feedback": "Aguardando feedback", "in_review": "Em revisão", "approved": "Aprovado" },
-    "types": { "demand": "Demanda", "planning": "Planejamento" }
+    "statuses": {
+      "todo": "A fazer",
+      "in_progress": "Em andamento",
+      "awaiting_feedback": "Aguardando feedback",
+      "in_review": "Em revisão",
+      "approved": "Aprovado"
+    },
+    "types": {
+      "demand": "Demanda",
+      "planning": "Planejamento"
+    }
   },
-  "auth": { "login": "Entrar", "logout": "Sair", "register": "Criar conta", "email": "E-mail", "password": "Senha", "name": "Nome" },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Criar conta",
+    "email": "E-mail",
+    "password": "Senha",
+    "name": "Nome"
+  },
   "clients": {
     "title": "Clientes",
     "new": "Novo cliente",
@@ -149,7 +195,10 @@
       "testThrottled": "Muitas tentativas em sequência. Aguarde 1 minuto.",
       "lastCheck": "Última verificação: {{date}}",
       "maUnavailableBanner": "Managed Agents não está habilitado nesta conta Anthropic. Chat, Brief e Planejamento continuam funcionando; a pesquisa automática de cliente (🤖 Conhecer este cliente com IA) ficará desabilitada.",
-      "status": { "configured": "Chave configurada", "missing": "Nenhuma chave configurada" }
+      "status": {
+        "configured": "Chave configurada",
+        "missing": "Nenhuma chave configurada"
+      }
     }
   },
   "demands": {

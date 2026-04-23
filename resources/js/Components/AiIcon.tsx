@@ -7,21 +7,32 @@ export interface AiIconProps {
   spinning?: boolean;
   className?: string;
   alt?: string;
+  /** "auto" switches with theme (default). "dark" always uses the dark (white) variant — for colored/dark backgrounds. */
+  variant?: 'auto' | 'dark';
 }
 
 /**
- * Briefy AI icon — renders the chatbot SVG in both light and dark variants
- * (one is hidden based on `dark:` class). Per D-15 this component is the
- * ONLY approved way to surface the AI identity in Phase 3 UI.
- *
- * Usage:
- *   <AiIcon size={16} />           — static
- *   <AiIcon size={12} spinning />  — rotating (loading state)
- *   <AiIcon size={20} alt={t('ai.assistantIcon')} />  — standalone (no text label)
+ * Briefy AI icon — renders the chatbot SVG in both light and dark variants.
+ * Use variant="dark" on colored/dark backgrounds (e.g. purple buttons) to always
+ * show the white variant regardless of the current theme.
  */
-export function AiIcon({ size = 16, spinning = false, className = '', alt = '' }: AiIconProps) {
+export function AiIcon({ size = 16, spinning = false, className = '', alt = '', variant = 'auto' }: AiIconProps) {
   const spin = spinning ? 'animate-spin motion-reduce:animate-none' : '';
   const classes = `shrink-0 ${spin} ${className}`.trim();
+
+  if (variant === 'dark') {
+    return (
+      <img
+        src={chatbotIconDark}
+        alt={alt}
+        width={size}
+        height={size}
+        className={classes}
+        aria-hidden={alt === '' ? 'true' : undefined}
+      />
+    );
+  }
+
   return (
     <>
       <img

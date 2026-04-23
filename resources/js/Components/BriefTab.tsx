@@ -139,7 +139,7 @@ export default function BriefTab({ demand, generating, onGeneratingChange }: Bri
           disabled={!hasKey}
           className="inline-flex items-center gap-2 rounded-[8px] bg-[#7c3aed] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
         >
-          <AiIcon size={20} />
+          <AiIcon size={20} variant="dark" />
           {t('ai.brief.empty.cta')}
         </button>
         {!hasKey && (

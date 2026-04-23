@@ -166,7 +166,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
             title={!hasKey ? t('settings.ai.status.missing') : undefined}
             className="flex items-center gap-2 rounded-[8px] bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <AiIcon size={16} />
+            <AiIcon size={16} variant="dark" />
             {t('planning.generate')}
           </button>
           {!hasKey && (
@@ -303,7 +303,7 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
                 disabled={generating || !genClientId || !!hasNoQuota}
                 className="flex items-center gap-2 rounded-[8px] bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 transition-colors"
               >
-                {generating && <AiIcon size={12} spinning />}
+                {generating && <AiIcon size={12} variant="dark" spinning />}
                 {generating ? t('planning.generating') : t('planning.generate')}
               </button>
             </div>

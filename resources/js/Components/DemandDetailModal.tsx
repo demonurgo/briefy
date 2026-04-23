@@ -209,7 +209,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                   title={!hasKey ? t('ai.brief.errors.serviceUnavailable') : undefined}
                   className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 transition-colors"
                 >
-                  <AiIcon size={16} spinning={generatingBrief} />
+                  <AiIcon size={16} variant="dark" spinning={generatingBrief} />
                   {generatingBrief
                     ? t('ai.brief.generating')
                     : demand.ai_analysis?.brief

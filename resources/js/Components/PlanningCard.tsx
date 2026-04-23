@@ -178,7 +178,7 @@ export function PlanningCard({ suggestion, selected, onToggleSelect, onLocalUpda
               disabled={applying}
               className="flex items-center gap-1 rounded-[8px] bg-[#7c3aed] hover:bg-[#6d28d9] px-3 py-1 text-xs font-medium text-white disabled:opacity-60 transition-colors"
             >
-              {applying && <AiIcon size={12} spinning />}
+              {applying && <AiIcon size={12} variant="dark" spinning />}
               {applying ? t('planning.applyingRedesign') : t('planning.applyRedesign')}
             </button>
           </div>
