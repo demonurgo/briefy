@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 3 — AI Integration
-Plan: 03-02 (Plan 01 complete)
+Plan: 03-05 (Plans 01 and 04 complete)
 Status: In progress
-Last activity: 2026-04-23 — Plan 01 (BYOK infrastructure) complete
+Last activity: 2026-04-23 — Plan 04 (Brief streaming) complete
 
 Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 Phase 3 in execution)
 
@@ -37,6 +37,10 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 - v1.1 AI: `ai_memory` table already exists — load client memory before each AI call, update after
 - v1.1 BYOK: AnthropicClientInterface + AnthropicClientFactory (forOrganization) — per-org key resolution, abort 402 if no key
 - v1.1 BYOK: Tests bind AnthropicClientInterface fake via $app->instance() — no subclassing of final SDK classes (H5)
+- v1.1 Streaming: BriefStreamer accepts AnthropicClientInterface (not \Anthropic\Client) — factory returns interface
+- v1.1 Streaming: BriefStreamer is NOT final — allows anonymous test double subclasses
+- v1.1 Streaming: SSE test split pattern — assertStatus+content-type without sendContent; persistence via direct generator exhaustion
+- v1.1 Streaming: forceFill() required to write anthropic_api_key_encrypted past $fillable in tests
 - v1.1 BYOK: dontFlash lives in bootstrap/app.php (Laravel 11+) — no Handler.php in this project
 - v1.1 BYOK: MA probe uses GET /v1/agents?limit=0 — zero tokens consumed, checks HTTP status only
 - v1.1 RT: Laravel Reverb for WebSockets — `php artisan reverb:install`
@@ -71,5 +75,5 @@ Progress: [████░░░░░░] 40% (v1.0 complete: 2/5 phases; v1.1 
 ## Session Continuity
 
 Last session: 2026-04-23
-Stopped at: Completed 03-01-PLAN.md (BYOK infrastructure) — Plan 02 is next
+Stopped at: Completed 03-04-PLAN.md (Brief streaming) — Plan 05 (Chat streaming) is next
 Resume file: None
