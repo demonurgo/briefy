@@ -83,7 +83,11 @@ class ClientController extends Controller
     public function edit(Client $client): Response
     {
         $this->authorizeClient($client);
-        return Inertia::render('Clients/Edit', ['client' => $client]);
+        $latest = $client->researchSessions()->latest()->first();
+        return Inertia::render('Clients/Edit', [
+            'client'         => $client,
+            'latest_session' => $latest ? ['id' => $latest->id, 'status' => $latest->status] : null,
+        ]);
     }
 
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse

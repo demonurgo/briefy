@@ -9,11 +9,12 @@ class ClientResearchSession extends Model
 {
     protected $fillable = [
         'client_id', 'managed_agent_session_id', 'status',
-        'started_at', 'completed_at', 'events_url', 'progress_summary',
+        'started_at', 'completed_at', 'events_url', 'progress_summary', 'full_report',
     ];
     protected $casts = [
-        'started_at' => 'datetime',
+        'started_at'  => 'datetime',
         'completed_at' => 'datetime',
+        'full_report' => 'array',
     ];
 
     public function client(): BelongsTo

@@ -1,6 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
+import { ExternalLink } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientForm } from '@/Components/ClientForm';
 
@@ -20,7 +21,7 @@ interface Client {
   social_handles: Record<string, string> | null;
 }
 
-export default function ClientsEdit({ client }: { client: Client }) {
+export default function ClientsEdit({ client, latest_session }: { client: Client; latest_session?: { id: number; status: string } | null }) {
   const { t } = useTranslation();
   const { data, setData, post, processing, errors } = useForm({
     _method: 'PUT',
@@ -52,6 +53,24 @@ export default function ClientsEdit({ client }: { client: Client }) {
     <AppLayout title={t('clients.edit')}>
       <Head title={t('clients.edit')} />
       <div className="mx-auto max-w-2xl">
+        {latest_session && (
+          <div className="mb-4 flex items-center justify-between rounded-[12px] border border-[#7c3aed]/20 bg-[#7c3aed]/5 px-4 py-3">
+            <p className="text-sm text-[#7c3aed]">
+              {latest_session.status === 'completed'
+                ? 'Pesquisa profunda concluída'
+                : latest_session.status === 'failed'
+                  ? 'Pesquisa falhou'
+                  : 'Pesquisa em andamento...'}
+            </p>
+            <Link
+              href={route('clients.research.show', [client.id, latest_session.id])}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#7c3aed] hover:underline"
+            >
+              <ExternalLink size={14} />
+              Ver resultados
+            </Link>
+          </div>
+        )}
         <div className="rounded-[12px] bg-white p-6 shadow-sm dark:bg-[#111827]">
           <ClientForm
             data={data}

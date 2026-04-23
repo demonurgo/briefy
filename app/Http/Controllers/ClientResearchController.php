@@ -68,20 +68,50 @@ class ClientResearchController extends Controller
      * GET /clients/{client}/research/{session}
      * Returns session status JSON (for polling by the timeline modal).
      */
-    public function show(Client $client, ClientResearchSession $session): JsonResponse
+    /** GET /clients/{client}/research — redirects to latest session */
+    public function latest(Client $client): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorizeClient($client);
+        $session = $client->researchSessions()->latest()->firstOrFail();
+        return redirect()->route('clients.research.show', [$client, $session]);
+    }
+
+    public function show(Client $client, ClientResearchSession $session): \Inertia\Response|JsonResponse
     {
         $this->authorizeClient($client);
         abort_if($session->client_id !== $client->id, 404);
 
-        return response()->json([
-            'id'                          => $session->id,
-            'status'                      => $session->status,
-            'started_at'                  => optional($session->started_at)->toIso8601String(),
-            'completed_at'                => optional($session->completed_at)->toIso8601String(),
-            'progress_summary'            => $session->progress_summary,
-            'estimated_remaining_minutes' => $session->started_at
-                ? max(0, 30 - (int) $session->started_at->diffInMinutes(now()))
-                : 30,
+        // JSON for API consumers (e.g. polling badge).
+        if (request()->expectsJson()) {
+            return response()->json([
+                'id'                          => $session->id,
+                'status'                      => $session->status,
+                'started_at'                  => optional($session->started_at)->toIso8601String(),
+                'completed_at'                => optional($session->completed_at)->toIso8601String(),
+                'progress_summary'            => $session->progress_summary,
+                'estimated_remaining_minutes' => $session->started_at
+                    ? max(0, 30 - (int) $session->started_at->diffInMinutes(now()))
+                    : 30,
+            ]);
+        }
+
+        // Inertia page for browser navigation.
+        $insights = \App\Models\ClientAiMemory::where('client_id', $client->id)
+            ->where('source', 'managed_agent_onboarding')
+            ->orderBy('category')->orderByDesc('confidence')
+            ->get(['id', 'category', 'insight', 'confidence', 'status', 'created_at']);
+
+        return \Inertia\Inertia::render('Clients/ResearchShow', [
+            'client'  => ['id' => $client->id, 'name' => $client->name],
+            'session' => [
+                'id'             => $session->id,
+                'status'         => $session->status,
+                'started_at'     => optional($session->started_at)->toIso8601String(),
+                'completed_at'   => optional($session->completed_at)->toIso8601String(),
+                'progress_summary' => $session->progress_summary,
+                'full_report'    => $session->full_report,
+            ],
+            'insights' => $insights,
         ]);
     }
 

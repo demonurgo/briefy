@@ -81,6 +81,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('clients.research.launch');
     Route::get('/clients/{client}/research/estimate-cost', [\App\Http\Controllers\ClientResearchController::class, 'estimateCost'])
         ->name('clients.research.estimateCost');
+    Route::get('/clients/{client}/research', [\App\Http\Controllers\ClientResearchController::class, 'latest'])
+        ->name('clients.research.latest');
     Route::get('/clients/{client}/research/{session}', [\App\Http\Controllers\ClientResearchController::class, 'show'])
         ->name('clients.research.show');
     Route::get('/clients/{client}/research/{session}/events', [\App\Http\Controllers\ClientResearchController::class, 'streamEvents'])

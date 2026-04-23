@@ -182,6 +182,23 @@ class PollClientResearchSessionJob implements ShouldQueue
             $written++;
         }
 
+        // Build and persist the full structured report for the research view page.
+        $reportInsights = array_map(fn ($i) => [
+            'category'   => $i['category'] ?? '',
+            'insight'    => $i['insight'] ?? '',
+            'confidence' => (float) ($i['confidence'] ?? 0),
+        ], $insights);
+
+        $this->session->update([
+            'full_report' => [
+                'generated_at' => now()->toIso8601String(),
+                'client_name'  => $client->name,
+                'total_raw'    => count($insights),
+                'total_saved'  => $written,
+                'insights'     => $reportInsights,
+            ],
+        ]);
+
         Log::info('ma.insights_captured', [
             'session_id' => $this->session->id,
             'client_id'  => $client->id,

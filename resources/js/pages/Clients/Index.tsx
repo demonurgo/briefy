@@ -164,22 +164,16 @@ export default function ClientsIndex({ clients, filters }: Props) {
                       </span>
                     )}
                     {client.active_research_session && (
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          setActiveSession({
-                            clientId: client.id,
-                            sessionId: client.active_research_session!.id,
-                            clientName: client.name,
-                          });
-                        }}
+                      <Link
+                        href={route('clients.research.show', [client.id, client.active_research_session.id])}
+                        onClick={e => e.stopPropagation()}
                         className="inline-flex items-center gap-1 rounded-full bg-[#7c3aed]/10 px-2 py-0.5 text-[11px] font-medium text-[#7c3aed] hover:bg-[#7c3aed]/20 transition-colors"
                       >
                         <AiIcon size={12} spinning />
                         {t('clients.monthlyPlan.researchingBadge', {
                           minutes: client.active_research_session.estimated_remaining_minutes,
                         })}
-                      </button>
+                      </Link>
                     )}
                   </div>
                   <p className="mt-1 text-xs text-[#9ca3af]">
