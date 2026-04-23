@@ -31,14 +31,17 @@ const CHANNEL_COLORS: Record<string, string> = {
 export function PlanningCard({ suggestion, selected, onToggleSelect, onOpen }: PlanningCardProps) {
   const { id, date, title, description, channel, status } = suggestion;
 
-  const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
-    weekday: 'short', day: '2-digit', month: 'short',
-  });
+  // Handle both "YYYY-MM-DD" and full ISO strings safely
+  const rawDate = date.includes('T') ? date : date + 'T12:00:00';
+  const dateObj = new Date(rawDate);
+  const dateLabel = isNaN(dateObj.getTime())
+    ? date
+    : dateObj.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
 
   const channelColor = channel ? (CHANNEL_COLORS[channel] ?? 'bg-[#f3f4f6] text-[#6b7280]') : '';
 
   const cardClass = [
-    'group relative flex flex-col rounded-[14px] border bg-white dark:bg-[#111827] transition-all cursor-pointer',
+    'group relative flex flex-col rounded-[14px] border bg-white dark:bg-[#111827] transition-all cursor-pointer min-h-[200px]',
     status === 'accepted'
       ? 'border-[#10b981]/50 shadow-sm shadow-[#10b981]/10'
       : status === 'rejected'
@@ -83,7 +86,7 @@ export function PlanningCard({ suggestion, selected, onToggleSelect, onOpen }: P
         </p>
 
         {/* Description preview */}
-        <p className="text-xs leading-relaxed text-[#6b7280] dark:text-[#9ca3af] line-clamp-3">
+        <p className="text-xs leading-relaxed text-[#6b7280] dark:text-[#9ca3af] line-clamp-5">
           {description}
         </p>
 

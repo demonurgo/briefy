@@ -36,9 +36,11 @@ export function PlanningItemModal({ suggestion, onClose, onLocalUpdate }: Props)
 
   const { id, date, title, description, channel, status } = suggestion;
 
-  const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
-    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
-  });
+  const rawDate = date.includes('T') ? date : date + 'T12:00:00';
+  const dateObj = new Date(rawDate);
+  const dateLabel = isNaN(dateObj.getTime())
+    ? date
+    : dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
   const channelColor = channel ? (CHANNEL_COLORS[channel] ?? 'bg-[#f3f4f6] text-[#6b7280]') : '';
 

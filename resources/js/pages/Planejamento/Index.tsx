@@ -44,7 +44,8 @@ function nextMonthDefault(): string {
 function getPlanningMonthLabel(p: PlanningDemand): string {
   // Prefer suggestion dates (most reliable)
   if (p.planning_suggestions.length > 0) {
-    const d = new Date(p.planning_suggestions[0].date);
+    const raw = p.planning_suggestions[0].date;
+    const d = new Date(raw.includes('T') ? raw : raw + 'T12:00:00');
     return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   }
   // Fallback: target month stored in ai_analysis
