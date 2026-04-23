@@ -6,7 +6,7 @@ use Illuminate\Validation\Rule;
 
 final class MonthlyPlanSchema
 {
-    public const CHANNELS = ['instagram', 'linkedin', 'facebook', 'tiktok', 'blog', 'email', 'other'];
+    public const CHANNELS = ['instagram', 'linkedin', 'facebook', 'tiktok', 'twitter', 'youtube', 'blog', 'email', 'whatsapp', 'website', 'other'];
 
     /** JSON schema passed as Anthropic tool input_schema. */
     public static function toolSchema(int $expectedCount): array
