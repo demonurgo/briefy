@@ -15,11 +15,29 @@ class ClientController extends Controller
 {
     public function index(Request $request): Response
     {
-        $clients = Client::where('organization_id', auth()->user()->organization_id)
+        $orgId = auth()->user()->organization_id;
+
+        $clients = Client::where('organization_id', $orgId)
             ->withCount('demands')
+            ->with(['researchSessions' => fn ($q) => $q->latest()->limit(1)])
             ->when($request->search, fn($q, $s) => $q->where('name', 'ilike', "%{$s}%"))
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($c) {
+                $latest = $c->researchSessions->first();
+                $active = $latest && in_array($latest->status, ['queued', 'running', 'idle']);
+                return array_merge($c->toArray(), [
+                    'active_research_session' => $active ? [
+                        'id'     => $latest->id,
+                        'status' => $latest->status,
+                        'started_at' => optional($latest->started_at)->toIso8601String(),
+                        // Heuristic: 30-min target; remaining = max(0, 30 - elapsed)
+                        'estimated_remaining_minutes' => $latest->started_at
+                            ? max(0, 30 - (int) $latest->started_at->diffInMinutes(now()))
+                            : 30,
+                    ] : null,
+                ]);
+            });
 
         return Inertia::render('Clients/Index', [
             'clients' => $clients,
