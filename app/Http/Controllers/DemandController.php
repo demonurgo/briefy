@@ -136,11 +136,9 @@ class DemandController extends Controller
     public function destroy(Demand $demand): RedirectResponse
     {
         $this->authorizeDemand($demand);
-        $demand->files->each(fn($f) => Storage::disk('public')->delete($f->path_or_url));
-        $demand->delete();
+        $demand->delete(); // soft delete — files preserved, restorable for 30 days
 
-        return redirect()->route('demands.index')
-            ->with('success', __('app.demand_deleted'));
+        return back()->with('success', __('app.demand_deleted'));
     }
 
     public function addFile(Request $request, Demand $demand): RedirectResponse

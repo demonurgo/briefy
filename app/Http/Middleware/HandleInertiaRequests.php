@@ -61,6 +61,9 @@ class HandleInertiaRequests extends Middleware
             'unread_notifications' => $user
                 ? BriefyNotification::where('user_id', $user->id)->whereNull('read_at')->count()
                 : 0,
+            'trash_count' => $user
+                ? \App\Models\Demand::onlyTrashed()->where('organization_id', $user->organization_id)->count()
+                : 0,
         ]);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DemandController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TrashController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,6 +30,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/demands/{demand}/files/{file}', [DemandController::class, 'updateFile'])->name('demands.files.update');
     Route::patch('/demands/{demand}/status', [DemandController::class, 'updateStatus'])->name('demands.status.update');
     Route::put('/demands/{demand}/inline', [DemandController::class, 'updateInline'])->name('demands.inline.update');
+
+    // Trash
+    Route::get('/lixeira', [TrashController::class, 'index'])->name('trash.index');
+    Route::post('/demands/{demand}/trash', [TrashController::class, 'trash'])->name('demands.trash');
+    Route::post('/lixeira/{id}/restore', [TrashController::class, 'restore'])->name('trash.restore');
+    Route::delete('/lixeira/{id}/force', [TrashController::class, 'forceDelete'])->name('trash.force-delete');
 
     Route::prefix('planning')->name('planning.')->group(function () {
         Route::get('/', [PlanningController::class, 'index'])->name('index');

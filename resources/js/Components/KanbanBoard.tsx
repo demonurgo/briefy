@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Loader2, User } from 'lucide-react';
+import { Calendar, Loader2, Trash2, User } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -20,6 +20,25 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
 const STATUSES = ['todo', 'in_progress', 'awaiting_feedback', 'in_review', 'approved'] as const;
+
+function TrashZone({ visible }: { visible: boolean }) {
+  const { isOver, setNodeRef } = useDroppable({ id: '__trash__' });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium shadow-lg transition-all duration-200 ${
+        visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
+      } ${
+        isOver
+          ? 'bg-red-500 text-white shadow-red-200'
+          : 'bg-white dark:bg-[#111827] border border-[#e5e7eb] dark:border-[#1f2937] text-[#9ca3af]'
+      }`}
+    >
+      <Trash2 size={16} className={isOver ? 'text-white' : 'text-[#9ca3af]'} />
+      {isOver ? 'Solte para mover para a lixeira' : 'Arraste aqui para excluir'}
+    </div>
+  );
+}
 
 const COLUMN_COLORS: Record<string, string> = {
   todo:               'border-t-[#9ca3af]',
@@ -164,13 +183,20 @@ export function KanbanBoard({ demands: initialDemands, onDemandClick, loadingDem
     if (!over) return;
 
     const demandId = active.id as number;
-    const newStatus = over.id as string;
+    const overId = over.id as string;
 
-    if (!STATUSES.includes(newStatus as typeof STATUSES[number])) return;
+    // Dropped on trash zone
+    if (overId === '__trash__') {
+      setDemands(prev => prev.filter(d => d.id !== demandId));
+      router.post(route('demands.trash', demandId), {}, { preserveScroll: true });
+      return;
+    }
+
+    if (!STATUSES.includes(overId as typeof STATUSES[number])) return;
 
     const original = initialDemands.find(d => d.id === demandId);
-    if (original && original.status !== newStatus) {
-      router.patch(route('demands.status.update', demandId), { status: newStatus }, { preserveScroll: true });
+    if (original && original.status !== overId) {
+      router.patch(route('demands.status.update', demandId), { status: overId }, { preserveScroll: true });
     }
   };
 
@@ -199,6 +225,8 @@ export function KanbanBoard({ demands: initialDemands, onDemandClick, loadingDem
           />
         ))}
       </div>
+
+      <TrashZone visible={activeId !== null} />
 
       <DragOverlay dropAnimation={{ duration: 150, easing: 'ease' }}>
         {activeDemand && <DemandCard demand={activeDemand} isDragging />}
