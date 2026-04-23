@@ -122,6 +122,19 @@ class ClientController extends Controller
             ->with('success', __('app.client_updated'));
     }
 
+    public function updateImportantDates(Request $request, Client $client): \Illuminate\Http\JsonResponse
+    {
+        $this->authorizeClient($client);
+        $request->validate([
+            'important_dates'             => 'nullable|array|max:50',
+            'important_dates.*.label'     => 'required|string|max:100',
+            'important_dates.*.month'     => 'required|integer|min:1|max:12',
+            'important_dates.*.day'       => 'required|integer|min:1|max:31',
+        ]);
+        $client->update(['important_dates' => $request->input('important_dates', [])]);
+        return response()->json(['ok' => true, 'important_dates' => $client->fresh()->important_dates]);
+    }
+
     public function destroy(Client $client): RedirectResponse
     {
         $this->authorizeClient($client);

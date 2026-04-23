@@ -48,13 +48,20 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
   const [newDate, setNewDate] = useState<ImportantDate>({ label: '', month: 1, day: 1 });
   const [savingDates, setSavingDates] = useState(false);
 
-  const persistDates = (next: ImportantDate[]) => {
+  const persistDates = async (next: ImportantDate[]) => {
     setSavingDates(true);
-    router.patch(route('clients.update', client.id), { important_dates: next } as any, {
-      preserveScroll: true,
-      onSuccess: () => { setDates(next); setSavingDates(false); },
-      onError: () => setSavingDates(false),
-    });
+    try {
+      const csrf = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+      const res = await fetch(route('clients.important-dates.update', client.id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ important_dates: next }),
+      });
+      if (res.ok) setDates(next);
+    } finally {
+      setSavingDates(false);
+    }
   };
 
   const saveEdit = () => {

@@ -16,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('clients', ClientController::class);
+    Route::patch('/clients/{client}/important-dates', [ClientController::class, 'updateImportantDates'])->name('clients.important-dates.update');
 
     Route::get('/demands', [DemandController::class, 'index'])->name('demands.index');
     Route::resource('clients.demands', DemandController::class)
