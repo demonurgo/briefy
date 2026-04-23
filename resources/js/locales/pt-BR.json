@@ -175,6 +175,11 @@
     "uploadFile": "Enviar arquivo",
     "addLink": "Adicionar link",
     "writeComment": "Escreva um comentário...",
-    "send": "Enviar"
+    "send": "Enviar",
+    "tabs": {
+      "comments": "Comentários",
+      "files": "Arquivos",
+      "brief": "Brief"
+    }
   }
 }

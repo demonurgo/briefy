@@ -35,8 +35,17 @@ class DemandController extends Controller
         $selectedDemand = null;
         if ($request->filled('demand')) {
             $selectedDemand = Demand::where('organization_id', $orgId)
-                ->with(['client', 'creator', 'assignee', 'files.uploader', 'comments.user'])
+                ->with([
+                    'client', 'creator', 'assignee', 'files.uploader', 'comments.user',
+                    'aiConversations' => fn ($q) => $q->orderBy('created_at'),
+                    'aiConversations.messages' => fn ($q) => $q->orderBy('id'),
+                ])
                 ->find($request->demand);
+
+            // Alias aiConversations → conversations for frontend clarity (Plan 09).
+            if ($selectedDemand) {
+                $selectedDemand->conversations = $selectedDemand->aiConversations;
+            }
         }
 
         $teamMembers = \App\Models\User::where('organization_id', $orgId)->get(['id', 'name']);
