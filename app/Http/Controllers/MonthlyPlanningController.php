@@ -79,7 +79,7 @@ class MonthlyPlanningController extends Controller
             'description'     => $client->monthly_plan_notes ?: null,
             'type'            => 'planning',
             'status'          => 'todo',
-            'ai_analysis'     => ['status' => 'generating'],
+            'ai_analysis'     => ['status' => 'generating', 'target_year' => (int) $request->year, 'target_month' => (int) $request->month],
         ]);
 
         GenerateMonthlyPlanJob::dispatch(

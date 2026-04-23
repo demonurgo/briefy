@@ -53,9 +53,11 @@ class GenerateMonthlyPlanJob implements ShouldQueue
 
                 $demand->update([
                     'ai_analysis' => array_merge($demand->ai_analysis ?? [], [
-                        'status'      => 'done',
-                        'items_count' => count($plan['items']),
-                        'generated_at' => now()->toIso8601String(),
+                        'status'        => 'done',
+                        'items_count'   => count($plan['items']),
+                        'generated_at'  => now()->toIso8601String(),
+                        'target_year'   => $this->year,
+                        'target_month'  => $this->month,
                     ]),
                 ]);
             });

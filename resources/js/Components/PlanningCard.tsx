@@ -1,9 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { useState } from 'react';
-import { router } from '@inertiajs/react';
-import { useTranslation } from 'react-i18next';
-import { Check, RefreshCw, X } from 'lucide-react';
-import { AiIcon } from '@/Components/AiIcon';
+import { Check } from 'lucide-react';
 
 export interface Suggestion {
   id: number;
@@ -19,171 +15,88 @@ interface PlanningCardProps {
   suggestion: Suggestion;
   selected: boolean;
   onToggleSelect: (id: number) => void;
-  onLocalUpdate?: (next: Suggestion) => void;
+  onOpen: (s: Suggestion) => void;
 }
 
-function getCsrfToken(): string {
-  return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
-}
+const CHANNEL_COLORS: Record<string, string> = {
+  instagram:  'bg-[#e9d5ff] text-[#7c3aed]',
+  linkedin:   'bg-[#dbeafe] text-[#1d4ed8]',
+  tiktok:     'bg-[#fce7f3] text-[#be185d]',
+  facebook:   'bg-[#dbeafe] text-[#1e40af]',
+  youtube:    'bg-[#fee2e2] text-[#dc2626]',
+  email:      'bg-[#d1fae5] text-[#065f46]',
+  blog:       'bg-[#fef3c7] text-[#92400e]',
+};
 
-export function PlanningCard({ suggestion, selected, onToggleSelect, onLocalUpdate }: PlanningCardProps) {
-  const { t } = useTranslation();
-  const [redesigning, setRedesigning] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const [applying, setApplying] = useState(false);
-  const [redesignError, setRedesignError] = useState<string | null>(null);
-
+export function PlanningCard({ suggestion, selected, onToggleSelect, onOpen }: PlanningCardProps) {
   const { id, date, title, description, channel, status } = suggestion;
 
-  const dateLabel = new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
+    weekday: 'short', day: '2-digit', month: 'short',
+  });
 
-  // --- container class based on status ---
-  const containerClass = [
-    'relative rounded-[12px] border p-4 transition-all',
+  const channelColor = channel ? (CHANNEL_COLORS[channel] ?? 'bg-[#f3f4f6] text-[#6b7280]') : '';
+
+  const cardClass = [
+    'group relative flex flex-col rounded-[14px] border bg-white dark:bg-[#111827] transition-all cursor-pointer',
     status === 'accepted'
-      ? 'border-[#10b981]/40 bg-white dark:bg-[#111827]'
+      ? 'border-[#10b981]/50 shadow-sm shadow-[#10b981]/10'
       : status === 'rejected'
-        ? 'border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] opacity-50'
+        ? 'border-[#e5e7eb] dark:border-[#1f2937] opacity-50 pointer-events-none'
         : selected
-          ? 'border-[#7c3aed] ring-2 ring-[#7c3aed] bg-white dark:bg-[#111827] hover:border-[#7c3aed]/40'
-          : 'border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] hover:border-[#7c3aed]/40',
+          ? 'border-[#7c3aed] ring-2 ring-[#7c3aed]/20 shadow-md'
+          : 'border-[#e5e7eb] dark:border-[#1f2937] hover:border-[#7c3aed]/50 hover:shadow-md',
   ].join(' ');
 
-  const handleApplyRedesign = async () => {
-    if (!feedback.trim()) {
-      setRedesignError(t('planning.redesignEmpty'));
-      return;
-    }
-    setRedesignError(null);
-    setApplying(true);
-    try {
-      const res = await fetch(route('planning-suggestions.redesign', id), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken(),
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({ feedback }),
-      });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        onLocalUpdate?.({ ...suggestion, ...data.suggestion });
-        setRedesigning(false);
-        setFeedback('');
-      } else {
-        setRedesignError(data.message ?? t('planning.convertError'));
-      }
-    } catch {
-      setRedesignError(t('planning.convertError'));
-    } finally {
-      setApplying(false);
-    }
-  };
-
   return (
-    <div className={containerClass}>
-      {/* Accepted checkmark top-right */}
-      {status === 'accepted' && (
-        <span className="absolute right-3 top-3 text-[#10b981]">
-          <Check size={14} />
-        </span>
-      )}
-
-      {/* Top row: checkbox + date chip */}
-      <div className="flex items-center justify-between">
-        <input
-          type="checkbox"
-          className="h-4 w-4 accent-[#7c3aed]"
-          checked={selected}
-          onChange={() => onToggleSelect(id)}
-          disabled={status !== 'pending'}
-          aria-label={title}
-        />
-        <span className="text-[11px] text-[#9ca3af]">{dateLabel}</span>
+    <div className={cardClass} onClick={() => status !== 'rejected' && onOpen(suggestion)}>
+      {/* Top stripe: date + checkbox */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+        <span className="text-xs font-medium text-[#9ca3af] capitalize">{dateLabel}</span>
+        <div className="flex items-center gap-2">
+          {status === 'accepted' && <Check size={14} className="text-[#10b981]" />}
+          {status === 'pending' && (
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-[#7c3aed] cursor-pointer"
+              checked={selected}
+              onClick={e => e.stopPropagation()}
+              onChange={() => onToggleSelect(id)}
+              aria-label={title}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Title */}
-      <p className={`mt-2 text-sm font-semibold line-clamp-2 text-[#111827] dark:text-[#f9fafb] ${status === 'rejected' ? 'line-through' : ''}`}>
-        {title}
-      </p>
+      {/* Body */}
+      <div className="flex flex-col gap-2 px-4 pb-4 flex-1">
+        {/* Channel badge */}
+        {channel && (
+          <span className={`self-start rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ${channelColor}`}>
+            {channel}
+          </span>
+        )}
 
-      {/* Channel chip */}
-      {channel && (
-        <span className="mt-2 inline-flex rounded-full bg-[#f3f4f6] dark:bg-[#1f2937] px-2 py-0.5 text-[11px] font-medium capitalize text-[#6b7280] dark:text-[#9ca3af]">
-          {channel}
-        </span>
-      )}
+        {/* Title */}
+        <p className={`text-sm font-semibold leading-snug text-[#111827] dark:text-[#f9fafb] line-clamp-2 ${status === 'rejected' ? 'line-through' : ''}`}>
+          {title}
+        </p>
 
-      {/* Description */}
-      <p className="mt-2 line-clamp-3 text-xs text-[#6b7280] dark:text-[#9ca3af]">
-        {description}
-      </p>
+        {/* Description preview */}
+        <p className="text-xs leading-relaxed text-[#6b7280] dark:text-[#9ca3af] line-clamp-3">
+          {description}
+        </p>
 
-      {/* Action row — only when pending and not redesigning */}
-      {status === 'pending' && !redesigning && (
-        <div className="mt-3 flex items-center gap-1.5 border-t border-[#e5e7eb] dark:border-[#1f2937] pt-3">
-          {/* Converter */}
-          <button
-            onClick={() => router.post(route('planning-suggestions.convert', id), {}, { preserveScroll: true })}
-            className="flex items-center gap-1 rounded-[8px] border border-[#7c3aed] px-2 py-1 text-xs text-[#7c3aed] hover:bg-[#7c3aed]/10 transition-colors"
-          >
-            <Check size={13} />
-            {t('planning.convert')}
-          </button>
-
-          {/* Rejeitar */}
-          <button
-            onClick={() => router.post(route('planning-suggestions.reject', id), {}, { preserveScroll: true })}
-            className="flex items-center gap-1 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] px-2 py-1 text-xs text-[#9ca3af] hover:border-red-400 hover:text-red-500 transition-colors"
-          >
-            <X size={13} />
-            {t('planning.reject')}
-          </button>
-
-          {/* Redesenhar */}
-          <button
-            onClick={() => setRedesigning(true)}
-            className="flex items-center gap-1 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] px-2 py-1 text-xs text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors"
-          >
-            <RefreshCw size={13} />
-            {t('planning.redesign')}
-          </button>
-        </div>
-      )}
-
-      {/* Redesign inline state */}
-      {redesigning && (
-        <div className="mt-3 border-t border-[#e5e7eb] dark:border-[#1f2937] pt-3">
-          <textarea
-            value={feedback}
-            onChange={e => setFeedback(e.target.value)}
-            placeholder={t('planning.redesignPlaceholder')}
-            className="w-full resize-none rounded-[8px] border border-[#7c3aed] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm min-h-[80px] text-[#111827] dark:text-[#f9fafb] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20"
-          />
-          {redesignError && (
-            <p className="mt-1 text-xs text-red-500">{redesignError}</p>
-          )}
-          <div className="mt-2 flex items-center justify-end gap-2">
-            <button
-              onClick={() => { setRedesigning(false); setFeedback(''); setRedesignError(null); }}
-              disabled={applying}
-              className="rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] px-3 py-1 text-xs text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] disabled:opacity-50 transition-colors"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              onClick={handleApplyRedesign}
-              disabled={applying}
-              className="flex items-center gap-1 rounded-[8px] bg-[#7c3aed] hover:bg-[#6d28d9] px-3 py-1 text-xs font-medium text-white disabled:opacity-60 transition-colors"
-            >
-              {applying && <AiIcon size={12} variant="dark" spinning />}
-              {applying ? t('planning.applyingRedesign') : t('planning.applyRedesign')}
-            </button>
-          </div>
-        </div>
-      )}
+        {/* Footer hint */}
+        {status === 'pending' && (
+          <p className="mt-auto pt-2 text-[11px] text-[#c4b5fd] opacity-0 group-hover:opacity-100 transition-opacity">
+            Clique para ver detalhes →
+          </p>
+        )}
+        {status === 'accepted' && (
+          <p className="mt-auto pt-2 text-[11px] text-[#10b981]">Convertida em demanda</p>
+        )}
+      </div>
     </div>
   );
 }

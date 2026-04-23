@@ -36,6 +36,36 @@ export default function AppLayout({ children, title, actions }: Props) {
   const [bellOpen, setBellOpen] = useState(false);
   const [notes, setNotes] = useState<Notification[]>([]);
   const bellRef = useRef<HTMLDivElement>(null);
+  const prevUnread = useRef(unread_notifications);
+
+  // Play a soft notification sound using Web Audio API
+  const playNotificationSound = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+    } catch { /* AudioContext not available */ }
+  };
+
+  // Poll for new notifications every 30s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.reload({ only: ['unread_notifications'] });
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Play sound when unread count increases
+  useEffect(() => {
+    if (unread_notifications > prevUnread.current) playNotificationSound();
+    prevUnread.current = unread_notifications;
+  }, [unread_notifications]);
 
   useEffect(() => {
     try { localStorage.setItem('sidebar', sidebarOpen ? 'open' : 'closed'); } catch {}

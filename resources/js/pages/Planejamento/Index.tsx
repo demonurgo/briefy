@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { AiIcon } from '@/Components/AiIcon';
 import { PlanningCard, Suggestion } from '@/Components/PlanningCard';
+import { PlanningItemModal } from '@/Components/PlanningItemModal';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
 import emptyLight from '@/assets/empty-state-light.svg';
 import emptyDark from '@/assets/empty-state-dark.svg';
@@ -16,7 +17,7 @@ interface PlanningDemand {
   client: { id: number; name: string };
   created_at: string;
   planning_suggestions: Suggestion[];
-  ai_analysis: { status?: string } | null;
+  ai_analysis: { status?: string; target_year?: number; target_month?: number } | null;
 }
 
 interface ClientLite {
@@ -39,11 +40,27 @@ function nextMonthDefault(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
-// Group plannings by month label
+// Group by the actual target month (first suggestion date, or ai_analysis.target_month, or created_at)
+function getPlanningMonthLabel(p: PlanningDemand): string {
+  // Prefer suggestion dates (most reliable)
+  if (p.planning_suggestions.length > 0) {
+    const d = new Date(p.planning_suggestions[0].date);
+    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+  // Fallback: target month stored in ai_analysis
+  const ty = p.ai_analysis?.target_year;
+  const tm = p.ai_analysis?.target_month;
+  if (ty && tm) {
+    return new Date(ty as number, (tm as number) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+  // Last resort: created_at
+  return new Date(p.created_at).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+
 function groupByMonth(plannings: PlanningDemand[]): Array<{ label: string; items: PlanningDemand[] }> {
   const map = new Map<string, PlanningDemand[]>();
   for (const p of plannings) {
-    const label = new Date(p.created_at).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const label = getPlanningMonthLabel(p);
     if (!map.has(label)) map.set(label, []);
     map.get(label)!.push(p);
   }
@@ -55,6 +72,9 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { auth } = usePage().props as any;
   const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+
+  // --- Detail modal state ---
+  const [detailItem, setDetailItem] = useState<import('@/Components/PlanningCard').Suggestion | null>(null);
 
   // --- Selection state ---
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -227,15 +247,15 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
                       </span>
                     )}
                   </div>
-                  {/* Cards grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Cards grid — 2 per row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {planning.planning_suggestions.map(s => (
                       <PlanningCard
                         key={s.id}
                         suggestion={resolveSuggestion(s)}
                         selected={selected.has(s.id)}
                         onToggleSelect={toggleSelect}
-                        onLocalUpdate={handleLocalUpdate}
+                        onOpen={setDetailItem}
                       />
                     ))}
                   </div>
@@ -364,6 +384,15 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
             <X size={16} />
           </button>
         </div>
+      )}
+
+      {/* Planning item detail modal */}
+      {detailItem && (
+        <PlanningItemModal
+          suggestion={detailItem}
+          onClose={() => setDetailItem(null)}
+          onLocalUpdate={(next) => { handleLocalUpdate(next); setDetailItem(next); }}
+        />
       )}
     </AppLayout>
   );
