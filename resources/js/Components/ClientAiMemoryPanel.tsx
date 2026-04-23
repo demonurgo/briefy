@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { AiIcon } from '@/Components/AiIcon';
+import { Brain } from 'lucide-react';
 
 interface MemoryEntry {
   id: number;
@@ -113,7 +114,7 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
         <div className="space-y-2">
           {activeEntries.length === 0 ? (
             <div className="flex flex-col items-center py-8 text-center">
-              <AiIcon size={32} className="mb-3 opacity-40" />
+              <Brain size={32} className="mb-3 opacity-40 text-[#6b7280] dark:text-[#9ca3af]" />
               <p className="text-sm text-[#6b7280]">Nenhuma memória ativa ainda.</p>
               <p className="mt-1 text-xs text-[#9ca3af]">
                 A memória é populada pelo Chat IA e pela pesquisa automática do cliente.

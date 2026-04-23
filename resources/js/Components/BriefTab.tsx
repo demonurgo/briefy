@@ -4,6 +4,8 @@ import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Pencil, RefreshCw } from 'lucide-react';
 import { AiIcon } from '@/Components/AiIcon';
+import emptyLight from '@/assets/empty-state-light.svg';
+import emptyDark from '@/assets/empty-state-dark.svg';
 import { AiMarkdown } from '@/Components/AiMarkdown';
 import { useAiStream } from '@/hooks/useAiStream';
 import { useTypewriter } from '@/hooks/useTypewriter';
@@ -123,8 +125,9 @@ export default function BriefTab({ demand, generating, onGeneratingChange }: Bri
   if (!existingBrief && !streaming && stream.state !== 'done') {
     return (
       <div className="flex h-full flex-col items-center justify-center px-6 py-12 text-center">
-        <AiIcon size={64} alt={t('ai.assistantIcon')} />
-        <h3 className="mt-4 text-base font-semibold text-[#111827] dark:text-[#f9fafb]">
+        <img src={emptyLight} alt="" className="mb-4 h-40 dark:hidden" aria-hidden />
+        <img src={emptyDark} alt="" className="mb-4 h-40 hidden dark:block" aria-hidden />
+        <h3 className="mt-0 text-base font-semibold text-[#111827] dark:text-[#f9fafb]">
           {t('ai.brief.empty.heading')}
         </h3>
         <p className="mt-2 mb-6 max-w-sm text-sm leading-[1.5] text-[#6b7280] dark:text-[#9ca3af]">

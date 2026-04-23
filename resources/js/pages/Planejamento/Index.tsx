@@ -7,6 +7,8 @@ import AppLayout from '@/Layouts/AppLayout';
 import { AiIcon } from '@/Components/AiIcon';
 import { PlanningCard, Suggestion } from '@/Components/PlanningCard';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
+import emptyLight from '@/assets/empty-state-light.svg';
+import emptyDark from '@/assets/empty-state-dark.svg';
 
 interface PlanningDemand {
   id: number;
@@ -178,7 +180,8 @@ export default function PlanejamentoIndex({ plannings, clients, filters }: Props
       {/* Empty state */}
       {plannings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <AiIcon size={64} />
+          <img src={emptyLight} alt="" className="mb-4 h-40 dark:hidden" aria-hidden />
+          <img src={emptyDark} alt="" className="mb-4 h-40 hidden dark:block" aria-hidden />
           <p className="mt-4 text-base font-semibold text-[#111827] dark:text-[#f9fafb]">
             {filters.client_id
               ? t('planning.empty.noPlans.heading', { clientName: clients.find(c => String(c.id) === filters.client_id)?.name ?? '' })

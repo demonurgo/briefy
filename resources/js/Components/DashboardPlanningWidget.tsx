@@ -2,8 +2,7 @@
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { X, Calendar } from 'lucide-react';
-import { AiIcon } from '@/Components/AiIcon';
+import { X, Calendar, Sparkles } from 'lucide-react';
 
 export interface PlanningReminderClient {
   id: number;
@@ -71,7 +70,7 @@ export function DashboardPlanningWidget({ clients }: DashboardPlanningWidgetProp
     <div className="rounded-xl border border-[#a78bfa]/30 bg-[#7c3aed]/5 dark:bg-[#7c3aed]/10 p-4 space-y-3">
       {/* Widget header */}
       <div className="flex items-center gap-2 mb-1">
-        <AiIcon size={32} />
+        <Sparkles size={20} className="text-[#7c3aed] dark:text-[#a78bfa]" />
         <span className="text-sm font-semibold text-[#7c3aed] dark:text-[#a78bfa]">
           {t('planning.title')}
         </span>
