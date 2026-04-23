@@ -1,8 +1,9 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { Head, useForm } from '@inertiajs/react';
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import TextInput from '@/Components/TextInput';
+
+const INPUT = 'w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm text-[#111827] placeholder-[#9ca3af] transition-colors focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb] dark:placeholder-[#6b7280] dark:focus:border-[#a78bfa] dark:focus:ring-[#a78bfa]/20';
+const LABEL = 'mb-1.5 block text-sm font-medium text-[#111827] dark:text-[#f9fafb]';
 
 interface Props {
     expired: boolean;
@@ -90,43 +91,46 @@ export default function InviteAccept({ expired, invitation, organization, has_ac
                                 /* ── Branch A: new user ── */
                                 <>
                                     <div>
-                                        <InputLabel htmlFor="name" value="Seu nome" />
-                                        <TextInput
+                                        <label htmlFor="name" className={LABEL}>Seu nome</label>
+                                        <input
                                             id="name"
                                             type="text"
-                                            className="mt-1 block w-full"
+                                            className={INPUT}
                                             value={form.data.name}
                                             onChange={e => form.setData('name', e.target.value)}
                                             required
                                             autoFocus
+                                            placeholder="Como você quer ser chamado"
                                         />
                                         <InputError message={form.errors.name} className="mt-1" />
                                     </div>
 
                                     <div>
-                                        <InputLabel htmlFor="password" value="Senha" />
-                                        <TextInput
+                                        <label htmlFor="password" className={LABEL}>Senha</label>
+                                        <input
                                             id="password"
                                             type="password"
-                                            className="mt-1 block w-full"
+                                            className={INPUT}
                                             value={form.data.password}
                                             onChange={e => form.setData('password', e.target.value)}
                                             required
                                             autoComplete="new-password"
+                                            placeholder="Mínimo 8 caracteres"
                                         />
                                         <InputError message={form.errors.password} className="mt-1" />
                                     </div>
 
                                     <div>
-                                        <InputLabel htmlFor="password_confirmation" value="Confirmar senha" />
-                                        <TextInput
+                                        <label htmlFor="password_confirmation" className={LABEL}>Confirmar senha</label>
+                                        <input
                                             id="password_confirmation"
                                             type="password"
-                                            className="mt-1 block w-full"
+                                            className={INPUT}
                                             value={form.data.password_confirmation}
                                             onChange={e => form.setData('password_confirmation', e.target.value)}
                                             required
                                             autoComplete="new-password"
+                                            placeholder="Repita a senha"
                                         />
                                         <InputError message={form.errors.password_confirmation} className="mt-1" />
                                     </div>
