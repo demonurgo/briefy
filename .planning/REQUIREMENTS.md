@@ -25,13 +25,14 @@ Requirements for milestone v1.1 (AI + Real-time + Dashboard). Continues from v1.
 - [ ] **MPLAN-04**: AI-generated monthly plan produces a structured list of content pieces (title suggestion, channel, content type, approximate week/date) that fills the full month quota
 - [ ] **MPLAN-05**: Generated monthly plan can be viewed, and individual items can be converted into actual demands with one action
 
-### Real-time Collaboration
+### Team Management
 
-- [ ] **RT-01**: Kanban board updates live (card moves column) when another team member changes a demand's status — no page refresh needed
-- [ ] **RT-02**: New comments appear live in the demand detail modal when added by another user
-- [ ] **RT-03**: User receives an in-app notification when they are assigned to a demand
-- [ ] **RT-04**: User receives an in-app notification when a demand they own or are assigned to changes status
-- [ ] **RT-05**: Notification bell in the header shows unread count; clicking opens a dropdown list of recent notifications
+- [ ] **TEAM-01**: Admin can invite a new user to the organization by email; invited user receives a link and joins as a member
+- [ ] **TEAM-02**: Admin can view all organization members in a team roster (name, avatar, role, join date)
+- [ ] **TEAM-03**: Admin can change a member's role (admin ↔ member) or remove them from the organization
+- [ ] **TEAM-04**: Any user can edit their own profile: display name, avatar photo, locale, and theme preferences
+- [ ] **TEAM-05**: Role-based access enforced — only admins/owners can invite, remove members, and delete others' content
+- [ ] **TEAM-06**: Settings page organized into sections: Profile, Organization, Team, AI Key
 
 ### Dashboard
 
@@ -55,6 +56,14 @@ Deferred to future releases. Tracked but not in current roadmap.
 - **AI-F01**: AI can suggest demand status transitions based on comment activity
 - **AI-F02**: AI can summarize all comments on a demand into a status digest
 - **AI-F03**: Multi-turn AI conversation with persistent session history per demand
+
+### Real-time Collaboration (deferred from v1.1 Phase 4 → v1.2)
+
+- **RT-01**: Kanban board updates live (card moves column) when another team member changes a demand's status — no page refresh needed
+- **RT-02**: New comments appear live in the demand detail modal when added by another user
+- **RT-03**: User receives an in-app notification when they are assigned to a demand
+- **RT-04**: User receives an in-app notification when a demand they own or are assigned to changes status
+- **RT-05**: Notification bell in the header shows unread count; clicking opens a dropdown list of recent notifications
 
 ### Real-time Enhancements
 
@@ -94,11 +103,17 @@ Which phases cover which requirements.
 | MPLAN-03 | Phase 3 | Pending |
 | MPLAN-04 | Phase 3 | Pending |
 | MPLAN-05 | Phase 3 | Pending |
-| RT-01 | Phase 4 | Pending |
-| RT-02 | Phase 4 | Pending |
-| RT-03 | Phase 4 | Pending |
-| RT-04 | Phase 4 | Pending |
-| RT-05 | Phase 4 | Pending |
+| TEAM-01 | Phase 4 | Pending |
+| TEAM-02 | Phase 4 | Pending |
+| TEAM-03 | Phase 4 | Pending |
+| TEAM-04 | Phase 4 | Pending |
+| TEAM-05 | Phase 4 | Pending |
+| TEAM-06 | Phase 4 | Pending |
+| RT-01 | v1.2 | Deferred |
+| RT-02 | v1.2 | Deferred |
+| RT-03 | v1.2 | Deferred |
+| RT-04 | v1.2 | Deferred |
+| RT-05 | v1.2 | Deferred |
 | DASH-01 | Phase 5 | Pending |
 | DASH-02 | Phase 5 | Pending |
 | DASH-03 | Phase 5 | Pending |
@@ -108,9 +123,10 @@ Which phases cover which requirements.
 | ONBRD-02 | Phase 5 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 24 total
-- Mapped to phases: 24
+- v1.1 requirements: 25 total (TEAM-01–06 replacing RT-01–05 in active phases)
+- Mapped to phases: 25
 - Unmapped: 0 ✓
+- Deferred to v1.2: RT-01–RT-05 (Real-time Collaboration)
 
 ---
 *Requirements defined: 2026-04-22*
