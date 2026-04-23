@@ -38,4 +38,10 @@ return [
     'planning_rejected'           => 'Item rejected.',
     'planning_updated'            => 'Item updated.',
     'planning_quota_missing'      => 'Configure the client monthly plan to generate planning.',
+    'ma_started'                  => 'Research started. Follow progress on the client card.',
+    'ma_launch_failed'            => 'Could not start research. Please try again.',
+    'ma_no_sources'               => 'Add at least one social handle or website before starting research.',
+    'ma_already_running'          => 'A research is already running for this client.',
+    'memory_suggestion_approved'  => 'Suggestion approved.',
+    'memory_suggestion_dismissed' => 'Suggestion dismissed.',
 ];

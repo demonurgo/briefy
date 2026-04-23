@@ -6,6 +6,8 @@ import { Plus, Search, Trash2, Edit2, Eye, Calendar } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { ClientAvatar } from '@/Components/ClientAvatar';
 import { AiIcon } from '@/Components/AiIcon';
+import { ClientResearchTimelineModal } from '@/Components/ClientResearchTimelineModal';
+import { CostConfirmModal } from '@/Components/CostConfirmModal';
 import emptyLight from '@/assets/empty-state-light.svg';
 import emptyDark from '@/assets/empty-state-dark.svg';
 
@@ -36,6 +38,21 @@ export default function ClientsIndex({ clients, filters }: Props) {
   const [search, setSearch] = useState(filters.search ?? '');
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  // Timeline modal state (clicking the research badge)
+  const [activeSession, setActiveSession] = useState<{
+    clientId: number;
+    sessionId: number;
+    clientName: string;
+  } | null>(null);
+
+  // Pre-launch cost confirmation modal state (D-34)
+  const [pendingLaunchClientId, setPendingLaunchClientId] = useState<number | null>(null);
+  const [pendingCost, setPendingCost] = useState<{
+    cost_usd: number;
+    duration_minutes: string;
+  } | null>(null);
+  const [launchBusy, setLaunchBusy] = useState(false);
+
   const handleSearch = (value: string) => {
     setSearch(value);
     router.get(route('clients.index'), { search: value }, { preserveState: true, replace: true });
@@ -45,6 +62,43 @@ export default function ClientsIndex({ clients, filters }: Props) {
     router.delete(route('clients.destroy', id), {
       onSuccess: () => setDeletingId(null),
     });
+  };
+
+  /**
+   * Open the pre-launch cost confirmation for the Managed Agent research (D-34).
+   * Fetches cost estimate first; always confirm_required=true per controller.
+   */
+  const openResearchWithConfirm = async (clientId: number) => {
+    try {
+      const res = await fetch(route('clients.research.estimateCost', clientId), {
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' },
+      });
+      const data = await res.json();
+      setPendingLaunchClientId(clientId);
+      setPendingCost({ cost_usd: data.cost_usd, duration_minutes: data.duration_minutes });
+    } catch {
+      // On fetch failure, show modal with default cost 0 so user can still confirm.
+      setPendingLaunchClientId(clientId);
+      setPendingCost({ cost_usd: 0, duration_minutes: '20-40' });
+    }
+  };
+
+  const confirmLaunch = () => {
+    if (pendingLaunchClientId == null) return;
+    setLaunchBusy(true);
+    router.post(
+      route('clients.research.launch', pendingLaunchClientId),
+      {},
+      {
+        preserveScroll: true,
+        onFinish: () => {
+          setLaunchBusy(false);
+          setPendingLaunchClientId(null);
+          setPendingCost(null);
+        },
+      }
+    );
   };
 
   return (
@@ -110,10 +164,22 @@ export default function ClientsIndex({ clients, filters }: Props) {
                       </span>
                     )}
                     {client.active_research_session && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#7c3aed]/10 px-2 py-0.5 text-[11px] font-medium text-[#7c3aed]">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setActiveSession({
+                            clientId: client.id,
+                            sessionId: client.active_research_session!.id,
+                            clientName: client.name,
+                          });
+                        }}
+                        className="inline-flex items-center gap-1 rounded-full bg-[#7c3aed]/10 px-2 py-0.5 text-[11px] font-medium text-[#7c3aed] hover:bg-[#7c3aed]/20 transition-colors"
+                      >
                         <AiIcon size={12} spinning />
-                        {t('clients.monthlyPlan.researchingBadge', { minutes: client.active_research_session.estimated_remaining_minutes })}
-                      </span>
+                        {t('clients.monthlyPlan.researchingBadge', {
+                          minutes: client.active_research_session.estimated_remaining_minutes,
+                        })}
+                      </button>
                     )}
                   </div>
                   <p className="mt-1 text-xs text-[#9ca3af]">
@@ -163,6 +229,31 @@ export default function ClientsIndex({ clients, filters }: Props) {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Timeline modal — opens when the research badge is clicked */}
+      {activeSession && (
+        <ClientResearchTimelineModal
+          {...activeSession}
+          onClose={() => setActiveSession(null)}
+        />
+      )}
+
+      {/* Pre-launch cost confirmation modal (D-34) */}
+      {pendingCost && (
+        <CostConfirmModal
+          open={true}
+          costUsd={pendingCost.cost_usd}
+          title={t('clients.research.confirmTitle')}
+          body={t('clients.research.confirmBody', { minutes: pendingCost.duration_minutes })}
+          confirmLabel={t('clients.research.confirmCta')}
+          busy={launchBusy}
+          onConfirm={confirmLaunch}
+          onCancel={() => {
+            setPendingLaunchClientId(null);
+            setPendingCost(null);
+          }}
+        />
       )}
     </AppLayout>
   );
