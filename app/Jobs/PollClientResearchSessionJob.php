@@ -114,7 +114,8 @@ class PollClientResearchSessionJob implements ShouldQueue
     private function processEvent(array $event): void
     {
         $type = $event['type'] ?? '';
-        if ($type !== 'tool_use' && $type !== 'message.tool_use') {
+        // MA emits 'agent.custom_tool_use' for custom tool calls (not 'tool_use')
+        if ($type !== 'agent.custom_tool_use' && $type !== 'tool_use' && $type !== 'message.tool_use') {
             return;
         }
 
@@ -205,6 +206,41 @@ class PollClientResearchSessionJob implements ShouldQueue
             'count'      => $written,
             'total_raw'  => count($insights),
         ]);
+
+        // CRITICAL: Send tool result back to unblock the MA session.
+        // The session is in idle/requires_action state waiting for this response.
+        // Without it the agent hangs indefinitely at the record_insights call.
+        $eventId = $event['id'] ?? null;
+        if ($eventId && $this->session->managed_agent_session_id) {
+            try {
+                $org = $client->organization;
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'x-api-key'         => $org->anthropic_api_key,
+                    'anthropic-beta'    => (string) config('services.anthropic.beta_ma'),
+                    'anthropic-version' => '2023-06-01',
+                    'content-type'      => 'application/json',
+                ])->timeout(30)->post(
+                    'https://api.anthropic.com/v1/sessions/' . $this->session->managed_agent_session_id . '/events',
+                    [
+                        'events' => [
+                            [
+                                'type'               => 'user.custom_tool_result',
+                                'custom_tool_use_id' => $eventId,
+                                'content'            => [
+                                    ['type' => 'text', 'text' => "Insights recorded: {$written} insights saved."],
+                                ],
+                            ],
+                        ],
+                    ]
+                );
+            } catch (\Throwable $e) {
+                Log::warning('ma.tool_result_failed', [
+                    'session_id'  => $this->session->id,
+                    'event_id'    => $eventId,
+                    'error'       => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     private function summarizeEvent(array $event): string
