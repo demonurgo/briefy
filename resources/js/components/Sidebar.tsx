@@ -1,7 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useRef, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Archive, Calendar, CheckCircle2, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, Settings, Trash2, Users } from 'lucide-react';
+import { Archive, Calendar, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, Settings, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import logoLight from '../assets/logo.svg';
 import logoDark from '../assets/logo-dark.svg';
@@ -101,10 +101,10 @@ export function Sidebar({ collapsed, onToggle }: Props) {
           const { archive_count } = usePage().props as { archive_count: number; [key: string]: unknown };
           return (
             <Link href="/concluidas" title={collapsed ? 'Concluídas' : undefined} className={linkClass('/concluidas')}>
-              <CheckCircle2 size={18} className="shrink-0" />
+              <Archive size={18} className="shrink-0" />
               {!collapsed && 'Concluídas'}
               {!collapsed && archive_count > 0 && (
-                <span className="ml-auto rounded-full bg-[#d1fae5] px-1.5 py-0.5 text-[10px] font-medium text-[#065f46] dark:bg-[#064e3b] dark:text-[#6ee7b7]">
+                <span className="ml-auto rounded-full bg-[#f3f4f6] px-1.5 py-0.5 text-[10px] font-medium text-[#6b7280] dark:bg-[#1f2937] dark:text-[#9ca3af]">
                   {archive_count}
                 </span>
               )}
@@ -113,20 +113,10 @@ export function Sidebar({ collapsed, onToggle }: Props) {
         })()}
 
         {/* Trash */}
-        {(() => {
-          const { trash_count } = usePage().props as { trash_count: number; [key: string]: unknown };
-          return (
-            <Link href="/lixeira" title={collapsed ? 'Lixeira' : undefined} className={linkClass('/lixeira') + ' relative'}>
-              <Trash2 size={18} className="shrink-0" />
-              {!collapsed && 'Lixeira'}
-              {trash_count > 0 && (
-                <span className="ml-auto rounded-full bg-[#f3f4f6] px-1.5 py-0.5 text-[10px] font-medium text-[#6b7280] dark:bg-[#1f2937] dark:text-[#9ca3af]">
-                  {trash_count}
-                </span>
-              )}
-            </Link>
-          );
-        })()}
+        <Link href="/lixeira" title={collapsed ? 'Lixeira' : undefined} className={linkClass('/lixeira')}>
+          <Trash2 size={18} className="shrink-0" />
+          {!collapsed && 'Lixeira'}
+        </Link>
       </div>
     </aside>
   );
