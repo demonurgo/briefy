@@ -11,6 +11,7 @@ class AiConversation extends Model
     protected $casts = [
         'compacted_at' => 'datetime',
     ];
+    public function organization(): BelongsTo { return $this->belongsTo(Organization::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function messages(): HasMany { return $this->hasMany(AiConversationMessage::class, 'conversation_id')->orderBy('created_at'); }
 }
