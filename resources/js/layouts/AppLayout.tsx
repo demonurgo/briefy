@@ -143,7 +143,7 @@ export default function AppLayout({ children, title, actions }: Props) {
     <div className="flex min-h-screen overflow-x-hidden bg-[#f9fafb] dark:bg-[#0b0f14]" style={{ minHeight: '540px', minWidth: '360px' }}>
       <Sidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(v => !v)} />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <header className="sticky top-0 z-40 bg-[#ffffff] dark:bg-[#111827] border-b border-[#e5e7eb] dark:border-[#1f2937] px-4 md:px-6 h-14 flex items-center gap-4">
           {title && (
             <h1 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb] truncate">{title}</h1>
@@ -274,7 +274,7 @@ export default function AppLayout({ children, title, actions }: Props) {
             </div>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
           {children}
         </main>
       </div>
