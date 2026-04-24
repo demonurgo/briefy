@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { Link, usePage } from '@inertiajs/react';
 import { Archive, Calendar, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, Settings, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { PageProps } from '@/types';
 import logoLight from '../assets/logo.svg';
 import logoDark from '../assets/logo-dark.svg';
 import logoIconLight from '../assets/logo-icon.svg';
@@ -149,7 +150,7 @@ export function Sidebar({ collapsed, onToggle }: Props) {
             </Link>
 
             {(() => {
-              const { archive_count } = usePage().props as { archive_count: number; [key: string]: unknown };
+              const { archive_count } = usePage<PageProps>().props;
               return (
                 <Link
                   href="/concluidas"
