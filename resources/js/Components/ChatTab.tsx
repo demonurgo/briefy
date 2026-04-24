@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Send } from 'lucide-react';
+import { Plus, Send, ChevronDown, Check } from 'lucide-react';
 import { AiIcon } from '@/Components/AiIcon';
 import { AiMarkdown } from '@/Components/AiMarkdown';
 import { useAiStream } from '@/hooks/useAiStream';
@@ -28,7 +28,7 @@ interface Conversation {
 
 interface Demand {
   id: number;
-  /** Injected by DemandController after Plan 09 — latest conversation with its messages. */
+  /** Injected by DemandController — all conversations with their messages. */
   conversations?: Conversation[];
 }
 
@@ -41,33 +41,59 @@ interface ChatTabProps {
 /**
  * Chat IA tab inside DemandDetailModal.
  *
- * v1.1 UX Constraint (FLAG 11): Only the LATEST ai_conversation is loaded and
- * shown. Older conversations persist in DB but are not accessible via UI in
- * v1.1. A conversation picker dropdown is deferred to the v1.2 backlog.
+ * v1.2 (POLISH-03): Conversation picker dropdown added to header.
+ * Users can browse previous AI conversations in read-only mode.
+ * Only the latest conversation is writable.
  */
 export default function ChatTab({ demand }: ChatTabProps) {
   const { t } = useTranslation();
   const { auth } = usePage<PageProps>().props;
   const hasKey = auth?.organization?.has_anthropic_key ?? false;
 
-  // Use the latest conversation from the demand prop (v1.1: only latest shown).
+  // Use the latest conversation from the demand prop.
   const latestConv = demand.conversations?.length
     ? demand.conversations[demand.conversations.length - 1]
     : null;
 
-  const [conv, setConv] = useState<Conversation | null>(latestConv);
+  // selectedConvId pattern: store the ID instead of the full object.
+  // This survives Inertia partial reloads without overwriting picker selection.
+  const [selectedConvId, setSelectedConvId] = useState<number | null>(latestConv?.id ?? null);
+  const conv = demand.conversations?.find(c => c.id === selectedConvId) ?? latestConv;
+  const isLatest = !latestConv || conv?.id === latestConv.id;
+
   const [input, setInput] = useState('');
   const [confirmingNew, setConfirmingNew] = useState(false);
   const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Keep local conv in sync when demand reloads (Inertia partial reload after stream done).
+  // Conversation picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Outside-click close for picker dropdown
   useEffect(() => {
-    const updated = demand.conversations?.length
+    const handler = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Sync guard — only advance selectedConvId to latest if user is already on latest or has no selection.
+  // This prevents Inertia partial reloads from overwriting a manually-selected older conversation.
+  useEffect(() => {
+    const latest = demand.conversations?.length
       ? demand.conversations[demand.conversations.length - 1]
       : null;
-    setConv(updated);
+    if (!latest) return;
+    setSelectedConvId(prev => {
+      if (prev === null) return latest.id;
+      const isOnLatest = prev === demand.conversations?.[demand.conversations.length - 1]?.id;
+      return isOnLatest ? latest.id : prev;
+    });
   }, [demand.conversations]);
 
   // ─── Streaming hook ─────────────────────────────────────────────────────────
@@ -114,7 +140,8 @@ export default function ChatTab({ demand }: ChatTabProps) {
       }
       const data = (await res.json()) as { id: number; created_at: string };
       const newConv: Conversation = { id: data.id, created_at: data.created_at, messages: [] };
-      setConv(newConv);
+      // Reset selectedConvId to null so sync guard will advance it to the new latest on next reload
+      setSelectedConvId(null);
       return newConv;
     } catch {
       setError(t('ai.chat.errors.streamFailed'));
@@ -133,6 +160,8 @@ export default function ChatTab({ demand }: ChatTabProps) {
     // Second click (or conv has no messages): create new conversation.
     setConfirmingNew(false);
     if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
+    // Reset picker to follow latest before creating (sync guard will advance to new latest)
+    setSelectedConvId(null);
     await startConversation();
     // After creating, reload to persist the new conv in selectedDemand.
     router.reload({ only: ['selectedDemand'] });
@@ -142,7 +171,7 @@ export default function ChatTab({ demand }: ChatTabProps) {
 
   const sendMessage = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !hasKey || stream.state === 'streaming') return;
+    if (!input.trim() || !hasKey || !isLatest || stream.state === 'streaming') return;
 
     setError(null);
 
@@ -156,18 +185,6 @@ export default function ChatTab({ demand }: ChatTabProps) {
     const userMsg = input.trim();
     setInput('');
 
-    // Optimistic render: add user message bubble immediately.
-    setConv((prev) => {
-      const base = prev ?? active!;
-      return {
-        ...base,
-        messages: [
-          ...base.messages,
-          { id: -Date.now(), role: 'user', content: userMsg, created_at: new Date().toISOString() },
-        ],
-      };
-    });
-
     // Start SSE stream with the user message body.
     await stream.start({
       url: route('demands.chat.stream', [demand.id, active.id]),
@@ -177,17 +194,51 @@ export default function ChatTab({ demand }: ChatTabProps) {
 
   const isStreaming = stream.state === 'streaming';
 
+  // ─── Conversation label helper ────────────────────────────────────────────────
+
+  const convLabel = (c: Conversation) =>
+    c.title ??
+    `${new Date(c.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} — ${c.messages.length} msgs`;
+
   // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header bar: conversation meta + Nova conversa button */}
+      {/* Header bar: conversation picker + Nova conversa button */}
       <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-2.5 dark:border-[#1f2937]">
-        <p className="text-xs text-[#9ca3af]">
-          {conv
-            ? t('ai.chat.startedAt', { date: new Date(conv.created_at).toLocaleDateString('pt-BR') })
-            : ''}
-        </p>
+        {/* Conversation picker — shows label always; dropdown only when 2+ convs */}
+        <div ref={pickerRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setPickerOpen(v => !v)}
+            className="flex items-center gap-1 text-xs text-[#9ca3af] hover:text-[#6b7280] transition-colors"
+          >
+            <span className="max-w-[140px] truncate">
+              {conv ? convLabel(conv) : t('ai.chat.currentConversation', 'Conversa atual')}
+            </span>
+            <ChevronDown size={10} className={`shrink-0 transition-transform ${pickerOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {pickerOpen && demand.conversations && demand.conversations.length > 1 && (
+            <div className="absolute left-0 top-full mt-1 z-50 w-60 rounded-[12px] border border-[#e5e7eb] bg-white shadow-lg dark:border-[#1f2937] dark:bg-[#111827]">
+              {demand.conversations.map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => { setSelectedConvId(c.id); setPickerOpen(false); }}
+                  className={`flex w-full items-center gap-2 px-4 py-2 text-left text-xs hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] ${
+                    c.id === selectedConvId ? 'text-[#7c3aed]' : 'text-[#6b7280]'
+                  }`}
+                >
+                  <span className="flex-1 truncate">{convLabel(c)}</span>
+                  {c.id === latestConv?.id && (
+                    <Check size={10} className="shrink-0 text-[#7c3aed]" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Nova conversa button — unchanged */}
         <button
           type="button"
           onClick={handleNovaConversa}
@@ -213,6 +264,13 @@ export default function ChatTab({ demand }: ChatTabProps) {
           >
             {t('ai.chat.compactedCta')}
           </button>
+        </div>
+      )}
+
+      {/* Read-only indicator for non-latest conversations */}
+      {!isLatest && (
+        <div className="flex items-center justify-center border-b border-[#e5e7eb] bg-[#f9fafb] px-4 py-1.5 text-xs text-[#9ca3af] dark:border-[#1f2937] dark:bg-[#111827]">
+          {t('ai.chat.readOnly', 'Somente leitura — selecione a conversa mais recente para enviar mensagens')}
         </div>
       )}
 
@@ -302,13 +360,13 @@ export default function ChatTab({ demand }: ChatTabProps) {
             }
           }}
           placeholder={t('ai.chat.placeholder')}
-          disabled={!hasKey}
+          disabled={!hasKey || !isLatest}
           rows={1}
           className="min-h-[44px] max-h-[160px] flex-1 resize-none rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
         />
         <button
           type="submit"
-          disabled={!input.trim() || isStreaming || !hasKey}
+          disabled={!input.trim() || isStreaming || !hasKey || !isLatest}
           aria-label={t('demands.send') ?? 'Enviar'}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#7c3aed] text-white hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
         >
