@@ -1,14 +1,9 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-// ARCH NOTE (Plan 12 / v1.1): uses native EventSource instead of useAiStream because:
-//   1. This is a GET SSE stream (no POST body).
-//   2. It emits custom events (`event: status` / `event: done`), not delta frames.
-//   3. EventSource handles reconnect for free.
-// useAiStream (shared hook from Plan 08) covers POST streams only.
-// Backlog for v1.2: extend useAiStream to expose a custom-event listener and consolidate.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { AiIcon } from '@/Components/AiIcon';
+import { useAiStream } from '@/hooks/useAiStream';
 
 interface Props {
   clientId: number;
@@ -25,13 +20,12 @@ interface StatusFrame {
 /**
  * Modal that shows live research session progress.
  *
- * Opens an EventSource to /clients/{clientId}/research/{sessionId}/events
+ * Opens an SSE stream to /clients/{clientId}/research/{sessionId}/events
  * which emits `event: status` frames every ~5s from our server's DB-polling proxy.
  * Raw MA events and auth credentials are NEVER forwarded to the browser (T-03-110).
  *
- * Uses native EventSource (not useAiStream) — see ARCH NOTE above.
+ * Uses useAiStream GET branch (POLISH-01 / D-11 / D-12) — EventSource with native reconnect.
  * The /events route is a GET SSE endpoint; EventSource is the correct primitive.
- * useAiStream handles POST delta-frame streams only (as of v1.1).
  */
 export function ClientResearchTimelineModal({
   clientId,
@@ -42,28 +36,25 @@ export function ClientResearchTimelineModal({
   const { t } = useTranslation();
   const [events, setEvents] = useState<StatusFrame[]>([]);
 
-  useEffect(() => {
-    const es = new EventSource(
-      `/clients/${clientId}/research/${sessionId}/events`,
-      { withCredentials: true }
-    );
-
-    const onStatus = (e: MessageEvent) => {
-      try {
-        const data: StatusFrame = JSON.parse(e.data);
-        setEvents(prev => [...prev, data]);
-      } catch {
-        // Ignore malformed frames.
+  const stream = useAiStream({
+    url: `/clients/${clientId}/research/${sessionId}/events`,
+    method: 'GET',
+    onEvent: (type, data) => {
+      if (type === 'status') {
+        setEvents(prev => [...prev, data as StatusFrame]);
       }
-    };
+    },
+    onDone: () => {
+      // Stream complete — isActive derived value handles display via latest event status
+    },
+    onError: () => {
+      // Connection closed with error — preserve existing events, stop adding new ones
+    },
+  });
 
-    es.addEventListener('status', onStatus);
-    es.addEventListener('done', () => es.close());
-    es.onerror = () => es.close();
-
-    return () => {
-      es.close();
-    };
+  useEffect(() => {
+    stream.start();
+    return () => stream.cancel();
   }, [clientId, sessionId]);
 
   const latest = events[events.length - 1];
