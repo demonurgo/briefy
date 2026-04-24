@@ -1,15 +1,16 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 
 /**
- * useAiStream — fetch+ReadableStream hook for Anthropic-style POST SSE streams.
+ * useAiStream — unified SSE hook covering both stream patterns:
  *
- * Scope:
- *   ✅ POST requests that respond with `event: delta` / `event: done` frames (brief, chat).
- *   ❌ GET SSE streams with custom event types (e.g., ClientResearchTimelineModal, which uses EventSource).
+ *   POST branch (default): fetch+ReadableStream for Anthropic-style delta-frame streams (brief, chat).
+ *     Uses: onDelta, onDone, onError
  *
- * v1.2 backlog: extend this hook with a custom-event listener + GET support so that
- *   the Managed Agents timeline modal can drop its direct EventSource usage.
- *   Until then, the two SSE consumer paths coexist by design.
+ *   GET branch: EventSource for custom-event streams (e.g., ClientResearchTimelineModal).
+ *     Uses: onEvent, onDone, onError
+ *     EventSource provides native reconnect on transient connection drops; fetch does not.
+ *
+ * POLISH-01 (D-11 / D-14): GET branch added in v1.2. No direct EventSource usage remains in components.
  */
 import { useCallback, useRef, useState } from 'react';
 
@@ -17,10 +18,11 @@ export interface UseAiStreamOptions {
   url: string;
   method?: 'POST' | 'GET';
   body?: Record<string, unknown> | FormData;
-  onDelta?: (chunk: string) => void;   // called for each delta chunk
+  onDelta?: (chunk: string) => void;   // called for each delta chunk (POST mode)
   onDone?: (payload: unknown) => void;
   onError?: (message: string) => void;
   headers?: Record<string, string>;
+  onEvent?: (type: string, data: unknown) => void;  // called for each custom event in GET mode
 }
 
 export type AiStreamState = 'idle' | 'streaming' | 'done' | 'error';
@@ -67,6 +69,71 @@ export function useAiStream(defaults: UseAiStreamOptions): UseAiStreamResult {
     cancel();
     reset();
     setState('streaming');
+
+    // GET branch: EventSource for native reconnect (D-14 / POLISH-01)
+    // MUST use EventSource, not fetch — EventSource provides native reconnect; fetch does not.
+    if ((opts.method ?? 'POST') === 'GET') {
+      const es = new EventSource(opts.url, { withCredentials: true });
+      // Store close fn so cancel() works identically to POST branch
+      abortRef.current = { abort: () => es.close() } as unknown as AbortController;
+
+      return new Promise<void>((resolve) => {
+        // Factory for custom event listeners
+        const listenFor = (type: string) => {
+          es.addEventListener(type, (e: MessageEvent) => {
+            if (type === 'done') {
+              try {
+                opts.onDone?.(e.data ? JSON.parse(e.data) : {});
+              } catch {
+                opts.onDone?.({});
+              }
+              setState('done');
+              es.close();
+              abortRef.current = null;
+              resolve();
+            } else if (type === 'error') {
+              const msg = 'SSE stream error';
+              setError(msg);
+              opts.onError?.(msg);
+              setState('error');
+              es.close();
+              abortRef.current = null;
+              resolve();
+            } else {
+              try {
+                opts.onEvent?.(type, JSON.parse(e.data));
+              } catch {
+                opts.onEvent?.(type, e.data);
+              }
+            }
+          });
+        };
+
+        // Register listeners for known custom event types
+        // ClientResearchTimelineModal uses: 'status', 'done'
+        // Add more here if other GET SSE endpoints are added in future phases
+        listenFor('status');
+        listenFor('done');
+        listenFor('error');
+
+        es.onerror = () => {
+          // EventSource reconnects automatically on transient errors.
+          // Only treat as fatal if the connection is CLOSED (readyState === 2)
+          // and we didn't close it ourselves (abortRef still points to es.close).
+          if (es.readyState === EventSource.CLOSED && abortRef.current !== null) {
+            const msg = 'SSE connection closed unexpectedly';
+            setError(msg);
+            opts.onError?.(msg);
+            setState('error');
+            abortRef.current = null;
+            resolve();
+          }
+        };
+
+        setState('streaming');
+      });
+    }
+    // else: fall through to existing fetch+ReadableStream POST path (unchanged below)
 
     const controller = new AbortController();
     abortRef.current = controller;
