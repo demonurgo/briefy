@@ -36,7 +36,6 @@
 - AI: suggest status transitions from comments — deferred to v2
 - AI: summarize comments into digest — deferred to v2
 - Client portal (client-facing login) — out of scope for v1.x
-- MA 03-12b backlog item — deferred, needs spec
 
 ---
 
@@ -54,16 +53,16 @@
 
 ## Traceability
 
-| REQ-ID | Phase | Plan |
-|--------|-------|------|
-| RT-01 | — | — |
-| RT-02 | — | — |
-| RT-03 | — | — |
-| RT-04 | — | — |
-| RT-05 | — | — |
-| RT-06 | — | — |
-| RT-07 | — | — |
-| MORG-01 | — | — |
-| POLISH-01 | — | — |
-| POLISH-02 | — | — |
-| POLISH-03 | — | — |
+| REQ-ID    | Phase | Plan |
+|-----------|-------|------|
+| RT-01     | 6     | —    |
+| RT-02     | 6     | —    |
+| RT-03     | 7     | —    |
+| RT-04     | 7     | —    |
+| RT-05     | 7     | —    |
+| RT-06     | 7     | —    |
+| RT-07     | 7     | —    |
+| MORG-01   | 8     | —    |
+| POLISH-01 | 8     | —    |
+| POLISH-02 | 8     | —    |
+| POLISH-03 | 8     | —    |
