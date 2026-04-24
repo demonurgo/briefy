@@ -1,11 +1,14 @@
 <?php
 // (c) 2026 Briefy contributors — AGPL-3.0
 namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BriefyNotification extends Model
 {
+    use HasFactory;
+
     protected $table = 'briefy_notifications';
     protected $fillable = ['organization_id', 'user_id', 'type', 'title', 'body', 'data', 'read_at'];
     protected $casts = ['data' => 'array', 'read_at' => 'datetime'];

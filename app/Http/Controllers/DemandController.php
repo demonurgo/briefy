@@ -2,9 +2,12 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 namespace App\Http\Controllers;
 
+use App\Events\DemandAssigned;
 use App\Events\DemandCommentCreated;
+use App\Events\DemandStatusChanged;
 use App\Http\Requests\StoreDemandRequest;
 use App\Http\Requests\UpdateDemandRequest;
+use App\Models\BriefyNotification;
 use App\Models\Client;
 use App\Models\Demand;
 use App\Models\DemandComment;
@@ -254,7 +257,41 @@ class DemandController extends Controller
     public function updateInline(UpdateDemandRequest $request, Demand $demand): RedirectResponse
     {
         $this->authorizeDemand($demand);
+
+        // Capture old values BEFORE update — Eloquent update() overwrites in-memory model
+        $oldAssignedTo = $demand->assigned_to;
+        $oldStatus     = $demand->status;
+
         $demand->update($request->validated());
+
+        // RT-03 (D-01): assigned_to changed → notify only the new assignee
+        // D-03: skip if new assignee is null
+        // D-04: skip if actor is the new assignee (no self-notification)
+        if ($demand->assigned_to
+            && $demand->assigned_to !== $oldAssignedTo
+            && $demand->assigned_to !== auth()->id()
+        ) {
+            $notification = BriefyNotification::create([
+                'organization_id' => $demand->organization_id,
+                'user_id'         => $demand->assigned_to,
+                'type'            => 'demand_assigned',
+                'title'           => 'Demanda atribuída a você',
+                'body'            => $demand->title,
+                'data'            => ['demand_id' => $demand->id, 'demand_title' => $demand->title],
+            ]);
+            DemandAssigned::dispatch(
+                $demand->organization_id,
+                $demand->assigned_to,
+                $notification->title,
+                $notification->body,
+                $notification->data,
+            );
+        }
+
+        // RT-04 (D-14): status can also change via updateInline — same dispatch logic as updateStatus
+        if ($demand->status !== $oldStatus) {
+            $this->dispatchStatusChangedNotifications($demand, $oldStatus);
+        }
 
         return back()->with('success', __('app.demand_updated'));
     }
@@ -263,9 +300,53 @@ class DemandController extends Controller
     {
         $this->authorizeDemand($demand);
         $request->validate(['status' => 'required|in:todo,in_progress,awaiting_feedback,in_review,approved']);
+
+        $oldStatus = $demand->status;   // capture BEFORE update
         $demand->update(['status' => $request->status]);
 
+        // RT-04 (D-14): notify creator + assignee, excluding actor
+        if ($demand->status !== $oldStatus) {
+            $this->dispatchStatusChangedNotifications($demand, $oldStatus);
+        }
+
         return back();
+    }
+
+    private function dispatchStatusChangedNotifications(Demand $demand, string $oldStatus): void
+    {
+        $actorId = auth()->id();
+
+        // D-02: notify creator + assignee
+        // D-03: filter nulls (collect()->filter() removes null values)
+        // D-04: exclude the actor who triggered the change
+        // D-11: deduplicate — if creator === assignee, send one notification
+        $recipients = collect([$demand->created_by, $demand->assigned_to])
+            ->filter()                                         // remove nulls
+            ->filter(fn($id) => $id !== $actorId)             // no self-notification
+            ->unique();                                        // deduplicate
+
+        foreach ($recipients as $userId) {
+            $notification = BriefyNotification::create([
+                'organization_id' => $demand->organization_id,
+                'user_id'         => $userId,
+                'type'            => 'demand_status_changed',
+                'title'           => 'Status de demanda alterado',
+                'body'            => $demand->title,
+                'data'            => [
+                    'demand_id'    => $demand->id,
+                    'demand_title' => $demand->title,
+                    'old_status'   => $oldStatus,
+                    'new_status'   => $demand->status,
+                ],
+            ]);
+            DemandStatusChanged::dispatch(
+                $demand->organization_id,
+                $userId,
+                $notification->title,
+                $notification->body,
+                $notification->data,
+            );
+        }
     }
 
     private function authorizeDemand(Demand $demand): void
