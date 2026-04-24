@@ -7,6 +7,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { ClientAvatar } from '@/Components/ClientAvatar';
 import { AiIcon } from '@/Components/AiIcon';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
+import type { PageProps } from '@/types';
 
 const MONTHS_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -36,9 +37,8 @@ const inputCls = 'rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-1.5 tex
 
 export default function ClientsShow({ client, demands, sessions = [] }: { client: Client; demands: Demand[]; sessions?: Session[] }) {
   const { t } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { auth } = usePage().props as any;
-  const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+  const { auth } = usePage<PageProps>().props;
+  const hasKey = auth?.organization?.has_anthropic_key ?? false;
   const isAdmin = ['admin', 'owner'].includes(auth?.user?.role ?? '');
   const hasActiveSession = sessions.some(s => s.status === 'queued' || s.status === 'running');
 

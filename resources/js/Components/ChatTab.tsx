@@ -7,6 +7,7 @@ import { AiIcon } from '@/Components/AiIcon';
 import { AiMarkdown } from '@/Components/AiMarkdown';
 import { useAiStream } from '@/hooks/useAiStream';
 import { useTypewriter } from '@/hooks/useTypewriter';
+import type { PageProps } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,11 +32,6 @@ interface Demand {
   conversations?: Conversation[];
 }
 
-interface PageProps {
-  auth: { user: { organization?: { has_anthropic_key: boolean } } };
-  [key: string]: unknown;
-}
-
 interface ChatTabProps {
   demand: Demand;
 }
@@ -52,7 +48,7 @@ interface ChatTabProps {
 export default function ChatTab({ demand }: ChatTabProps) {
   const { t } = useTranslation();
   const { auth } = usePage<PageProps>().props;
-  const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
+  const hasKey = auth?.organization?.has_anthropic_key ?? false;
 
   // Use the latest conversation from the demand prop (v1.1: only latest shown).
   const latestConv = demand.conversations?.length

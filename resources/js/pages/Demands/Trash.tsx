@@ -6,6 +6,7 @@ import { RotateCcw, Trash2 } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import emptyLight from '@/assets/empty-state-light.svg';
 import emptyDark from '@/assets/empty-state-dark.svg';
+import type { PageProps } from '@/types';
 
 interface TrashedDemand {
   id: number;
@@ -30,7 +31,7 @@ function daysLeft(expiresAt: string): number {
 
 export default function DemandsTrash({ demands }: Props) {
   const { t } = useTranslation();
-  const { auth } = usePage().props as { auth: { user: { role: string } }; [key: string]: unknown };
+  const { auth } = usePage<PageProps>().props;
   const isAdmin = ['admin', 'owner'].includes(auth?.user?.role ?? '');
 
   const restore = (id: number) =>

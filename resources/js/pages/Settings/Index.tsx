@@ -16,6 +16,7 @@ import { UserAvatar } from '@/Components/UserAvatar';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
 import Dropdown from '@/Components/Dropdown';
 import InputError from '@/Components/InputError';
+import type { PageProps } from '@/types';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -49,33 +50,23 @@ interface TestResult {
   message: string;
 }
 
-interface SettingsPageProps {
-  [key: string]: unknown;
-  auth: {
-    user: {
-      id: number;
-      name: string;
-      email: string;
-      avatar: string | null;
-      role: string;
-      preferences: { locale?: string; theme?: string };
-      organization: {
-        id: number;
-        name: string;
-        slug: string;
-        logo: string | null;
-        has_anthropic_key: boolean;
-        anthropic_api_key_mask: string | null;
-        key_valid: boolean;
-        managed_agents_enabled: boolean;
-        last_key_check_at: string | null;
-        client_research_agent_id: string | null;
-        client_research_environment_id: string | null;
-      };
-    };
-    organization: { id: number; name: string; slug: string; logo?: string; has_anthropic_key: boolean; anthropic_api_key_mask: string | null } | null;
-  };
+// SettingsPageProps extends global PageProps with extra fields on auth.organization
+// that only the settings page receives (client_research_agent_id, etc.)
+interface SettingsOrganization {
+  id: number;
+  name: string;
+  slug: string;
+  logo?: string | null;
+  has_anthropic_key: boolean;
+  anthropic_api_key_mask: string | null;
+  key_valid: boolean;
+  managed_agents_enabled: boolean;
+  last_key_check_at: string | null;
+  client_research_agent_id: string | null;
+  client_research_environment_id: string | null;
 }
+
+type SettingsPageProps = PageProps<{ auth: { organization: SettingsOrganization | null } }>;
 
 // ── Inline utility: RoleBadge ──────────────────────────────────────────────
 
@@ -116,7 +107,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
   const { t } = useTranslation();
   const { auth } = usePage<SettingsPageProps>().props;
   const user = auth.user;
-  const userOrg = user.organization;
+  const userOrg = auth.organization as SettingsOrganization;
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -125,8 +116,8 @@ export default function SettingsIndex({ members, pending_invites, organization, 
 
   const profileForm = useForm({
     name: user.name,
-    locale: user.preferences?.locale ?? 'pt-BR',
-    theme: user.preferences?.theme ?? 'light',
+    locale: (user.preferences?.['locale'] as string | undefined) ?? 'pt-BR',
+    theme: (user.preferences?.['theme'] as string | undefined) ?? 'light',
     current_password: '',
     password: '',
     password_confirmation: '',

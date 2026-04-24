@@ -46,9 +46,8 @@ export default function ClientsEdit({ client, latest_session }: { client: Client
     const cleanedHandles = Object.fromEntries(
       Object.entries(data.social_handles ?? {}).filter(([, v]) => v && String(v).trim() !== '')
     );
-    post(route('clients.update', client.id), {
-      data: { ...data, social_handles: cleanedHandles },
-    });
+    setData('social_handles', cleanedHandles);
+    post(route('clients.update', client.id));
   };
 
   return (

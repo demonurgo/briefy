@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { AiIcon } from '@/Components/AiIcon';
+import type { PageProps } from '@/types';
 import { PlanningCard, Suggestion } from '@/Components/PlanningCard';
 import { PlanningItemModal } from '@/Components/PlanningItemModal';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
@@ -73,9 +74,8 @@ function groupByMonth(plannings: PlanningDemand[]): Array<{ label: string; items
 
 export default function PlanejamentoIndex({ plannings, clients, filters, teamMembers }: Props) {
   const { t } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { auth } = usePage().props as any;
-  const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+  const { auth } = usePage<PageProps>().props;
+  const hasKey = auth?.organization?.has_anthropic_key ?? false;
 
   // --- Detail modal state ---
   const [detailItem, setDetailItem] = useState<import('@/Components/PlanningCard').Suggestion | null>(null);

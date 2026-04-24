@@ -9,6 +9,7 @@ import { AiIcon } from '@/Components/AiIcon';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
 import emptyLight from '@/assets/empty-state-light.svg';
 import emptyDark from '@/assets/empty-state-dark.svg';
+import type { PageProps } from '@/types';
 
 interface ActiveResearchSession {
   id: number;
@@ -55,9 +56,8 @@ const CHANNEL_COLORS: Record<string, string> = {
 
 export default function ClientsIndex({ clients, filters }: Props) {
   const { t } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { auth } = usePage().props as any;
-  const hasKey = (auth?.user?.organization?.has_anthropic_key as boolean) ?? false;
+  const { auth } = usePage<PageProps>().props;
+  const hasKey = auth?.organization?.has_anthropic_key ?? false;
   const isAdmin = ['admin', 'owner'].includes(auth?.user?.role ?? '');
   const [search, setSearch] = useState(filters.search ?? '');
   const [deletingId, setDeletingId] = useState<number | null>(null);
