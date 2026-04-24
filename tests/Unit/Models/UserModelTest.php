@@ -35,7 +35,9 @@ class UserModelTest extends TestCase
 
     public function test_is_admin_returns_true_for_admin_role(): void
     {
-        $user = User::factory()->create(['role' => 'admin']);
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['current_organization_id' => $org->id, 'role' => 'admin']);
+        $user->organizations()->attach($org->id, ['role' => 'admin', 'joined_at' => now()]);
         $this->assertTrue($user->isAdmin());
     }
 

@@ -59,7 +59,7 @@ class ProfileControllerTest extends TestCase
         $this->actingAs($user);
         $bigFile = UploadedFile::fake()->image('big.jpg')->size(3000);
 
-        $response = $this->post(route('settings.profile.avatar'), ['avatar' => $bigFile]);
+        $response = $this->from(route('settings.index'))->post(route('settings.profile.avatar'), ['avatar' => $bigFile]);
         $response->assertSessionHasErrors(['avatar']);
     }
 }

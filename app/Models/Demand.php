@@ -11,6 +11,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Demand extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::deleting(function (Demand $demand) {
+            $demand->files()->delete();
+            $demand->comments()->delete();
+        });
+    }
+
     protected $fillable = [
         'organization_id', 'client_id', 'type', 'title', 'description',
         'objective', 'tone', 'channel', 'deadline', 'status', 'priority',

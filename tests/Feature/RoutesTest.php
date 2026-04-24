@@ -16,6 +16,7 @@ class RoutesTest extends TestCase
         parent::setUp();
         $org = Organization::factory()->create();
         $this->user = User::factory()->create(['current_organization_id' => $org->id]);
+        $this->user->organizations()->attach($org->id, ['role' => 'owner', 'joined_at' => now()]);
     }
 
     public function test_dashboard_redirects_unauthenticated_users_to_login(): void
