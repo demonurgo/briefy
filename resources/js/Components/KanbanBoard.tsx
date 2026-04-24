@@ -233,7 +233,7 @@ export function KanbanBoard({ demands: initialDemands, onDemandClick, loadingDem
   };
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -242,7 +242,7 @@ export function KanbanBoard({ demands: initialDemands, onDemandClick, loadingDem
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex h-full gap-4 overflow-x-auto kanban-scroll pb-2">
+        <div className="flex h-[calc(100dvh-8rem)] md:h-full gap-4 overflow-x-auto kanban-scroll pb-2">
           {STATUSES.map(status => (
             <DroppableColumn
               key={status}
