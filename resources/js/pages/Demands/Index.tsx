@@ -1,6 +1,6 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { formatDate } from '@/utils/date';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { PageProps } from '@/types';
 import { useTranslation } from 'react-i18next';
@@ -62,13 +62,17 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
   // Real-time: recarregar demandas quando outro usuário da org fizer uma alteração
   const { auth } = usePage<PageProps>().props;
   const orgId = (auth?.user as { current_organization_id?: number } | undefined)?.current_organization_id;
+  const reloadTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!orgId || !window.Echo) return;
 
     const channel = window.Echo.private(`organization.${orgId}`);
     channel.listen('.demand.board.updated', () => {
-      router.reload({ only: ['demands'] });
+      if (reloadTimeout.current) clearTimeout(reloadTimeout.current);
+      reloadTimeout.current = setTimeout(() => {
+        router.reload({ only: ['demands'] });
+      }, 300);
     });
 
     return () => {
