@@ -73,5 +73,5 @@ Plans:  3/3 complete (Phase 6)
 ## Session Continuity
 
 Last session: 2026-04-24
-Stopped at: Phase 7 complete — MOB-01–04 delivered, UAT approved, 6 mobile polish fixes committed
-Resume: `/gsd-discuss-phase 8` or `/gsd-plan-phase 8` to begin Multi-Org + Polish
+Stopped at: Phase 8 context gathered — 4 areas discussed, CONTEXT.md ready
+Resume: `/gsd-plan-phase 8` to plan Multi-Org + Polish (CONTEXT.md present)
