@@ -45,7 +45,7 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request): RedirectResponse
     {
         $request->validate([
-            'avatar' => ['required', 'image', 'max:20480', 'mimes:jpeg,jpg,png,webp'],
+            'avatar' => ['required', 'image', 'max:2048', 'mimes:jpeg,jpg,png,webp'],
         ]);
 
         $user = $request->user();

@@ -46,7 +46,7 @@ class RoutesTest extends TestCase
 
     public function test_authenticated_user_can_access_planning(): void
     {
-        $this->actingAs($this->user)->get('/planning')->assertStatus(200);
+        $this->actingAs($this->user)->get('/planejamento')->assertStatus(200);
     }
 
     public function test_authenticated_user_can_access_settings(): void
