@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Real-time + Polish
 status: planning
-stopped_at: roadmap created — ready to plan Phase 6
+stopped_at: Phase 6 context gathered
 last_updated: "2026-04-24T00:00:00Z"
 last_activity: 2026-04-24 — Roadmap created for v1.2 (Phases 6–8)
 progress:
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 6 (Real-time Infrastructure) — Not started
+Phase: 6 (Real-time Infrastructure) — Context ready
 Plan: —
 Status: Roadmap created — ready to plan Phase 6
 Last activity: 2026-04-24 — Roadmap written for v1.2 (Phases 6–8)
