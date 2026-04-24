@@ -39,7 +39,7 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 - [x] **Phase 6: Real-time Infrastructure** — Live Kanban status updates and live comments via Reverb WebSocket
 - [x] **Phase 7: Mobile + PWA** — Responsive layout fix, mobile-first UI redesign, PWA manifest + service worker — completed 2026-04-24
-- [ ] **Phase 8: Multi-Org + Polish** — New org creation from /settings, SSE consolidation, TypeScript fixes, AI conversation picker
+- [ ] **Phase 8: Multi-Org + Polish** — New org creation from OrgSwitcher, SSE consolidation, TypeScript fixes, AI conversation picker
 
 ---
 
@@ -79,15 +79,24 @@ Plans:
 - [x] 07-03-PLAN.md — Verify app.blade.php PWA tags + Dashboard responsive grids + human UAT checkpoint
 
 ### Phase 8: Multi-Org + Polish
-**Goal:** Existing users can create additional organizations from /settings, and the known technical debt from v1.1 is fully resolved.
+**Goal:** Existing users can create additional organizations from the OrgSwitcher, and the known technical debt from v1.1 is fully resolved.
 **Depends on:** Phase 7
 **Requirements:** MORG-01, POLISH-01, POLISH-02, POLISH-03
 **Success Criteria** (what must be TRUE):
-  1. A logged-in user can create a new organization directly from /settings without logging out or re-registering; the new org appears immediately in the OrgSwitcher.
+  1. A logged-in user can create a new organization directly from the OrgSwitcher dropdown without logging out or re-registering; the new org appears immediately in the switcher.
   2. All AI streaming uses a single unified React hook — the parallel `useAiStream` / native `EventSource` pattern no longer exists in the codebase.
   3. TypeScript strict mode reports zero errors related to `auth.organization` shape mismatches and `AiIcon` size enum gaps.
   4. In the demand AI chat panel, a user can open a dropdown to select a previous AI conversation for that demand and resume it.
-**Plans:** TBD
+**Plans:** 7 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Wave 1: RED test stub (OrganizationCreationTest) + expand index.d.ts global types
+- [ ] 08-02-PLAN.md — Wave 2: MORG-01 backend — OrganizationController@store + POST /organizations route
+- [ ] 08-03-PLAN.md — Wave 2: POLISH-02 — remove local PageProps + AiIcon enum + Inertia v3 fix + unsafe casts
+- [ ] 08-04-PLAN.md — Wave 3: MORG-01 frontend — wire OrgSwitcher button + CreateOrgModal in AppLayout
+- [ ] 08-05-PLAN.md — Wave 3: POLISH-01 — extend useAiStream GET branch + migrate ClientResearchTimelineModal
+- [ ] 08-06-PLAN.md — Wave 3: POLISH-03 — conversation picker dropdown in ChatTab
+- [ ] 08-07-PLAN.md — Wave 4: Full verification + human UAT checkpoint
 
 ---
 
@@ -118,11 +127,11 @@ Plans:
 | 1. Auth + Org + Layout | v1.0 | — | Complete | 2026-04-22 |
 | 2. Clients + Demands | v1.0 | — | Complete | 2026-04-22 |
 | 3. AI Integration | v1.1 | 13/13 | Complete | 2026-04-24 |
-| 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-24 |
+| 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-23 |
 | 5. Dashboard + Onboarding | v1.1 | 5/5 | Complete | 2026-04-24 |
 | 6. Real-time Infrastructure | v1.2 | 3/3 | Complete | 2026-04-24 |
 | 7. Mobile + PWA | v1.2 | 0/3 | Not started | - |
-| 8. Multi-Org + Polish | v1.2 | 0/? | Not started | - |
+| 8. Multi-Org + Polish | v1.2 | 0/7 | Not started | - |
 
 ---
 
@@ -147,5 +156,5 @@ Plans:
 ---
 
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-24 — Phase 7 substituída: Notifications → Mobile + PWA*
+*Last updated: 2026-04-24 — Phase 8 planned: 7 plans created*
 *Phase 7 planned: 2026-04-24 — 3 plans created*
