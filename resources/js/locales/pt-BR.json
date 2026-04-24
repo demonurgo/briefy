@@ -182,7 +182,10 @@
       "deepResearch": "Deep Research do cliente",
       "hint": "A pesquisa leva 20-40 min e popula a memória do cliente com insights de tom, padrões e preferências automaticamente.",
       "disabledNoSources": "Adicione pelo menos um social handle ou website antes de iniciar a pesquisa.",
-      "disabledNoKey": "Configure uma chave Anthropic em Configurações → IA para usar este recurso."
+      "disabledNoKey": "Configure uma chave Anthropic em Configurações → IA para usar este recurso.",
+      "confirmTitle": "Iniciar Deep Research",
+      "confirmBody": "A pesquisa leva aproximadamente {{minutes}} minutos e consome créditos da sua chave Anthropic. Deseja continuar?",
+      "confirmCta": "Iniciar pesquisa"
     }
   },
   "settings": {

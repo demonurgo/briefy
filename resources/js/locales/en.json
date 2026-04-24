@@ -182,7 +182,10 @@
       "deepResearch": "Deep Research client",
       "hint": "Research takes 20-40 min and automatically populates the client memory with tone, pattern and preference insights.",
       "disabledNoSources": "Add at least one social handle or website before starting the research.",
-      "disabledNoKey": "Configure an Anthropic key in Settings → AI to use this feature."
+      "disabledNoKey": "Configure an Anthropic key in Settings → AI to use this feature.",
+      "confirmTitle": "Start Deep Research",
+      "confirmBody": "Research takes approximately {{minutes}} minutes and consumes credits from your Anthropic key. Continue?",
+      "confirmCta": "Start research"
     }
   },
   "settings": {
