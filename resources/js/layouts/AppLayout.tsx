@@ -1,12 +1,13 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { PropsWithChildren, useEffect, useRef, useState } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { router, usePage, useForm } from '@inertiajs/react';
 import { Bell, ChevronDown, Check, Plus } from 'lucide-react';
 import { BottomNav } from '@/Components/BottomNav';
 import { Sidebar } from '@/Components/Sidebar';
 import { ThemeToggle } from '@/Components/ThemeToggle';
 import { FlashMessage } from '@/Components/FlashMessage';
 import { UserAvatar } from '@/Components/UserAvatar';
+import type { PageProps } from '@/types';
 
 interface Notification {
   id: number;
@@ -16,24 +17,6 @@ interface Notification {
   data: Record<string, unknown>;
   read_at: string | null;
   created_at: string;
-}
-
-interface PageProps {
-  [key: string]: unknown;
-  auth: {
-    user: {
-      id: number;
-      name: string;
-      email: string;
-      avatar: string | null;
-      role: string;
-      current_organization_id: number;
-      organization: { id: number; name: string; slug: string; logo: string | null } | null;
-      organizations: Array<{ id: number; name: string; slug: string; logo: string | null; role: string }>;
-    };
-    organization: { id: number; name: string; slug: string; logo?: string; has_anthropic_key: boolean; anthropic_api_key_mask: string | null } | null;
-  };
-  unread_notifications: number;
 }
 
 interface Props extends PropsWithChildren {
@@ -52,6 +35,7 @@ export default function AppLayout({ children, title, actions }: Props) {
   const prevUnread = useRef(unread_notifications);
   const [orgSwitcherOpen, setOrgSwitcherOpen] = useState(false);
   const orgSwitcherRef = useRef<HTMLDivElement>(null);
+  const [createOrgOpen, setCreateOrgOpen] = useState(false);
 
   // Play a soft notification sound using Web Audio API
   const playNotificationSound = () => {
@@ -105,6 +89,28 @@ export default function AppLayout({ children, title, actions }: Props) {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const {
+    data: orgData,
+    setData: setOrgData,
+    post: postOrg,
+    processing: orgProcessing,
+    errors: orgErrors,
+    reset: resetOrg,
+  } = useForm({ name: '', slug: '' });
+
+  const toSlug = (s: string) =>
+    s.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+  const handleCreateOrg = (e: React.FormEvent) => {
+    e.preventDefault();
+    postOrg(route('organizations.store'), {
+      onSuccess: () => { setCreateOrgOpen(false); resetOrg(); },
+    });
+  };
 
   const openBell = async () => {
     setBellOpen(v => !v);
@@ -237,9 +243,12 @@ export default function AppLayout({ children, title, actions }: Props) {
 
                     <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] mt-1 pt-1">
                       <button
-                        disabled
-                        title="Em breve"
-                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#7c3aed] opacity-50 cursor-not-allowed"
+                        type="button"
+                        onClick={() => {
+                          setOrgSwitcherOpen(false);
+                          setCreateOrgOpen(true);
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#7c3aed] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
                       >
                         <Plus size={14} />
                         Criar nova organização
@@ -257,6 +266,75 @@ export default function AppLayout({ children, title, actions }: Props) {
       </div>
       <BottomNav />
       <FlashMessage />
+
+      {createOrgOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setCreateOrgOpen(false)}
+        >
+          <div
+            className="max-w-lg w-full rounded-[16px] bg-[#f9fafb] dark:bg-[#0b0f14] p-6 shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h2 className="mb-4 text-base font-semibold text-[#111827] dark:text-[#f9fafb]">
+              Criar nova organização
+            </h2>
+            <form onSubmit={handleCreateOrg} className="flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#374151] dark:text-[#d1d5db]">
+                  Nome <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={orgData.name}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setOrgData(prev => ({ ...prev, name: v, slug: toSlug(v) }));
+                  }}
+                  className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm text-[#111827] outline-none focus:border-[#7c3aed] dark:border-[#374151] dark:bg-[#111827] dark:text-[#f9fafb]"
+                  placeholder="Minha Agência"
+                  required
+                  autoFocus
+                />
+                {orgErrors.name && (
+                  <p className="mt-1 text-xs text-red-500">{orgErrors.name}</p>
+                )}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#374151] dark:text-[#d1d5db]">
+                  Slug
+                </label>
+                <input
+                  type="text"
+                  value={orgData.slug}
+                  onChange={e => setOrgData('slug', e.target.value)}
+                  className="w-full rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm font-mono text-[#111827] outline-none focus:border-[#7c3aed] dark:border-[#374151] dark:bg-[#111827] dark:text-[#f9fafb]"
+                  placeholder="minha-agencia"
+                />
+                {orgErrors.slug && (
+                  <p className="mt-1 text-xs text-red-500">{orgErrors.slug}</p>
+                )}
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setCreateOrgOpen(false); resetOrg(); }}
+                  className="rounded-lg px-4 py-2 text-sm text-[#6b7280] hover:text-[#374151] dark:text-[#9ca3af]"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={orgProcessing || !orgData.name.trim()}
+                  className="rounded-lg bg-[#7c3aed] px-4 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:opacity-50"
+                >
+                  {orgProcessing ? 'Criando...' : 'Criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
