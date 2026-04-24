@@ -107,6 +107,7 @@ interface Props {
   activityFeed: ActivityEvent[];
   hasClients: boolean;
   hasDemands: boolean;
+  hasAnthropicKey: boolean;
 }
 
 // -----------------------------------------------------------------------
@@ -764,6 +765,7 @@ export default function Dashboard({
   activityFeed,
   hasClients,
   hasDemands,
+  hasAnthropicKey,
 }: Props) {
   const { t } = useTranslation();
   const { auth } = usePage<PageProps>().props;
@@ -876,6 +878,8 @@ export default function Dashboard({
         <OnboardingChecklist
           hasClients={hasClients}
           hasDemands={hasDemands}
+          hasAnthropicKey={hasAnthropicKey}
+          isAdmin={isAdmin}
           onboardingDismissed={prefs?.onboarding_dismissed}
         />
 

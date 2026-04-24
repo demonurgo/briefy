@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Client;
 use App\Models\Demand;
+use App\Models\Organization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -324,10 +325,11 @@ class DashboardController extends Controller
         // ---------------------------------------------------------------
         // Onboarding (ONBRD-01)
         // ---------------------------------------------------------------
-        $hasClients = Client::where('organization_id', $orgId)->exists();
-        $hasDemands = Demand::where('organization_id', $orgId)
+        $hasClients      = Client::where('organization_id', $orgId)->exists();
+        $hasDemands      = Demand::where('organization_id', $orgId)
             ->whereNull('archived_at')
             ->exists();
+        $hasAnthropicKey = Organization::find($orgId)?->hasAnthropicKey() ?? false;
 
         // Planning reminder clients (widget existente — manter)
         $planningReminderClients = Client::where('organization_id', $orgId)
@@ -340,6 +342,7 @@ class DashboardController extends Controller
             'activityFeed'            => $activityFeed,
             'hasClients'              => $hasClients,
             'hasDemands'              => $hasDemands,
+            'hasAnthropicKey'         => $hasAnthropicKey,
             'planningReminderClients' => $planningReminderClients,
         ]);
     }
