@@ -6,19 +6,24 @@ import { CheckCircle, Circle, X } from 'lucide-react';
 interface Props {
   hasClients: boolean;
   hasDemands: boolean;
+  hasAnthropicKey: boolean;
+  isAdmin: boolean;
   onboardingDismissed?: boolean;
 }
 
-export function OnboardingChecklist({ hasClients, hasDemands, onboardingDismissed }: Props) {
+export function OnboardingChecklist({ hasClients, hasDemands, hasAnthropicKey, isAdmin, onboardingDismissed }: Props) {
   const [dismissed, setDismissed] = useState(false);
 
-  // Não renderizar se: dispensado (estado local ou preference persistida) OU ambos os passos completos
-  if (dismissed || onboardingDismissed || (hasClients && hasDemands)) {
+  const allDone = isAdmin
+    ? hasAnthropicKey && hasClients && hasDemands
+    : hasClients && hasDemands;
+
+  if (dismissed || onboardingDismissed || allDone) {
     return null;
   }
 
   const handleDismiss = () => {
-    setDismissed(true); // Otimistic — esconde imediatamente
+    setDismissed(true);
     router.patch(
       route('settings.preferences'),
       { onboarding_dismissed: true },
@@ -27,15 +32,24 @@ export function OnboardingChecklist({ hasClients, hasDemands, onboardingDismisse
   };
 
   const steps = [
+    ...(isAdmin ? [{
+      id: 'setup-ai',
+      label: 'Configurar chave de IA',
+      description: 'Adicione sua chave Anthropic para ativar geração de brief, chat e planejamento mensal.',
+      href: '/settings/ai',
+      complete: hasAnthropicKey,
+    }] : []),
     {
       id: 'add-client',
       label: 'Adicionar um cliente',
+      description: undefined,
       href: '/clients/create',
       complete: hasClients,
     },
     {
       id: 'create-demand',
       label: 'Criar a primeira demanda',
+      description: undefined,
       href: '/demands?create=1',
       complete: hasDemands,
     },
@@ -79,7 +93,10 @@ export function OnboardingChecklist({ hasClients, hasDemands, onboardingDismisse
               {step.label}
             </span>
             {!step.complete && (
-              <div className="mt-0.5">
+              <div className="mt-0.5 space-y-0.5">
+                {step.description && (
+                  <p className="text-xs text-[#6b7280] dark:text-[#9ca3af]">{step.description}</p>
+                )}
                 <Link
                   href={step.href}
                   className="text-xs font-medium text-[#7c3aed] hover:underline"
