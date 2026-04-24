@@ -2,9 +2,10 @@
 import { usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, X } from 'lucide-react';
+import type { PageProps } from '@/types';
 
 export function FlashMessage() {
-  const { flash } = usePage<{ [key: string]: unknown; auth: { user: { id: number; name: string; email: string } }; flash: { success?: string; error?: string } }>().props;
+  const { flash } = usePage<PageProps>().props;
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

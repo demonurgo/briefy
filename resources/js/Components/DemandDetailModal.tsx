@@ -8,7 +8,7 @@ import { StatusBadge } from '@/Components/StatusBadge';
 import { AiIcon } from '@/Components/AiIcon';
 import BriefTab from '@/Components/BriefTab';
 import ChatTab from '@/Components/ChatTab';
-import type { AiConversation } from '@/types';
+import type { AiConversation, PageProps } from '@/types';
 
 interface User { id: number; name: string; email: string; }
 interface Client { id: number; name: string; }
@@ -79,7 +79,7 @@ interface Props { demand: Demand; isAdmin: boolean; teamMembers: TeamMember[]; o
 
 export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Props) {
   const { t } = useTranslation();
-  const { auth } = usePage<{ auth: { user: User & { organization?: { has_anthropic_key: boolean } } }; [key: string]: unknown }>().props;
+  const { auth } = usePage<PageProps>().props;
 
   const [confirmClose, setConfirmClose] = useState(false);
   const [showFileForm, setShowFileForm] = useState(false);
@@ -93,10 +93,9 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   const [generatingBrief, setGeneratingBrief] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
+  const hasKey = auth?.organization?.has_anthropic_key ?? false;
 
-  const orgId = (auth?.user as { current_organization_id?: number } | undefined)
-    ?.current_organization_id;
+  const orgId = auth?.user?.current_organization_id;
 
   // Estado local RT-02: permite append via broadcast sem round-trip
   const [comments, setComments] = useState<Comment[]>(demand.comments);

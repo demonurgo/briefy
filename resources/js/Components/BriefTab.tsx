@@ -9,16 +9,12 @@ import emptyDark from '@/assets/empty-state-dark.svg';
 import { AiMarkdown } from '@/Components/AiMarkdown';
 import { useAiStream } from '@/hooks/useAiStream';
 import { useTypewriter } from '@/hooks/useTypewriter';
+import type { PageProps } from '@/types';
 
 interface Demand {
   id: number;
   title: string;
   ai_analysis?: { brief?: string; brief_generated_at?: string; brief_edited_at?: string };
-}
-
-interface PageProps {
-  auth: { user: { organization?: { has_anthropic_key: boolean } } };
-  [key: string]: unknown;
 }
 
 interface BriefTabProps {
@@ -39,7 +35,7 @@ interface BriefTabProps {
 export default function BriefTab({ demand, generating, onGeneratingChange }: BriefTabProps) {
   const { t } = useTranslation();
   const { auth } = usePage<PageProps>().props;
-  const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
+  const hasKey = auth?.organization?.has_anthropic_key ?? false;
 
   const existingBrief = demand.ai_analysis?.brief ?? '';
   const [isEditing, setIsEditing] = useState(false);

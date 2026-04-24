@@ -1,17 +1,13 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useCallback, useEffect, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import type { PageProps } from '@/types';
 
 type Theme = 'light' | 'dark';
 
-interface PageProps {
-  [key: string]: unknown;
-  auth: { user: { id: number; name: string; email: string; preferences: { theme: string } } };
-}
-
 export function useTheme() {
   const { auth } = usePage<PageProps>().props;
-  const initial = (auth?.user?.preferences?.theme as Theme) ?? 'light';
+  const initial = (auth?.user?.preferences?.['theme'] as Theme) ?? 'light';
   const [theme, setTheme] = useState<Theme>(initial);
 
   useEffect(() => {

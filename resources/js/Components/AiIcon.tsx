@@ -3,7 +3,7 @@ import chatbotIconLight from '@/assets/chatbot-icon-light.svg';
 import chatbotIconDark  from '@/assets/chatbot-icon-dark.svg';
 
 export interface AiIconProps {
-  size?: 12 | 16 | 20 | 24 | 32 | 48 | 64;
+  size?: 11 | 12 | 14 | 16 | 20 | 24 | 32 | 48 | 64;
   spinning?: boolean;
   className?: string;
   alt?: string;

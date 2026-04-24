@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, Edit2, Link2, Paperclip, Pencil, Plus, Send, Trash2, X } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { StatusBadge } from '@/Components/StatusBadge';
+import type { PageProps } from '@/types';
 
 interface User { id: number; name: string; }
 interface Client { id: number; name: string; }
@@ -91,7 +92,7 @@ const inputClass = 'w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3 p
 
 export default function DemandsShow({ demand, isAdmin }: { demand: Demand; isAdmin: boolean }) {
   const { t } = useTranslation();
-  const { auth } = usePage<{ auth: { user: { id: number; name: string; email: string } }; [key: string]: unknown }>().props;
+  const { auth } = usePage<PageProps>().props;
 
   const [showFileForm, setShowFileForm] = useState(false);
   const [fileType, setFileType] = useState<'upload' | 'link'>('upload');
