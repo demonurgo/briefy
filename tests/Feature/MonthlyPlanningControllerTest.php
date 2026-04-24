@@ -55,19 +55,23 @@ class MonthlyPlanningControllerTest extends TestCase
     {
         $this->org->forceFill(['anthropic_api_key_encrypted' => 'sk-ant-' . str_repeat('a', 50)])->save();
 
-        $this->app->instance(MonthlyPlanGenerator::class, new class extends MonthlyPlanGenerator {
-            public function __construct() {}
-            public function generate($client, int $year, int $month, \App\Services\Ai\AnthropicClientInterface $anthropic): array
-            {
-                return [
-                    'items' => array_map(fn ($i) => [
-                        'date' => sprintf('%04d-%02d-%02d', $year, $month, 5 + $i * 4),
-                        'title' => "Item {$i}",
-                        'description' => "Descrição do item {$i} com mais de dez caracteres.",
-                        'channel' => 'instagram',
-                    ], range(1, $client->monthly_posts)),
-                ];
-            }
+        $fakeItems = array_map(fn ($i) => [
+            'date'        => sprintf('2026-05-%02d', 5 + $i * 4),
+            'title'       => "Item {$i}",
+            'description' => "Descrição do item {$i} com mais de dez caracteres.",
+            'channel'     => 'instagram',
+        ], range(1, $this->client->monthly_posts));
+
+        $this->mock(\App\Services\Ai\AnthropicClientFactory::class, function ($mock) {
+            $stub = new class implements \App\Services\Ai\AnthropicClientInterface {
+                public function messages(): object { return new \stdClass(); }
+                public function beta(): object { return new \stdClass(); }
+            };
+            $mock->shouldReceive('forOrganization')->andReturn($stub);
+        });
+
+        $this->mock(MonthlyPlanGenerator::class, function ($mock) use ($fakeItems) {
+            $mock->shouldReceive('generate')->andReturn(['items' => $fakeItems]);
         });
 
         $res = $this->actingAs($this->user)->post('/planejamento/generate', [
