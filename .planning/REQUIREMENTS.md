@@ -1,7 +1,7 @@
 # Requirements: Briefy v1.2 — Real-time + Polish
 
 **Milestone:** v1.2
-**Goal:** Adicionar colaboração em tempo real via Laravel Reverb, sistema de notificações in-app, criação de multi-org para usuários existentes, e consolidar dívida técnica do v1.1.
+**Goal:** Adicionar colaboração em tempo real via Laravel Reverb, experiência mobile + PWA, criação de multi-org para usuários existentes, e consolidar dívida técnica do v1.1.
 
 ---
 
@@ -11,11 +11,14 @@
 
 - [ ] **RT-01**: User sees Kanban card status update in real-time without page refresh when another team member changes it
 - [ ] **RT-02**: User sees new comments appear live in the demand detail modal without refreshing when another team member adds one
-- [ ] **RT-03**: User receives an in-app notification when a demand is assigned to them
-- [ ] **RT-04**: User receives an in-app notification when a demand they own changes status
-- [ ] **RT-05**: User sees an unread notification count badge on the bell icon in the header
-- [ ] **RT-06**: User can open a notification dropdown listing recent notifications with timestamps and demand context
-- [ ] **RT-07**: User can mark individual notifications as read or mark all notifications as read at once
+~~RT-03 a RT-07 — Sistema de Notificações — movidos para seed (.planning/seeds/notifications-system.md) em 2026-04-24~~
+
+### Mobile + PWA
+
+- [ ] **MOB-01**: Nenhuma página exibe barra de scroll horizontal em viewport de 375px — layout 100% responsivo
+- [ ] **MOB-02**: Kanban board, demand modal e dashboard são usáveis e visualmente polidos no mobile
+- [ ] **MOB-03**: App pode ser instalado na tela inicial do iOS Safari e Android Chrome com ícone e splash screen corretos (PWA manifest)
+- [ ] **MOB-04**: Core pages carregam e são navegáveis offline ou em conexão lenta (service worker caches shell)
 
 ### Multi-Org
 
@@ -57,11 +60,10 @@
 |-----------|-------|------|
 | RT-01     | 6     | —    |
 | RT-02     | 6     | —    |
-| RT-03     | 7     | —    |
-| RT-04     | 7     | —    |
-| RT-05     | 7     | —    |
-| RT-06     | 7     | —    |
-| RT-07     | 7     | —    |
+| MOB-01    | 7     | —    |
+| MOB-02    | 7     | —    |
+| MOB-03    | 7     | —    |
+| MOB-04    | 7     | —    |
 | MORG-01   | 8     | —    |
 | POLISH-01 | 8     | —    |
 | POLISH-02 | 8     | —    |

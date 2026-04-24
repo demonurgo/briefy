@@ -10,6 +10,7 @@
 - ✅ **v1.0 — Core Platform** — Phases 1–2 (shipped 2026-04-22)
 - ✅ **v1.1 — AI + Team + Dashboard** — Phases 3–5 (shipped 2026-04-24)
 - **v1.2 — Real-time + Polish** — Phases 6–8 (in progress)
+  - Phase 7 substituída: Notifications → Mobile + PWA (prioridade ajustada em 2026-04-24)
 
 ## Phases
 
@@ -37,7 +38,7 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 ### v1.2 — Real-time + Polish
 
 - [x] **Phase 6: Real-time Infrastructure** — Live Kanban status updates and live comments via Reverb WebSocket
-- [ ] **Phase 7: Notifications System** — In-app notification delivery, bell badge, dropdown, and mark-read
+- [ ] **Phase 7: Mobile + PWA** — Responsive layout fix, mobile-first UI redesign, PWA manifest + service worker
 - [ ] **Phase 8: Multi-Org + Polish** — New org creation from /settings, SSE consolidation, TypeScript fixes, AI conversation picker
 
 ---
@@ -60,16 +61,15 @@ Plans:
 - [x] 06-02-PLAN.md — Debounce na subscription RT-01 em Index.tsx
 - [x] 06-03-PLAN.md — Subscription RT-02 em DemandDetailModal (frontend)
 
-### Phase 7: Notifications System
-**Goal:** Users are alerted in-app when demands are assigned to them or change status, with a persistent notification center in the header.
+### Phase 7: Mobile + PWA
+**Goal:** The Briefy app works beautifully on mobile browsers and can be installed as a PWA on iOS and Android.
 **Depends on:** Phase 6
-**Requirements:** RT-03, RT-04, RT-05, RT-06, RT-07
+**Requirements:** MOB-01, MOB-02, MOB-03, MOB-04
 **Success Criteria** (what must be TRUE):
-  1. User receives an in-app notification (via Reverb) within seconds of being assigned to a demand.
-  2. User receives an in-app notification when a demand they own changes status.
-  3. The bell icon in the header shows a numeric badge with the unread notification count; the count updates live without refresh.
-  4. Clicking the bell opens a dropdown listing recent notifications, each showing a timestamp, demand name, and the triggering event.
-  5. User can mark a single notification as read or mark all notifications as read at once; the unread badge updates immediately.
+  1. No horizontal scroll bar appears on any page when viewed on a 375px-wide mobile viewport.
+  2. The Kanban board, demand modal, and dashboard are usable and visually polished on mobile.
+  3. The app can be added to the home screen on iOS Safari and Android Chrome with a proper icon and splash screen.
+  4. Core pages load and are navigable when the device is offline or on a slow connection (service worker caches shell).
 **Plans:** TBD
 **UI hint:** yes
 
@@ -92,17 +92,17 @@ Plans:
 |-----------|-------|---------|
 | RT-01     | 6     | Complete |
 | RT-02     | 6     | Complete |
-| RT-03     | 7     | Pending |
-| RT-04     | 7     | Pending |
-| RT-05     | 7     | Pending |
-| RT-06     | 7     | Pending |
-| RT-07     | 7     | Pending |
+| MOB-01    | 7     | Pending |
+| MOB-02    | 7     | Pending |
+| MOB-03    | 7     | Pending |
+| MOB-04    | 7     | Pending |
 | MORG-01   | 8     | Pending |
 | POLISH-01 | 8     | Pending |
 | POLISH-02 | 8     | Pending |
 | POLISH-03 | 8     | Pending |
 
-**Total:** 11/11 requirements mapped. No orphans.
+**Total:** 10/10 requirements mapped. No orphans.
+*(RT-03–RT-07 movidos para seed — Notifications System depriorizado em 2026-04-24)*
 
 ---
 
@@ -116,7 +116,7 @@ Plans:
 | 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-24 |
 | 5. Dashboard + Onboarding | v1.1 | 5/5 | Complete | 2026-04-24 |
 | 6. Real-time Infrastructure | v1.2 | 3/3 | Complete | 2026-04-24 |
-| 7. Notifications System | v1.2 | 0/? | Not started | - |
+| 7. Mobile + PWA | v1.2 | 0/? | Not started | - |
 | 8. Multi-Org + Polish | v1.2 | 0/? | Not started | - |
 
 ---
@@ -142,4 +142,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-24 — Phase 6 complete (3/3 plans, RT-01 + RT-02 delivered)*
+*Last updated: 2026-04-24 — Phase 7 substituída: Notifications → Mobile + PWA*
