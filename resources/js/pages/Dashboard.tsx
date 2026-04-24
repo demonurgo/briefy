@@ -319,14 +319,21 @@ function PersonalView({ personal }: { personal: PersonalData }) {
 
   return (
     <div className="space-y-6">
-      {/* Region 4: 5 status cards (D-07) */}
-      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+      {/* Region 4: 5 status cards (D-07) — mobile: 3+2 centered via grid-cols-6 */}
+      <div className="grid grid-cols-6 lg:grid-cols-5 gap-3 sm:gap-4">
         {statusCards.map((card, i) => (
-          <DashboardStatusCard
+          <div
             key={card.label}
-            {...card}
-            animationDelay={i * 50}
-          />
+            className={
+              i < 3
+                ? 'col-span-2 lg:col-span-1'
+                : i === 3
+                  ? 'col-span-2 col-start-2 lg:col-span-1 lg:col-start-auto'
+                  : 'col-span-2 lg:col-span-1'
+            }
+          >
+            <DashboardStatusCard {...card} animationDelay={i * 50} />
+          </div>
         ))}
       </div>
 
@@ -559,10 +566,21 @@ function OverviewView({
 
   return (
     <div className="space-y-6">
-      {/* Region 2: 5 status cards org-wide */}
-      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+      {/* Region 2: 5 status cards org-wide — mobile: 3+2 centered via grid-cols-6 */}
+      <div className="grid grid-cols-6 lg:grid-cols-5 gap-3 sm:gap-4">
         {statusCards.map((card, i) => (
-          <DashboardStatusCard key={card.label} {...card} animationDelay={i * 50} />
+          <div
+            key={card.label}
+            className={
+              i < 3
+                ? 'col-span-2 lg:col-span-1'
+                : i === 3
+                  ? 'col-span-2 col-start-2 lg:col-span-1 lg:col-start-auto'
+                  : 'col-span-2 lg:col-span-1'
+            }
+          >
+            <DashboardStatusCard {...card} animationDelay={i * 50} />
+          </div>
         ))}
       </div>
 
