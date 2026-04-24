@@ -11,7 +11,7 @@
 - ✅ **v1.1 — AI + Team + Dashboard** — Phases 3–5 (shipped 2026-04-24)
 - ✅ **v1.2 — Real-time + Polish** — Phases 6–8 (shipped 2026-04-24)
   - Phase 7 substituída: Notifications → Mobile + PWA (prioridade ajustada em 2026-04-24)
-- **v1.3 — Notifications + Test Coverage** — Phases 9–10 (in progress)
+- ✅ **v1.3 — Notifications + Test Coverage** — Phases 9–10 (shipped 2026-04-24)
 
 ## Phases
 
@@ -129,9 +129,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Auth + Organization tests (TEST-01, TEST-02)
-- [ ] 10-02-PLAN.md — Demand lifecycle + AI chat tests (TEST-03, TEST-04)
-- [ ] 10-03-PLAN.md — Notification system tests + full suite smoke run (TEST-05)
+- [x] 10-01-PLAN.md — Auth + Organization tests (TEST-01, TEST-02) — completed 2026-04-24
+- [x] 10-02-PLAN.md — Demand lifecycle + AI chat tests (TEST-03, TEST-04) — completed 2026-04-24
+- [x] 10-03-PLAN.md — Notification system tests + full suite smoke run (TEST-05) — completed 2026-04-24
 
 ---
 
@@ -154,11 +154,11 @@ Plans:
 | RT-05   | 9     | Complete |
 | RT-06   | 9     | Complete |
 | RT-07   | 9     | Complete |
-| TEST-01 | 10    | Pending  |
-| TEST-02 | 10    | Pending  |
-| TEST-03 | 10    | Pending  |
-| TEST-04 | 10    | Pending  |
-| TEST-05 | 10    | Pending  |
+| TEST-01 | 10    | Complete |
+| TEST-02 | 10    | Complete |
+| TEST-03 | 10    | Complete |
+| TEST-04 | 10    | Complete |
+| TEST-05 | 10    | Complete |
 
 **Total:** 20/20 requirements mapped. No orphans.
 
