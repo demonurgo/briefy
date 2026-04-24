@@ -66,6 +66,8 @@ export default function ChatTab({ demand }: ChatTabProps) {
   const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+  // Optimistic user message — shown immediately after send, cleared after reload brings server data.
+  const [optimisticUserMsg, setOptimisticUserMsg] = useState<string | null>(null);
 
   // Conversation picker state
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -102,7 +104,10 @@ export default function ChatTab({ demand }: ChatTabProps) {
     url: conv ? route('demands.chat.stream', [demand.id, conv.id]) : '',
     method: 'POST',
     onDone: () => {
-      router.reload({ only: ['selectedDemand'] });
+      router.reload({
+        only: ['selectedDemand'],
+        onSuccess: () => setOptimisticUserMsg(null),
+      });
     },
     onError: (m) => setError(m),
   });
@@ -184,6 +189,7 @@ export default function ChatTab({ demand }: ChatTabProps) {
 
     const userMsg = input.trim();
     setInput('');
+    setOptimisticUserMsg(userMsg);
 
     // Start SSE stream with the user message body.
     await stream.start({
@@ -270,7 +276,7 @@ export default function ChatTab({ demand }: ChatTabProps) {
 
       {/* Messages scroll area */}
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-4 no-scrollbar">
-        {(!conv || conv.messages.length === 0) && !isStreaming ? (
+        {(!conv || conv.messages.length === 0) && !isStreaming && !optimisticUserMsg ? (
           /* Empty state */
           <div className="flex h-full flex-col items-center justify-center py-12 text-center">
             <AiIcon size={48} alt={t('ai.assistantIcon')} />
@@ -311,6 +317,17 @@ export default function ChatTab({ demand }: ChatTabProps) {
                   </div>
                 </div>
               ),
+            )}
+
+            {/* Optimistic user bubble — shown immediately after send, before server confirms */}
+            {optimisticUserMsg && (
+              <div className="flex justify-end">
+                <div className="max-w-[80%]">
+                  <div className="rounded-[12px] rounded-br-[4px] bg-[#7c3aed] px-4 py-2.5 text-sm leading-[1.5] text-white whitespace-pre-wrap opacity-90">
+                    {optimisticUserMsg}
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Live streaming assistant bubble */}
