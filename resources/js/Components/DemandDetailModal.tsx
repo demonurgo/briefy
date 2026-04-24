@@ -101,6 +101,11 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   // Estado local RT-02: permite append via broadcast sem round-trip
   const [comments, setComments] = useState<Comment[]>(demand.comments);
 
+  // Slide-up animation state — drives enter/exit transition on mobile
+  const [visible, setVisible] = useState(false);
+  // Touch tracking for swipe-down-to-close gesture
+  const touchStartY = useRef<number | null>(null);
+
   // Sincronizar com prop quando pai faz partial reload (router.reload)
   useEffect(() => {
     setComments(demand.comments);
@@ -130,6 +135,12 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
     };
   }, [orgId, demand.id]);
 
+  // Trigger slide-up enter animation on mount (mobile only — desktop ignores translate-y via md:translate-y-0)
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const commentForm = useForm({ body: '' });
   const fileForm = useForm<{ type: string; name: string; file: File | null; path_or_url: string }>(
     { type: 'upload', name: '', file: null, path_or_url: '' }
@@ -146,23 +157,29 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
 
   const isDirty = editForm.isDirty;
 
+  // Initiates exit animation then calls onClose after animation completes
+  const triggerClose = () => {
+    setVisible(false);
+    setTimeout(onClose, 200);
+  };
+
   const handleClose = () => {
     if (isDirty) { setConfirmClose(true); return; }
-    onClose();
+    triggerClose();
   };
 
   const saveAndClose = () => {
     editForm.put(route('demands.inline.update', demand.id), {
       preserveScroll: true,
       only: ['selectedDemand'],
-      onSuccess: () => { setConfirmClose(false); onClose(); },
+      onSuccess: () => { setConfirmClose(false); triggerClose(); },
     });
   };
 
   const discardAndClose = () => {
     editForm.reset();
     setConfirmClose(false);
-    onClose();
+    triggerClose();
   };
 
   const submitEdit = (e: React.FormEvent) => {
@@ -205,11 +222,26 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" onClick={handleClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6" onClick={handleClose}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative z-10 flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[16px] bg-[#f9fafb] shadow-2xl dark:bg-[#0b0f14]"
+        className={`relative z-10 flex w-full flex-col overflow-hidden bg-[#f9fafb] shadow-2xl dark:bg-[#0b0f14]
+                   rounded-none md:rounded-[16px]
+                   h-[100dvh] md:h-auto
+                   max-h-[100dvh] md:max-h-[90vh]
+                   md:max-w-6xl
+                   transition-transform duration-[250ms] ease-out
+                   ${visible ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}`}
         onClick={e => e.stopPropagation()}
+        onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; }}
+        onTouchMove={(e) => {
+          if (touchStartY.current === null) return;
+          const delta = e.touches[0].clientY - touchStartY.current;
+          if (delta > 80) {
+            touchStartY.current = null;
+            triggerClose();
+          }
+        }}
       >
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between gap-4 border-b border-[#e5e7eb] bg-white px-6 py-4 dark:border-[#1f2937] dark:bg-[#111827]">
