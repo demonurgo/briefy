@@ -15,7 +15,7 @@ class PreferencesTest extends TestCase
     {
         parent::setUp();
         $org = Organization::factory()->create();
-        $this->user = User::factory()->create(['organization_id' => $org->id, 'preferences' => ['locale' => 'pt-BR', 'theme' => 'light']]);
+        $this->user = User::factory()->create(['current_organization_id' => $org->id, 'preferences' => ['locale' => 'pt-BR', 'theme' => 'light']]);
     }
 
     public function test_user_can_update_theme_to_dark(): void

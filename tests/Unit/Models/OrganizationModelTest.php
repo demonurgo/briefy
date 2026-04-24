@@ -13,7 +13,8 @@ class OrganizationModelTest extends TestCase
     public function test_organization_has_many_users(): void
     {
         $org = Organization::factory()->create();
-        User::factory()->count(3)->create(['organization_id' => $org->id]);
+        $users = User::factory()->count(3)->create(['current_organization_id' => $org->id]);
+        $users->each(fn ($u) => $org->users()->attach($u->id, ['role' => 'member', 'joined_at' => now()]));
         $this->assertCount(3, $org->users);
     }
 

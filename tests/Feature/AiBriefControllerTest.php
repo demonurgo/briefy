@@ -26,7 +26,7 @@ class AiBriefControllerTest extends TestCase
     {
         parent::setUp();
         $this->org = Organization::factory()->create();
-        $this->user = User::factory()->create(['organization_id' => $this->org->id, 'role' => 'admin']);
+        $this->user = User::factory()->create(['current_organization_id' => $this->org->id, 'role' => 'admin']);
         $this->client = Client::factory()->create(['organization_id' => $this->org->id]);
         $this->demand = Demand::factory()->create([
             'organization_id' => $this->org->id,
@@ -134,7 +134,7 @@ class AiBriefControllerTest extends TestCase
     public function test_generate_different_org_returns_403(): void
     {
         $otherOrg = Organization::factory()->create();
-        $otherUser = User::factory()->create(['organization_id' => $otherOrg->id]);
+        $otherUser = User::factory()->create(['current_organization_id' => $otherOrg->id]);
 
         $this->actingAs($otherUser)
             ->post("/demands/{$this->demand->id}/brief/generate")

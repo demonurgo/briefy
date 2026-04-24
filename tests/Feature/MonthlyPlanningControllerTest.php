@@ -23,7 +23,7 @@ class MonthlyPlanningControllerTest extends TestCase
     {
         parent::setUp();
         $this->org = Organization::factory()->create();
-        $this->user = User::factory()->create(['organization_id' => $this->org->id]);
+        $this->user = User::factory()->create(['current_organization_id' => $this->org->id]);
         $this->client = ClientModel::factory()->create([
             'organization_id' => $this->org->id,
             'monthly_posts' => 5,
@@ -138,7 +138,7 @@ class MonthlyPlanningControllerTest extends TestCase
     public function test_cross_org_suggestion_returns_403(): void
     {
         $otherOrg = Organization::factory()->create();
-        $other = User::factory()->create(['organization_id' => $otherOrg->id]);
+        $other = User::factory()->create(['current_organization_id' => $otherOrg->id]);
         $pd = Demand::factory()->create([
             'organization_id' => $this->org->id, 'client_id' => $this->client->id, 'type' => 'planning',
         ]);

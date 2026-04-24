@@ -20,7 +20,7 @@ class ProfileControllerTest extends TestCase
         $user->organizations()->attach($org->id, ['role' => 'admin', 'joined_at' => now()]);
 
         $this->actingAs($user);
-        $response = $this->patch(route('settings.profile.update'), [
+        $response = $this->from(route('settings.index'))->patch(route('settings.profile.update'), [
             'name' => 'Updated Name',
             'locale' => 'en',
             'theme' => 'dark',
@@ -42,7 +42,7 @@ class ProfileControllerTest extends TestCase
         $this->actingAs($user);
         $file = UploadedFile::fake()->image('avatar.jpg', 512, 512);
 
-        $response = $this->post(route('settings.profile.avatar'), ['avatar' => $file]);
+        $response = $this->from(route('settings.index'))->post(route('settings.profile.avatar'), ['avatar' => $file]);
 
         $response->assertRedirectContains('/settings');
         $user->refresh();

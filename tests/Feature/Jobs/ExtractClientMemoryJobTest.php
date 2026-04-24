@@ -29,7 +29,7 @@ class ExtractClientMemoryJobTest extends TestCase
         $this->org = Organization::factory()->create([
             'anthropic_api_key_encrypted' => 'sk-ant-' . str_repeat('a', 50),
         ]);
-        $user = User::factory()->create(['organization_id' => $this->org->id]);
+        $user = User::factory()->create(['current_organization_id' => $this->org->id]);
         $this->client = ClientModel::factory()->create(['organization_id' => $this->org->id]);
         $demand = Demand::factory()->create([
             'organization_id' => $this->org->id,

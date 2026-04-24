@@ -48,7 +48,7 @@ class UserModelTest extends TestCase
     public function test_user_belongs_to_organization(): void
     {
         $org = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $org->id]);
+        $user = User::factory()->create(['current_organization_id' => $org->id]);
         $this->assertInstanceOf(Organization::class, $user->organization);
         $this->assertSame($org->id, $user->organization->id);
     }

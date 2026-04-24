@@ -21,7 +21,7 @@ class DemandModelTest extends TestCase
     {
         parent::setUp();
         $this->org = Organization::factory()->create();
-        $this->user = User::factory()->create(['organization_id' => $this->org->id]);
+        $this->user = User::factory()->create(['current_organization_id' => $this->org->id]);
         $this->client = Client::factory()->create(['organization_id' => $this->org->id]);
     }
 
