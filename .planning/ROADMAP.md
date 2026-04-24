@@ -126,6 +126,7 @@ Plans:
   3. Demand lifecycle (create, status update, assign, archive) has passing tests.
   4. Organization creation and team management flows have passing tests.
   5. AI chat endpoint has at least one integration test verifying message persistence.
+**Plans:** 3 plans
 
 Plans:
 - [ ] 10-01-PLAN.md — Auth + Organization tests (TEST-01, TEST-02)
@@ -176,6 +177,7 @@ Plans:
 | 7. Mobile + PWA | v1.2 | 3/3 | Complete | 2026-04-24 |
 | 8. Multi-Org + Polish | v1.2 | 7/7 | Complete | 2026-04-24 |
 | 9. Notifications System | v1.3 | 2/2 | Complete | 2026-04-24 |
+| 10. Automated Test Coverage | v1.3 | 0/3 | In Progress | — |
 
 ---
 
@@ -200,5 +202,5 @@ Plans:
 ---
 
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-24 — Phase 8 planned: 7 plans created*
+*Last updated: 2026-04-24 — Phase 10 planned: 3 plans created*
 *Phase 7 planned: 2026-04-24 — 3 plans created*
