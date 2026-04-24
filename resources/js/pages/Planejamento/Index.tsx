@@ -175,31 +175,16 @@ export default function PlanejamentoIndex({ plannings, clients, filters, teamMem
       <Head title={t('planning.title')} />
 
       {/* Sticky page header */}
-      <div className="sticky top-0 z-10 -mx-6 -mt-6 mb-6 flex items-center gap-3 border-b border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] px-6 py-3">
+      <div className="sticky top-0 z-10 -mx-6 -mt-6 mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] px-6 py-3">
         <h1 className="text-lg font-semibold text-[#111827] dark:text-[#f9fafb] shrink-0">
           {t('planning.title')}
         </h1>
 
-        {/* Client filter */}
-        <select
-          value={filters.client_id ?? ''}
-          onChange={e => {
-            const client_id = e.target.value || undefined;
-            router.get(route('planejamento.index'), { client_id }, { preserveState: true, replace: true });
-          }}
-          className="max-w-[280px] rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#6b7280] focus:border-[#7c3aed] focus:outline-none dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#9ca3af]"
-        >
-          <option value="">{t('planning.allClients')}</option>
-          {clients.map(c => (
-            <option key={c.id} value={String(c.id)}>{c.name}</option>
-          ))}
-        </select>
+        {/* Spacer — pushes generate CTA to the right on desktop */}
+        <div className="hidden sm:block flex-1" />
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Generate CTA */}
-        <div className="relative group">
+        {/* Generate CTA — always on first row */}
+        <div className="relative group ml-auto sm:ml-0 shrink-0">
           <button
             onClick={hasKey ? openGenerateModal : undefined}
             disabled={!hasKey}
@@ -215,6 +200,21 @@ export default function PlanejamentoIndex({ plannings, clients, filters, teamMem
             </div>
           )}
         </div>
+
+        {/* Client filter — full width on mobile (wraps to second row), auto on desktop */}
+        <select
+          value={filters.client_id ?? ''}
+          onChange={e => {
+            const client_id = e.target.value || undefined;
+            router.get(route('planejamento.index'), { client_id }, { preserveState: true, replace: true });
+          }}
+          className="w-full sm:w-auto sm:max-w-[280px] order-last sm:order-none rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#6b7280] focus:border-[#7c3aed] focus:outline-none dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#9ca3af]"
+        >
+          <option value="">{t('planning.allClients')}</option>
+          {clients.map(c => (
+            <option key={c.id} value={String(c.id)}>{c.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Empty state */}

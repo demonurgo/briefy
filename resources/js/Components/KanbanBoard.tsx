@@ -121,6 +121,7 @@ function DraggableCard({ demand, onDemandClick, loadingId }: { demand: Demand; o
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.35 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
+    touchAction: 'none' as const,
   };
 
   return (

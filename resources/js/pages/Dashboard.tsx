@@ -320,7 +320,7 @@ function PersonalView({ personal }: { personal: PersonalData }) {
   return (
     <div className="space-y-6">
       {/* Region 4: 5 status cards (D-07) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {statusCards.map((card, i) => (
           <DashboardStatusCard
             key={card.label}
@@ -428,11 +428,40 @@ function PersonalView({ personal }: { personal: PersonalData }) {
             ))}
           </div>
 
-          {/* Table */}
+          {/* Mobile: compact list + ver todas button */}
+          <div className="md:hidden">
+            {filteredDemands.length === 0 ? (
+              <p className="text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda neste filtro.</p>
+            ) : (
+              <div>
+                {filteredDemands.slice(0, 4).map((d) => (
+                  <div
+                    key={d.id}
+                    onClick={() => router.visit(`/demands?demand=${d.id}`)}
+                    className="flex items-center gap-2 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0 cursor-pointer hover:bg-[#f9fafb] dark:hover:bg-[#0b0f14] transition-colors rounded"
+                  >
+                    <span className="flex-1 text-sm text-[#111827] dark:text-[#f9fafb] truncate">{d.title}</span>
+                    <StatusBadge status={d.status} />
+                  </div>
+                ))}
+                {filteredDemands.length > 4 && (
+                  <p className="text-xs text-[#9ca3af] text-center pt-2">+{filteredDemands.length - 4} demandas</p>
+                )}
+              </div>
+            )}
+            <Link
+              href="/demands"
+              className="mt-3 flex items-center justify-center gap-1 w-full rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] py-2.5 text-sm font-medium text-[#7c3aed] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
+            >
+              Ver todas as demandas →
+            </Link>
+          </div>
+
+          {/* Desktop: full table */}
           {filteredDemands.length === 0 ? (
-            <p className="text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda neste filtro.</p>
+            <p className="hidden md:block text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda neste filtro.</p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="hidden md:table w-full text-sm">
               <thead>
                 <tr className="text-left">
                   <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Título</th>
@@ -531,7 +560,7 @@ function OverviewView({
   return (
     <div className="space-y-6">
       {/* Region 2: 5 status cards org-wide */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {statusCards.map((card, i) => (
           <DashboardStatusCard key={card.label} {...card} animationDelay={i * 50} />
         ))}

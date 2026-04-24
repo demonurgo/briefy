@@ -130,7 +130,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
               className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-sm font-medium text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-[#1f2937]"
             >
               <AiIcon size={14} />
-              {hasActiveSession ? 'Pesquisando...' : t('clients.research.deepResearch')}
+              <span className="hidden sm:inline">{hasActiveSession ? 'Pesquisando...' : t('clients.research.deepResearch')}</span>
             </button>
             {!hasKey && (
               <div className="pointer-events-none absolute right-0 top-full mt-1 hidden group-hover/research:block z-50 w-56 rounded-[8px] bg-[#111827] px-3 py-2 text-xs text-[#f9fafb] shadow-lg">
