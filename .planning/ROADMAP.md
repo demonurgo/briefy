@@ -9,7 +9,7 @@
 
 - ✅ **v1.0 — Core Platform** — Phases 1–2 (shipped 2026-04-22)
 - ✅ **v1.1 — AI + Team + Dashboard** — Phases 3–5 (shipped 2026-04-24)
-- **v1.2 — Real-time + Polish** — Phases 6–8 (in progress)
+- ✅ **v1.2 — Real-time + Polish** — Phases 6–8 (shipped 2026-04-24)
   - Phase 7 substituída: Notifications → Mobile + PWA (prioridade ajustada em 2026-04-24)
 
 ## Phases
@@ -90,13 +90,13 @@ Plans:
 **Plans:** 7 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Wave 1: RED test stub (OrganizationCreationTest) + expand index.d.ts global types
-- [ ] 08-02-PLAN.md — Wave 2: MORG-01 backend — OrganizationController@store + POST /organizations route
-- [ ] 08-03-PLAN.md — Wave 2: POLISH-02 — remove local PageProps + AiIcon enum + Inertia v3 fix + unsafe casts
-- [ ] 08-04-PLAN.md — Wave 3: MORG-01 frontend — wire OrgSwitcher button + CreateOrgModal in AppLayout
-- [ ] 08-05-PLAN.md — Wave 3: POLISH-01 — extend useAiStream GET branch + migrate ClientResearchTimelineModal
-- [ ] 08-06-PLAN.md — Wave 3: POLISH-03 — conversation picker dropdown in ChatTab
-- [ ] 08-07-PLAN.md — Wave 4: Full verification + human UAT checkpoint
+- [x] 08-01-PLAN.md — Wave 1: RED test stub (OrganizationCreationTest) + expand index.d.ts global types
+- [x] 08-02-PLAN.md — Wave 2: MORG-01 backend — OrganizationController@store + POST /organizations route
+- [x] 08-03-PLAN.md — Wave 2: POLISH-02 — remove local PageProps + AiIcon enum + Inertia v3 fix + unsafe casts
+- [x] 08-04-PLAN.md — Wave 3: MORG-01 frontend — wire OrgSwitcher button + CreateOrgModal in AppLayout
+- [x] 08-05-PLAN.md — Wave 3: POLISH-01 — extend useAiStream GET branch + migrate ClientResearchTimelineModal
+- [x] 08-06-PLAN.md — Wave 3: POLISH-03 — conversation picker dropdown in ChatTab
+- [x] 08-07-PLAN.md — Wave 4: Full verification + human UAT checkpoint — approved 2026-04-24
 
 ---
 
@@ -106,14 +106,14 @@ Plans:
 |-----------|-------|---------|
 | RT-01     | 6     | Complete |
 | RT-02     | 6     | Complete |
-| MOB-01    | 7     | Pending |
-| MOB-02    | 7     | Pending |
-| MOB-03    | 7     | Pending |
-| MOB-04    | 7     | Pending |
-| MORG-01   | 8     | Pending |
-| POLISH-01 | 8     | Pending |
-| POLISH-02 | 8     | Pending |
-| POLISH-03 | 8     | Pending |
+| MOB-01    | 7     | Complete |
+| MOB-02    | 7     | Complete |
+| MOB-03    | 7     | Complete |
+| MOB-04    | 7     | Complete |
+| MORG-01   | 8     | Complete |
+| POLISH-01 | 8     | Complete |
+| POLISH-02 | 8     | Complete |
+| POLISH-03 | 8     | Complete |
 
 **Total:** 10/10 requirements mapped. No orphans.
 *(RT-03–RT-07 movidos para seed — Notifications System depriorizado em 2026-04-24)*

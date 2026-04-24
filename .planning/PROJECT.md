@@ -1,6 +1,6 @@
 # Briefy
 
-## Current Milestone: v1.2 Real-time + Polish
+## ✅ v1.2 Real-time + Polish — SHIPPED 2026-04-24
 
 **Goal:** Adicionar colaboração em tempo real via Laravel Reverb, sistema de notificações in-app, criação de multi-org para usuários existentes, e consolidar dívida técnica do v1.1.
 
@@ -47,18 +47,16 @@ Agency teams can create, track, and complete client demands efficiently, with AI
 - ✓ Admin sees dashboard with demand metrics, charts, and team activity — v1.1
 - ✓ New users are guided through onboarding on first login — v1.1
 
-### Active
+### Validated in v1.2
 
-<!-- Milestone v1.2: Real-time + Polish -->
-
-- [ ] Live Kanban updates when team member changes a demand status (RT-01)
-- [ ] New comments appear live in demand detail (RT-02)
-- [ ] In-app notifications for assignments and status changes (RT-03, RT-04)
-- [ ] Notification bell with unread count and dropdown (RT-05)
-- [ ] Multi-org creation UI in /settings for existing users
-- [ ] Consolidate SSE dual-pattern (useAiStream + EventSource) (POLISH-01)
-- [ ] Fix TypeScript strict errors: auth.organization shape mismatch (POLISH-02)
-- [ ] Conversation picker dropdown for AI Chat (POLISH-03)
+- ✓ Live Kanban updates when team member changes a demand status (RT-01)
+- ✓ New comments appear live in demand detail (RT-02)
+- ✓ Notification bell with unread count and dropdown (RT-05)
+- ✓ User can create additional organizations from OrgSwitcher (MORG-01)
+- ✓ SSE consolidated — useAiStream handles both GET and POST streams (POLISH-01)
+- ✓ TypeScript strict: zero errors, auth.organization shape correct (POLISH-02)
+- ✓ AI chat conversation picker — all conversations readable and writable (POLISH-03)
+- ✓ Mobile-responsive layout + PWA installable on iOS/Android (MOB-01–04)
 
 ### Out of Scope
 
