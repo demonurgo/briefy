@@ -113,8 +113,8 @@ Plans:
   5. Clicking a notification navigates to the relevant demand.
 
 Plans:
-- [ ] 09-01-PLAN.md — Backend: BriefyNotification model, events (DemandAssigned, DemandStatusChanged), broadcast via Reverb
-- [ ] 09-02-PLAN.md — Frontend: real-time bell badge via Echo + notification dropdown with mark-as-read
+- [x] 09-01-PLAN.md — Backend: BriefyNotification model, events (DemandAssigned, DemandStatusChanged), broadcast via Reverb — completed 2026-04-24
+- [x] 09-02-PLAN.md — Frontend: real-time bell badge via Echo + notification dropdown with mark-as-read — completed 2026-04-24
 
 ### Phase 10: Automated Test Coverage
 **Goal:** A comprehensive feature test suite covers all critical user flows, giving confidence that core functionality works and regressions are caught automatically.
@@ -148,11 +148,11 @@ Plans:
 | POLISH-01 | 8   | Complete |
 | POLISH-02 | 8   | Complete |
 | POLISH-03 | 8   | Complete |
-| RT-03   | 9     | Pending  |
-| RT-04   | 9     | Pending  |
-| RT-05   | 9     | Pending  |
-| RT-06   | 9     | Pending  |
-| RT-07   | 9     | Pending  |
+| RT-03   | 9     | Complete |
+| RT-04   | 9     | Complete |
+| RT-05   | 9     | Complete |
+| RT-06   | 9     | Complete |
+| RT-07   | 9     | Complete |
 | TEST-01 | 10    | Pending  |
 | TEST-02 | 10    | Pending  |
 | TEST-03 | 10    | Pending  |
@@ -173,8 +173,9 @@ Plans:
 | 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-23 |
 | 5. Dashboard + Onboarding | v1.1 | 5/5 | Complete | 2026-04-24 |
 | 6. Real-time Infrastructure | v1.2 | 3/3 | Complete | 2026-04-24 |
-| 7. Mobile + PWA | v1.2 | 0/3 | Not started | - |
-| 8. Multi-Org + Polish | v1.2 | 0/7 | Not started | - |
+| 7. Mobile + PWA | v1.2 | 3/3 | Complete | 2026-04-24 |
+| 8. Multi-Org + Polish | v1.2 | 7/7 | Complete | 2026-04-24 |
+| 9. Notifications System | v1.3 | 2/2 | Complete | 2026-04-24 |
 
 ---
 
