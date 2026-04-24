@@ -1,22 +1,837 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import AppLayout from '@/Layouts/AppLayout';
+import { useState, useCallback } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
+import {
+  PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, Legend,
+} from 'recharts';
+import {
+  AlertCircle, Clock, MessageSquare, Eye, CheckCircle2,
+  Plus,
+} from 'lucide-react';
+import AppLayout from '@/Layouts/AppLayout';
 import { DashboardPlanningWidget } from '@/Components/DashboardPlanningWidget';
+import { DashboardStatusCard } from '@/Components/DashboardStatusCard';
+import { DashboardSectionCard } from '@/Components/DashboardSectionCard';
+import { ActivityFeed, type ActivityEvent } from '@/Components/ActivityFeed';
+import { OnboardingChecklist } from '@/Components/OnboardingChecklist';
+import { StatusBadge } from '@/Components/StatusBadge';
+import { UserAvatar } from '@/Components/UserAvatar';
+import type { PageProps } from '@/types';
+
+// -----------------------------------------------------------------------
+// Tipos
+// -----------------------------------------------------------------------
+interface FocusDemand {
+  id: number;
+  title: string;
+  status: string;
+  priority: string;
+  deadline: string | null;
+  client_name: string | null;
+}
+
+interface MyDemand {
+  id: number;
+  title: string;
+  status: string;
+  priority: string;
+  deadline: string | null;
+  client_name: string | null;
+  updated_at: string | null;
+}
+
+interface Blocker {
+  id: number;
+  title: string;
+  since: string;
+}
+
+interface LatestDemand {
+  id: number;
+  title: string;
+  status: string;
+  priority: string;
+  updated_at: string | null;
+  client_name: string | null;
+  assignee_name: string | null;
+  assignee_avatar: string | null;
+}
+
+interface TeamMember {
+  user_id: number;
+  name: string;
+  avatar: string | null;
+  total: number;
+  completed: number;
+  overdue: number;
+  active: number;
+}
+
+interface ClientRow {
+  client_id: number;
+  name: string;
+  total: number;
+  completed: number;
+}
+
+interface PersonalData {
+  statusCounts: Record<string, number>;
+  deltaVsYesterday: Record<string, number>;
+  focusDemands: FocusDemand[];
+  myDemands: MyDemand[];
+  blockers: Blocker[];
+  weekProgress: { completed: number; total: number };
+  completedByDay: Record<string, number>;
+}
+
+interface OverviewData {
+  statusBreakdown: Record<string, number>;
+  deltaVsYesterday: Record<string, number>;
+  overdueCount: number;
+  priorityBreakdown: Record<string, number>;
+  demandsOverTime: Array<{ date: string; created: number; completed: number }>;
+  latestDemands: LatestDemand[];
+  teamWorkload: TeamMember[];
+  clientDistribution: ClientRow[];
+  teamPerformance: { total: number; completed: number; in_progress: number; rate: number };
+  dateRange: { start: string; end: string };
+}
 
 interface Props {
   planningReminderClients?: Array<{ id: number; name: string; planning_day: number }>;
+  personal: PersonalData;
+  overview: OverviewData | null;
+  activityFeed: ActivityEvent[];
+  hasClients: boolean;
+  hasDemands: boolean;
 }
 
-export default function Dashboard({ planningReminderClients }: Props) {
+// -----------------------------------------------------------------------
+// Constantes de cor (D-03 — iguais ao StatusBadge)
+// -----------------------------------------------------------------------
+const STATUS_COLORS: Record<string, string> = {
+  todo:              '#9ca3af',
+  in_progress:       '#3b82f6',
+  awaiting_feedback: '#f59e0b',
+  in_review:         '#8b5cf6',
+  approved:          '#10b981',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  todo:              'A fazer',
+  in_progress:       'Em andamento',
+  awaiting_feedback: 'Aguardando',
+  in_review:         'Em revisão',
+  approved:          'Concluída',
+};
+
+const PRIORITY_COLORS: Record<string, string> = {
+  high:   '#ef4444',
+  medium: '#f59e0b',
+  low:    '#9ca3af',
+};
+
+const PRIORITY_LABELS: Record<string, string> = {
+  high:   'Alta',
+  medium: 'Média',
+  low:    'Baixa',
+};
+
+const CHART_TOOLTIP_STYLE = {
+  background: '#111827',
+  border: '1px solid #1f2937',
+  borderRadius: '8px',
+  fontSize: '12px',
+  color: '#f9fafb',
+};
+
+// -----------------------------------------------------------------------
+// Componentes inline pequenos
+// -----------------------------------------------------------------------
+
+/** Donut chart reutilizável com label centralizado */
+function DonutChart({
+  data,
+  centerLabel,
+  ariaLabel,
+}: {
+  data: Array<{ name: string; value: number; color: string }>;
+  centerLabel: string;
+  ariaLabel: string;
+}) {
+  return (
+    <div
+      className="relative h-[160px]"
+      role="img"
+      aria-label={`Gráfico: ${ariaLabel}`}
+    >
+      <ResponsiveContainer width="100%" height={160}>
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={48}
+            outerRadius={72}
+            paddingAngle={3}
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <span className="text-lg font-bold text-[#111827] dark:text-[#f9fafb]">
+          {centerLabel}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Badge de prioridade inline */
+function PriorityBadge({ priority }: { priority: string }) {
+  const color = PRIORITY_COLORS[priority] ?? '#9ca3af';
+  const label = PRIORITY_LABELS[priority] ?? priority;
+  return (
+    <span
+      className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium"
+      style={{ color, backgroundColor: `${color}1a` }}
+    >
+      {label}
+    </span>
+  );
+}
+
+/** Toggle de view pessoal / visão geral */
+function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: 'personal' | 'overview';
+  onChange: (v: 'personal' | 'overview') => void;
+}) {
+  return (
+    <div
+      className="flex rounded-[8px] overflow-hidden border border-[#e5e7eb] dark:border-[#1f2937]"
+      role="group"
+      aria-label="Alternar visualização do dashboard"
+    >
+      {(['personal', 'overview'] as const).map((v) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          className={`px-4 py-1.5 text-sm font-medium transition-colors ${
+            view === v
+              ? 'bg-[#7c3aed] text-white'
+              : 'bg-white dark:bg-[#111827] text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]'
+          }`}
+          aria-pressed={view === v}
+        >
+          {v === 'personal' ? 'Visão pessoal' : 'Visão geral'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------
+// View Pessoal (todos os usuários — D-07 a D-11)
+// -----------------------------------------------------------------------
+function PersonalView({ personal }: { personal: PersonalData }) {
+  const [demandTab, setDemandTab] = useState<'all' | 'in_progress' | 'overdue' | 'completed'>('all');
+  const today = new Date().toISOString().substring(0, 10);
+
+  // Status card config (D-07)
+  const statusCards = [
+    {
+      label: 'Atrasadas',
+      count: personal.statusCounts['overdue'] ?? 0,
+      delta: personal.deltaVsYesterday['overdue'] ?? null,
+      deltaInverted: true, // subir = ruim
+      icon: AlertCircle,
+      iconColor: '#ef4444',
+    },
+    {
+      label: 'Em andamento',
+      count: personal.statusCounts['in_progress'] ?? 0,
+      delta: personal.deltaVsYesterday['in_progress'] ?? null,
+      icon: Clock,
+      iconColor: '#3b82f6',
+    },
+    {
+      label: 'Aguardando retorno',
+      count: personal.statusCounts['awaiting_feedback'] ?? 0,
+      delta: personal.deltaVsYesterday['awaiting_feedback'] ?? null,
+      icon: MessageSquare,
+      iconColor: '#f59e0b',
+    },
+    {
+      label: 'Em revisão',
+      count: personal.statusCounts['in_review'] ?? 0,
+      delta: personal.deltaVsYesterday['in_review'] ?? null,
+      icon: Eye,
+      iconColor: '#8b5cf6',
+    },
+    {
+      label: 'Concluídas',
+      count: personal.statusCounts['approved'] ?? 0,
+      delta: personal.deltaVsYesterday['approved'] ?? null,
+      icon: CheckCircle2,
+      iconColor: '#10b981',
+    },
+  ];
+
+  // Filtrar "Minhas demandas" por tab (client-side — todos os dados já carregados)
+  const filteredDemands = personal.myDemands.filter((d) => {
+    if (demandTab === 'all') return true;
+    if (demandTab === 'in_progress') return d.status === 'in_progress';
+    if (demandTab === 'overdue') return d.deadline !== null && d.deadline < today && d.status !== 'approved';
+    if (demandTab === 'completed') return d.status === 'approved';
+    return true;
+  }).slice(0, 5);
+
+  // Bar chart: concluídas por dia (D-02)
+  const dayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const completedBarData = dayOrder.map((day) => ({
+    name: day,
+    value: personal.completedByDay[day] ?? 0,
+  }));
+
+  // Donut: progresso da semana (D-11)
+  const progressDonutData = [
+    { name: 'Concluídas', value: personal.weekProgress.completed, color: '#10b981' },
+    {
+      name: 'Pendentes',
+      value: Math.max(0, personal.weekProgress.total - personal.weekProgress.completed),
+      color: '#1f2937',
+    },
+  ];
+  const progressPercent = personal.weekProgress.total > 0
+    ? `${Math.round((personal.weekProgress.completed / personal.weekProgress.total) * 100)}%`
+    : '0%';
+
+  return (
+    <div className="space-y-6">
+      {/* Region 4: 5 status cards (D-07) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {statusCards.map((card, i) => (
+          <DashboardStatusCard
+            key={card.label}
+            {...card}
+            animationDelay={i * 50}
+          />
+        ))}
+      </div>
+
+      {/* Region 5: 3-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Seu foco agora (D-08) */}
+        <DashboardSectionCard title="Seu foco agora">
+          {personal.focusDemands.length === 0 ? (
+            <p className="text-sm text-[#9ca3af] text-center py-6">
+              Nenhuma demanda urgente. Bom trabalho!
+            </p>
+          ) : (
+            <div>
+              {personal.focusDemands.map((d) => (
+                <div
+                  key={d.id}
+                  className="flex items-center gap-3 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0"
+                >
+                  <PriorityBadge priority={d.priority} />
+                  <span className="text-sm text-[#111827] dark:text-[#f9fafb] truncate flex-1">
+                    {d.title}
+                  </span>
+                  <span
+                    className={`text-xs whitespace-nowrap font-medium ${
+                      d.deadline && d.deadline < today
+                        ? 'text-[#ef4444]'
+                        : 'text-[#9ca3af]'
+                    }`}
+                  >
+                    {d.deadline ?? 'Sem prazo'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </DashboardSectionCard>
+
+        {/* Concluídas por dia (D-02 DASH-02 simplificado para pessoal) */}
+        <DashboardSectionCard title="Concluídas esta semana">
+          <div role="img" aria-label="Gráfico: Concluídas por dia da semana">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={completedBarData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} name="Concluídas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </DashboardSectionCard>
+
+        {/* Seu progresso (D-11) */}
+        <DashboardSectionCard title="Seu progresso">
+          <DonutChart
+            data={progressDonutData}
+            centerLabel={progressPercent}
+            ariaLabel="Seu progresso — concluídas vs total"
+          />
+          <p className="text-xs text-[#6b7280] text-center mt-2">
+            {personal.weekProgress.completed} de {personal.weekProgress.total} concluídas esta semana
+          </p>
+        </DashboardSectionCard>
+      </div>
+
+      {/* Region 6: 2-column grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Minhas demandas com tabs (D-09) */}
+        <DashboardSectionCard
+          title="Minhas demandas"
+          action={
+            <Link href="/demands" className="text-xs text-[#7c3aed] hover:underline font-medium" aria-label="Ver todas as demandas">
+              Ver todas →
+            </Link>
+          }
+        >
+          {/* Tab bar */}
+          <div className="flex gap-1 mb-4 border-b border-[#e5e7eb] dark:border-[#1f2937]" role="tablist">
+            {[
+              { id: 'all' as const, label: 'Todas' },
+              { id: 'in_progress' as const, label: 'Em andamento' },
+              { id: 'overdue' as const, label: 'Atrasadas' },
+              { id: 'completed' as const, label: 'Concluídas' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={demandTab === tab.id}
+                onClick={() => setDemandTab(tab.id)}
+                className={`px-3 py-2 text-xs font-medium transition-colors -mb-px border-b-2 ${
+                  demandTab === tab.id
+                    ? 'border-[#7c3aed] text-[#7c3aed]'
+                    : 'border-transparent text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Table */}
+          {filteredDemands.length === 0 ? (
+            <p className="text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda neste filtro.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left">
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Título</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Status</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Prioridade</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Prazo</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Cliente</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDemands.map((d) => (
+                  <tr key={d.id} className="hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors">
+                    <td className="py-2 pr-2 text-[#111827] dark:text-[#f9fafb] truncate max-w-[140px]">{d.title}</td>
+                    <td className="py-2 pr-2"><StatusBadge status={d.status} /></td>
+                    <td className="py-2 pr-2"><PriorityBadge priority={d.priority} /></td>
+                    <td className="py-2 pr-2 text-xs text-[#6b7280] whitespace-nowrap">{d.deadline ?? '—'}</td>
+                    <td className="py-2 text-xs text-[#6b7280] truncate max-w-[100px]">{d.client_name ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </DashboardSectionCard>
+
+        {/* Bloqueios / Aguardando (D-10) */}
+        <DashboardSectionCard title="Bloqueios / Aguardando">
+          {personal.blockers.length === 0 ? (
+            <p className="text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda aguardando retorno.</p>
+          ) : (
+            <div>
+              {personal.blockers.map((b) => (
+                <div key={b.id} className="flex items-start gap-2 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0">
+                  <AlertCircle size={14} className="text-[#f59e0b] mt-0.5 shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm font-medium text-[#111827] dark:text-[#f9fafb]">{b.title}</p>
+                    <p className="text-xs text-[#9ca3af]">Desde {b.since}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DashboardSectionCard>
+      </div>
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------
+// View Gerencial (admin/owner — D-14 a D-19)
+// -----------------------------------------------------------------------
+function OverviewView({
+  overview,
+}: {
+  overview: OverviewData;
+  onDateRangeChange: (start: string, end: string) => void;
+}) {
+  const today = new Date().toISOString().substring(0, 10);
+
+  // Status cards org-wide (D-14) — reusar mesma estrutura da view pessoal
+  const statusCards = [
+    { label: 'Atrasadas', count: overview.overdueCount, delta: overview.deltaVsYesterday['overdue'] ?? null, deltaInverted: true, icon: AlertCircle, iconColor: '#ef4444' },
+    { label: 'Em andamento', count: overview.statusBreakdown['in_progress'] ?? 0, delta: overview.deltaVsYesterday['in_progress'] ?? null, icon: Clock, iconColor: '#3b82f6' },
+    { label: 'Aguardando retorno', count: overview.statusBreakdown['awaiting_feedback'] ?? 0, delta: overview.deltaVsYesterday['awaiting_feedback'] ?? null, icon: MessageSquare, iconColor: '#f59e0b' },
+    { label: 'Em revisão', count: overview.statusBreakdown['in_review'] ?? 0, delta: overview.deltaVsYesterday['in_review'] ?? null, icon: Eye, iconColor: '#8b5cf6' },
+    { label: 'Concluídas', count: overview.statusBreakdown['approved'] ?? 0, delta: overview.deltaVsYesterday['approved'] ?? null, icon: CheckCircle2, iconColor: '#10b981' },
+  ];
+
+  // Panorama geral donut (D-15)
+  const statusDonutData = Object.entries(overview.statusBreakdown).map(([status, count]) => ({
+    name: STATUS_LABELS[status] ?? status,
+    value: count as number,
+    color: STATUS_COLORS[status] ?? '#9ca3af',
+  }));
+  const orgTotal = statusDonutData.reduce((s, d) => s + d.value, 0);
+
+  // Prioridade bar chart (D-16)
+  const priorityBarData = [
+    { name: 'Alta',  value: overview.priorityBreakdown['high']   ?? 0, color: '#ef4444' },
+    { name: 'Média', value: overview.priorityBreakdown['medium'] ?? 0, color: '#f59e0b' },
+    { name: 'Baixa', value: overview.priorityBreakdown['low']    ?? 0, color: '#9ca3af' },
+  ];
+
+  // Desempenho donut (D-19)
+  const perfDonutData = [
+    { name: 'Concluídas',   value: overview.teamPerformance.completed,   color: '#10b981' },
+    { name: 'Em andamento', value: overview.teamPerformance.in_progress, color: '#3b82f6' },
+  ];
+
+  // suppress unused variable
+  void today;
+
+  return (
+    <div className="space-y-6">
+      {/* Region 2: 5 status cards org-wide */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {statusCards.map((card, i) => (
+          <DashboardStatusCard key={card.label} {...card} animationDelay={i * 50} />
+        ))}
+      </div>
+
+      {/* Region 3: 3-column grid — charts */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Panorama geral — donut (D-15) */}
+        <DashboardSectionCard title="Panorama geral">
+          <DonutChart
+            data={statusDonutData}
+            centerLabel={String(orgTotal)}
+            ariaLabel="Panorama geral — total de demandas por status"
+          />
+          {/* Legenda com count + % */}
+          <div className="mt-3 space-y-1">
+            {statusDonutData.map((d) => (
+              <div key={d.name} className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: d.color }} />
+                  <span className="text-[#6b7280]">{d.name}</span>
+                </div>
+                <span className="text-[#111827] dark:text-[#f9fafb] font-medium">
+                  {d.value} ({orgTotal > 0 ? Math.round((d.value / orgTotal) * 100) : 0}%)
+                </span>
+              </div>
+            ))}
+          </div>
+        </DashboardSectionCard>
+
+        {/* Demandas por prioridade — bar chart (D-16) */}
+        <DashboardSectionCard title="Demandas por prioridade">
+          <div role="img" aria-label="Gráfico: Demandas por prioridade">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={priorityBarData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Demandas">
+                  {priorityBarData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </DashboardSectionCard>
+
+        {/* Demanda ao longo do tempo — line chart (D-17) */}
+        <DashboardSectionCard title="Demanda ao longo do tempo">
+          <div role="img" aria-label="Gráfico: Criadas vs concluídas ao longo do tempo">
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={overview.demandsOverTime} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                <XAxis dataKey="date" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
+                <Legend wrapperStyle={{ fontSize: '12px', color: '#6b7280' }} />
+                <Line type="monotone" dataKey="created"   stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} name="Criadas" />
+                <Line type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4 }} name="Concluídas" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </DashboardSectionCard>
+      </div>
+
+      {/* Region 4: 2-column grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Últimas demandas (D-18) */}
+        <DashboardSectionCard
+          title="Últimas demandas"
+          action={
+            <Link href="/demands" className="text-xs text-[#7c3aed] hover:underline font-medium" aria-label="Ver todas as demandas">
+              Ver todas →
+            </Link>
+          }
+        >
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left">
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Título</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Status</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Prioridade</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Atualizado em</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Responsável</th>
+              </tr>
+            </thead>
+            <tbody>
+              {overview.latestDemands.map((d) => (
+                <tr key={d.id} className="hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors">
+                  <td className="py-2 pr-2 text-[#111827] dark:text-[#f9fafb] truncate max-w-[120px]">{d.title}</td>
+                  <td className="py-2 pr-2"><StatusBadge status={d.status} /></td>
+                  <td className="py-2 pr-2"><PriorityBadge priority={d.priority} /></td>
+                  <td className="py-2 pr-2 text-xs text-[#6b7280] whitespace-nowrap">{d.updated_at ?? '—'}</td>
+                  <td className="py-2">
+                    {d.assignee_name ? (
+                      <div className="flex items-center gap-2">
+                        <UserAvatar name={d.assignee_name} avatar={d.assignee_avatar} size="sm" />
+                        <span className="text-xs text-[#6b7280] truncate max-w-[80px]">{d.assignee_name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[#9ca3af]">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DashboardSectionCard>
+
+        {/* Desempenho da equipe — donut (D-19) */}
+        <DashboardSectionCard title="Desempenho da equipe">
+          <DonutChart
+            data={perfDonutData}
+            centerLabel={`${overview.teamPerformance.rate}%`}
+            ariaLabel="Desempenho da equipe — taxa de conclusão"
+          />
+          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+            <div>
+              <p className="text-lg font-bold text-[#111827] dark:text-[#f9fafb]">{overview.teamPerformance.total}</p>
+              <p className="text-xs text-[#6b7280]">Total</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-[#10b981]">{overview.teamPerformance.completed}</p>
+              <p className="text-xs text-[#6b7280]">Concluídas</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-[#3b82f6]">{overview.teamPerformance.in_progress}</p>
+              <p className="text-xs text-[#6b7280]">Em andamento</p>
+            </div>
+          </div>
+
+          {/* Workload da equipe (DASH-02) — tabela abaixo do donut */}
+          {overview.teamWorkload.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-[#e5e7eb] dark:border-[#1f2937]">
+              <h4 className="text-xs font-medium text-[#6b7280] mb-3 uppercase tracking-wide">Workload da equipe</h4>
+              <div className="space-y-2">
+                {overview.teamWorkload.slice(0, 5).map((m) => (
+                  <div key={m.user_id} className="flex items-center gap-2">
+                    <UserAvatar name={m.name} avatar={m.avatar} size="sm" />
+                    <span className="text-xs text-[#111827] dark:text-[#f9fafb] flex-1 truncate">{m.name}</span>
+                    <span className="text-xs text-[#6b7280]">{m.active} ativas</span>
+                    {m.overdue > 0 && (
+                      <span className="text-xs text-[#ef4444] font-medium">{m.overdue} atrasadas</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Distribuição por cliente (DASH-03) */}
+          {overview.clientDistribution.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-[#e5e7eb] dark:border-[#1f2937]">
+              <h4 className="text-xs font-medium text-[#6b7280] mb-3 uppercase tracking-wide">Atividade por cliente</h4>
+              <div className="space-y-2">
+                {overview.clientDistribution.slice(0, 5).map((c) => (
+                  <div key={c.client_id} className="flex items-center justify-between text-xs">
+                    <span className="text-[#111827] dark:text-[#f9fafb] truncate max-w-[140px]">{c.name}</span>
+                    <div className="flex gap-3">
+                      <span className="text-[#6b7280]">{c.total} ativas</span>
+                      <span className="text-[#10b981]">{c.completed} conc.</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </DashboardSectionCard>
+      </div>
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------
+// Componente principal
+// -----------------------------------------------------------------------
+export default function Dashboard({
+  planningReminderClients,
+  personal,
+  overview,
+  activityFeed,
+  hasClients,
+  hasDemands,
+}: Props) {
   const { t } = useTranslation();
+  const { auth } = usePage<PageProps>().props;
+  const isAdmin = ['admin', 'owner'].includes((auth?.user as { role?: string } | undefined)?.role ?? '');
+
+  const [view, setView] = useState<'personal' | 'overview'>('personal');
+
+  // Calcular semana atual para o date range picker (default)
+  const getWeekBounds = useCallback(() => {
+    const now = new Date();
+    const day = now.getDay(); // 0=Dom, 1=Seg...
+    const diffToMonday = (day === 0 ? -6 : 1 - day);
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return {
+      start: monday.toISOString().substring(0, 10),
+      end: sunday.toISOString().substring(0, 10),
+    };
+  }, []);
+
+  const weekBounds = overview?.dateRange ?? getWeekBounds();
+  const [dateStart, setDateStart] = useState(weekBounds.start);
+  const [dateEnd, setDateEnd] = useState(weekBounds.end);
+
+  const handleDateChange = useCallback(
+    (newStart: string, newEnd: string) => {
+      setDateStart(newStart);
+      setDateEnd(newEnd);
+      // Partial reload — apenas prop 'overview' (Pattern 2 RESEARCH.md)
+      router.get(
+        route('dashboard'),
+        { start: newStart, end: newEnd },
+        { preserveScroll: true, preserveState: true, only: ['overview'] }
+      );
+    },
+    []
+  );
+
+  const greeting = `Olá, ${auth?.user?.name?.split(' ')[0] ?? 'você'}!`;
+  const subtitle =
+    view === 'personal'
+      ? 'Aqui está o que precisa da sua atenção hoje.'
+      : 'Aqui está o resumo das suas demandas hoje.';
+
+  // Preferences para onboarding
+  const prefs = (auth?.user as { preferences?: { onboarding_dismissed?: boolean } } | undefined)?.preferences;
+
   return (
     <AppLayout title={t('nav.dashboard')}>
-      {planningReminderClients && planningReminderClients.length > 0 && (
-        <div className="mb-6">
-          <DashboardPlanningWidget clients={planningReminderClients} />
+      <div className="px-4 md:px-6 py-6 space-y-6">
+        {/* Region 1: Header */}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-lg font-semibold text-[#111827] dark:text-[#f9fafb]">{greeting}</p>
+            <p className="text-sm text-[#6b7280] mt-0.5">{subtitle}</p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            {isAdmin && (
+              <ViewToggle view={view} onChange={setView} />
+            )}
+            {isAdmin && view === 'overview' && (
+              <div className="flex items-center gap-2" aria-label="Filtro de período">
+                <label htmlFor="date-start" className="text-xs text-[#6b7280]">De:</label>
+                <input
+                  id="date-start"
+                  type="date"
+                  value={dateStart}
+                  onChange={(e) => handleDateChange(e.target.value, dateEnd)}
+                  className="h-9 px-3 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] text-sm focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] outline-none"
+                />
+                <span className="text-[#9ca3af]">–</span>
+                <label htmlFor="date-end" className="text-xs text-[#6b7280]">Até:</label>
+                <input
+                  id="date-end"
+                  type="date"
+                  value={dateEnd}
+                  onChange={(e) => handleDateChange(dateStart, e.target.value)}
+                  className="h-9 px-3 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] text-sm focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] outline-none"
+                />
+              </div>
+            )}
+            <Link
+              href="/demands/create"
+              className="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-semibold px-4 py-2 rounded-[8px] transition-colors"
+            >
+              <Plus size={16} aria-hidden="true" />
+              Nova demanda
+            </Link>
+          </div>
         </div>
-      )}
-      <p className="text-[#9ca3af] dark:text-[#6b7280] text-sm">Em breve...</p>
+
+        {/* Region 2: Onboarding checklist (condicional — topo) */}
+        <OnboardingChecklist
+          hasClients={hasClients}
+          hasDemands={hasDemands}
+          onboardingDismissed={prefs?.onboarding_dismissed}
+        />
+
+        {/* Region 3: Planning widget (existente — não remover) */}
+        {planningReminderClients && planningReminderClients.length > 0 && (
+          <DashboardPlanningWidget clients={planningReminderClients} />
+        )}
+
+        {/* Regions 4-7: Conteúdo por view */}
+        {view === 'personal' && (
+          <PersonalView personal={personal} />
+        )}
+
+        {view === 'overview' && isAdmin && overview && (
+          <OverviewView
+            overview={overview}
+            onDateRangeChange={handleDateChange}
+          />
+        )}
+
+        {/* Region Activity Feed — ambas as views */}
+        <ActivityFeed events={activityFeed} />
+      </div>
     </AppLayout>
   );
 }
