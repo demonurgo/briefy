@@ -38,7 +38,7 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 ### v1.2 — Real-time + Polish
 
 - [x] **Phase 6: Real-time Infrastructure** — Live Kanban status updates and live comments via Reverb WebSocket
-- [ ] **Phase 7: Mobile + PWA** — Responsive layout fix, mobile-first UI redesign, PWA manifest + service worker
+- [x] **Phase 7: Mobile + PWA** — Responsive layout fix, mobile-first UI redesign, PWA manifest + service worker — completed 2026-04-24
 - [ ] **Phase 8: Multi-Org + Polish** — New org creation from /settings, SSE consolidation, TypeScript fixes, AI conversation picker
 
 ---
@@ -74,9 +74,9 @@ Plans:
 **UI hint:** yes
 
 Plans:
-- [ ] 07-01-PLAN.md — AppLayout overflow-x-hidden + KanbanBoard scroll isolation + manifest.json icon split
-- [ ] 07-02-PLAN.md — DemandDetailModal full-screen mobile + slide animation + swipe-to-close
-- [ ] 07-03-PLAN.md — Verify app.blade.php PWA tags + Dashboard responsive grids + human UAT checkpoint
+- [x] 07-01-PLAN.md — AppLayout overflow-x-hidden + KanbanBoard scroll isolation + manifest.json icon split
+- [x] 07-02-PLAN.md — DemandDetailModal full-screen mobile + slide animation + swipe-to-close
+- [x] 07-03-PLAN.md — Verify app.blade.php PWA tags + Dashboard responsive grids + human UAT checkpoint
 
 ### Phase 8: Multi-Org + Polish
 **Goal:** Existing users can create additional organizations from /settings, and the known technical debt from v1.1 is fully resolved.

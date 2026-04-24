@@ -2,9 +2,9 @@
 plan: "07-03"
 phase: "07-mobile-pwa"
 wave: 3
-status: checkpoint_pending
+status: complete
 completed_at: "2026-04-24"
-tasks_completed: 1
+tasks_completed: 2
 tasks_total: 2
 self_check: PASSED
 ---
@@ -41,9 +41,16 @@ All pre-UAT automated checks confirmed:
 
 **TypeScript:** 0 new errors introduced by Phase 7 (15 pre-existing POLISH-02 errors unchanged) ✓
 
-### Task 2: Human UAT Checkpoint — PENDING
+### Task 2: Human UAT Checkpoint — APPROVED ✓
 
-Awaiting human mobile browser testing confirmation.
+Human testing confirmed all checks passed. 6 additional issues were discovered and fixed inline during UAT:
+
+1. **Dashboard stat cards**: `grid-cols-3` mobile (3+2 layout) + `grid-cols-6 col-start-2` centering for bottom row
+2. **Minhas demandas**: mobile simplified view (compact list + "Ver todas" btn) instead of overflowing table
+3. **AppLayout avatar**: OrgSwitcher `hidden sm:block` removed — avatar always visible on mobile
+4. **Clients/Show edit button**: research button text `hidden sm:inline` → clipping resolved, edit btn visible
+5. **Planejamento scroll**: header `flex-wrap`, select `w-full order-last` wraps to second row on mobile
+6. **Kanban drag**: `touchAction: 'none'` on DraggableCard — browser no longer intercepts touch as scroll
 
 ## Key Files Verified (read-only)
 
