@@ -103,6 +103,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/client-ai-memory/{memory}/dismiss', [\App\Http\Controllers\ClientAiMemoryController::class, 'dismiss'])
         ->name('client-ai-memory.dismiss');
 
+    // Organization creation (MORG-01) — creates a new org for an existing user
+    Route::post('/organizations', [\App\Http\Controllers\OrganizationController::class, 'store'])
+        ->name('organizations.store');
+
     // Team management — admin/owner only routes (protected by EnsureRole middleware)
     // Named without 'settings.' prefix so tests can use route('team.invite') etc.
     Route::post('/team/invite', [TeamController::class, 'invite'])
