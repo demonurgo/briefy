@@ -42,24 +42,24 @@ export function DashboardStatusCard({
 
   return (
     <div
-      className="rounded-[12px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] p-4 flex flex-col gap-2 animate-fadeInUp"
+      className="rounded-[12px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] p-2 sm:p-4 flex flex-col gap-1 sm:gap-2 animate-fadeInUp"
       style={{ animationDelay: `${animationDelay}ms` }}
       role="region"
       aria-label={`${label} count`}
     >
       {/* Top row: label + icon */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-[#6b7280]">{label}</span>
-        <Icon size={20} style={{ color: iconColor }} aria-hidden="true" />
+      <div className="flex items-start justify-between gap-1">
+        <span className="text-[10px] sm:text-xs font-medium text-[#6b7280] leading-tight">{label}</span>
+        <Icon size={14} style={{ color: iconColor }} aria-hidden="true" className="shrink-0 mt-0.5" />
       </div>
 
       {/* Count */}
-      <span className="text-2xl font-bold text-[#111827] dark:text-[#f9fafb]">
+      <span className="text-xl sm:text-2xl font-bold text-[#111827] dark:text-[#f9fafb]">
         {count}
       </span>
 
-      {/* Delta indicator */}
-      <div className={`flex items-center gap-1 text-xs font-medium ${deltaColor}`}>
+      {/* Delta indicator — hidden on mobile to keep cards compact */}
+      <div className={`hidden sm:flex items-center gap-1 text-xs font-medium ${deltaColor}`}>
         <DeltaIcon size={12} aria-hidden="true" />
         <span>{deltaText}</span>
       </div>
