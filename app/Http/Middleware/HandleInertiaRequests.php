@@ -51,11 +51,13 @@ class HandleInertiaRequests extends Middleware
                     'organization' => $user->currentOrganization ? array_merge(
                         $user->currentOrganization->only(['id', 'name', 'slug', 'logo']),
                         [
-                            'has_anthropic_key'       => $user->currentOrganization->hasAnthropicKey(),
-                            'anthropic_api_key_mask'  => $user->currentOrganization->anthropic_api_key_mask,
-                            'key_valid'               => (bool) ($user->currentOrganization->anthropic_key_valid ?? false),          // M3
-                            'managed_agents_enabled'  => (bool) ($user->currentOrganization->anthropic_managed_agents_ok ?? false),  // M3
-                            'last_key_check_at'       => optional($user->currentOrganization->anthropic_key_checked_at)->toIso8601String(), // M3
+                            'has_anthropic_key'                 => $user->currentOrganization->hasAnthropicKey(),
+                            'anthropic_api_key_mask'            => $user->currentOrganization->anthropic_api_key_mask,
+                            'key_valid'                         => (bool) ($user->currentOrganization->anthropic_key_valid ?? false),
+                            'managed_agents_enabled'            => (bool) ($user->currentOrganization->anthropic_managed_agents_ok ?? false),
+                            'last_key_check_at'                 => optional($user->currentOrganization->anthropic_key_checked_at)->toIso8601String(),
+                            'client_research_agent_id'          => $user->currentOrganization->client_research_agent_id,
+                            'client_research_environment_id'    => $user->currentOrganization->client_research_environment_id,
                         ]
                     ) : null,
                     'organizations' => $user->organizations->map(fn ($o) => [

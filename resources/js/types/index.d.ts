@@ -34,6 +34,8 @@ export interface AuthOrganization {
     key_valid: boolean;
     managed_agents_enabled: boolean;
     last_key_check_at: string | null;
+    client_research_agent_id: string | null;
+    client_research_environment_id: string | null;
 }
 
 export type PageProps<
