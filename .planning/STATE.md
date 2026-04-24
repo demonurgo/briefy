@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Real-time + Polish
-status: phase_complete
-stopped_at: Phase 6 complete — Phase 7 ready to plan
+status: in_progress
+stopped_at: Phase 7 executing — Wave 1 in progress
 last_updated: "2026-04-24T00:00:00Z"
-last_activity: 2026-04-24 — Phase 6 executed (3/3 plans, RT-01 + RT-02 delivered)
+last_activity: 2026-04-24 — Phase 7 execution started (3 plans, 3 waves)
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
   percent: 33
 ---
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 6 (Real-time Infrastructure) — Complete
-Next: Phase 7 (Notifications System) — ready to plan
-Status: Phase 6 complete — 3/3 plans delivered, RT-01 + RT-02 verified
-Last activity: 2026-04-24 — Phase 6 executed (DemandCommentCreated event, debounce RT-01, subscription RT-02)
+Phase: 7 (Mobile + PWA) — Ready to execute
+Next: Execute Phase 7 — 3 plans ready
+Status: Phase 7 planned — 3 plans in 3 waves, verification passed
+Last activity: 2026-04-24 — Phase 7 planned (overflow fix, Kanban mobile, DemandDetailModal full-screen, PWA manifest)
 
 ```
 v1.2 Progress: [====      ] 33%
