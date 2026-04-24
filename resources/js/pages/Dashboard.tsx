@@ -816,7 +816,7 @@ export default function Dashboard({
               </div>
             )}
             <Link
-              href="/demands/create"
+              href="/demands"
               className="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-semibold px-4 py-2 rounded-[8px] transition-colors"
             >
               <Plus size={16} aria-hidden="true" />
