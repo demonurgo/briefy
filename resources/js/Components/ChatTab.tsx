@@ -124,11 +124,19 @@ export default function ChatTab({ demand }: ChatTabProps) {
 
   // ─── Auto-scroll ─────────────────────────────────────────────────────────────
 
+  // Force scroll to bottom when user sends (optimistic) — always, regardless of position.
+  useEffect(() => {
+    if (!optimisticUserMsg) return;
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [optimisticUserMsg]);
+
+  // Auto-scroll during streaming and when new server messages arrive.
+  // Uses nearBottom guard so user can scroll up to read history without being yanked back.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    // Only auto-scroll if the user is within 40px of the bottom (not manually scrolled up).
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
     if (nearBottom) el.scrollTop = el.scrollHeight;
   }, [conv?.messages.length, streamingText]);
 
