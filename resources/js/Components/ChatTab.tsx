@@ -113,12 +113,21 @@ export default function ChatTab({ demand }: ChatTabProps) {
   const streamingText = useTypewriter({ target: stream.buffer, charsPerFrame: 2 });
 
   // Fire reload only after typewriter finishes animating — avoids mid-animation cutoff.
+  // pendingReload stays true until onSuccess so isStreaming keeps the bubble visible
+  // during the network round-trip, preventing scroll jump from DOM height change.
   useEffect(() => {
     if (!pendingReload || streamingText !== stream.buffer || !stream.buffer) return;
-    setPendingReload(false);
     router.reload({
       only: ['selectedDemand'],
-      onSuccess: () => setOptimisticUserMsg(null),
+      onSuccess: () => {
+        setPendingReload(false);
+        setOptimisticUserMsg(null);
+        // Force scroll to bottom after DOM settles with server messages.
+        requestAnimationFrame(() => {
+          const el = scrollRef.current;
+          if (el) el.scrollTop = el.scrollHeight;
+        });
+      },
     });
   }, [pendingReload, streamingText, stream.buffer]);
 
