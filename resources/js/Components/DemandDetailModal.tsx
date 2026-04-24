@@ -15,6 +15,18 @@ interface Client { id: number; name: string; }
 interface TeamMember { id: number; name: string; }
 interface DemandFile { id: number; type: 'upload' | 'link'; name: string; path_or_url: string; }
 interface Comment { id: number; body: string; user: User; created_at: string; }
+
+interface DemandCommentCreatedEvent {
+  organizationId: number;
+  demandId: number;
+  comment: {
+    id: number;
+    body: string;
+    user: { id: number; name: string; email?: string };
+    created_at: string;
+  };
+}
+
 interface Demand {
   id: number; title: string; description: string | null; objective: string | null;
   tone: string | null; channel: string | null; deadline: string | null;
@@ -82,6 +94,41 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const hasKey = auth?.user?.organization?.has_anthropic_key ?? false;
+
+  const orgId = (auth?.user as { current_organization_id?: number } | undefined)
+    ?.current_organization_id;
+
+  // Estado local RT-02: permite append via broadcast sem round-trip
+  const [comments, setComments] = useState<Comment[]>(demand.comments);
+
+  // Sincronizar com prop quando pai faz partial reload (router.reload)
+  useEffect(() => {
+    setComments(demand.comments);
+  }, [demand.comments]);
+
+  // Subscription Echo RT-02 — receber novos comentários em tempo real
+  useEffect(() => {
+    if (!orgId || !window.Echo) return;
+
+    const channel = window.Echo.private(`organization.${orgId}`);
+
+    channel.listen('.demand.comment.created', (event: DemandCommentCreatedEvent) => {
+      // Filtrar: apenas comentários desta demanda
+      if (event.demandId !== demand.id) return;
+
+      setComments(prev => {
+        // Guard D-06: deduplicar — evitar duplicata se broadcast chegar após append otimista futuro
+        if (prev.some(c => c.id === event.comment.id)) return prev;
+        return [...prev, event.comment as Comment];
+      });
+    });
+
+    return () => {
+      // CRÍTICO: usar stopListening, NÃO window.Echo.leave()
+      // leave() removeria o canal inteiro, matando a subscription RT-01 em Index.tsx
+      channel.stopListening('.demand.comment.created');
+    };
+  }, [orgId, demand.id]);
 
   const commentForm = useForm({ body: '' });
   const fileForm = useForm<{ type: string; name: string; file: File | null; path_or_url: string }>(
@@ -373,10 +420,10 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                 {/* Tab 2: Comentários */}
                 <TabPanel className="flex h-full w-full flex-col overflow-hidden focus:outline-none">
                   <div className="flex-1 overflow-y-auto no-scrollbar">
-                    {demand.comments.length === 0
+                    {comments.length === 0
                       ? <p className="px-6 py-8 text-center text-sm text-[#9ca3af]">{t('demands.empty')}</p>
                       : <ul className="divide-y divide-[#e5e7eb] dark:divide-[#1f2937]">
-                          {demand.comments.map(c => (
+                          {comments.map(c => (
                             <li key={c.id} className="group px-6 py-4">
                               <div className="mb-1.5 flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
