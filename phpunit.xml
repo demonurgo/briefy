@@ -19,8 +19,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="APP_BASE_PATH" value="D:\projetos\briefy\.claude\worktrees\agent-ad938ee4"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+<env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
