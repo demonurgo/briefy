@@ -5,6 +5,7 @@
 .env.production
 /.claude/
 /.clone/
+/DEMO_SCRIPT.md
 .phpactor.json
 .phpunit.result.cache
 /.codex
