@@ -11,6 +11,7 @@
 - ✅ **v1.1 — AI + Team + Dashboard** — Phases 3–5 (shipped 2026-04-24)
 - ✅ **v1.2 — Real-time + Polish** — Phases 6–8 (shipped 2026-04-24)
   - Phase 7 substituída: Notifications → Mobile + PWA (prioridade ajustada em 2026-04-24)
+- **v1.3 — Notifications + Test Coverage** — Phases 9–10 (in progress)
 
 ## Phases
 
@@ -100,23 +101,65 @@ Plans:
 
 ---
 
+### Phase 9: Notifications System
+**Goal:** Users receive in-app notifications in real-time when demands are assigned or change status, and can manage them from the bell dropdown.
+**Depends on:** Phase 8
+**Requirements:** RT-03, RT-04, RT-05, RT-06, RT-07
+**Success Criteria:**
+  1. A user assigned to a demand sees a notification appear in the bell dropdown without refreshing the page.
+  2. The bell badge count updates live via WebSocket when a new notification arrives.
+  3. User can mark all notifications as read and the badge clears immediately.
+  4. Notification shows demand title, event type, and timestamp.
+  5. Clicking a notification navigates to the relevant demand.
+
+Plans:
+- [ ] 09-01-PLAN.md — Backend: BriefyNotification model, events (DemandAssigned, DemandStatusChanged), broadcast via Reverb
+- [ ] 09-02-PLAN.md — Frontend: real-time bell badge via Echo + notification dropdown with mark-as-read
+
+### Phase 10: Automated Test Coverage
+**Goal:** A comprehensive feature test suite covers all critical user flows, giving confidence that core functionality works and regressions are caught automatically.
+**Depends on:** Phase 9
+**Requirements:** TEST-01, TEST-02, TEST-03, TEST-04, TEST-05
+**Success Criteria:**
+  1. `php artisan test` runs a full suite with no failures in a properly configured environment.
+  2. Auth flow (register, login, logout) is covered by at least 4 test cases.
+  3. Demand lifecycle (create, status update, assign, archive) has passing tests.
+  4. Organization creation and team management flows have passing tests.
+  5. AI chat endpoint has at least one integration test verifying message persistence.
+
+Plans:
+- [ ] 10-01-PLAN.md — Auth + Organization tests (TEST-01, TEST-02)
+- [ ] 10-02-PLAN.md — Demand lifecycle + AI chat tests (TEST-03, TEST-04)
+- [ ] 10-03-PLAN.md — Notification system tests + full suite smoke run (TEST-05)
+
+---
+
 ## Coverage
 
-| REQ-ID    | Phase | Status  |
-|-----------|-------|---------|
-| RT-01     | 6     | Complete |
-| RT-02     | 6     | Complete |
-| MOB-01    | 7     | Complete |
-| MOB-02    | 7     | Complete |
-| MOB-03    | 7     | Complete |
-| MOB-04    | 7     | Complete |
-| MORG-01   | 8     | Complete |
-| POLISH-01 | 8     | Complete |
-| POLISH-02 | 8     | Complete |
-| POLISH-03 | 8     | Complete |
+| REQ-ID  | Phase | Status   |
+|---------|-------|----------|
+| RT-01   | 6     | Complete |
+| RT-02   | 6     | Complete |
+| MOB-01  | 7     | Complete |
+| MOB-02  | 7     | Complete |
+| MOB-03  | 7     | Complete |
+| MOB-04  | 7     | Complete |
+| MORG-01 | 8     | Complete |
+| POLISH-01 | 8   | Complete |
+| POLISH-02 | 8   | Complete |
+| POLISH-03 | 8   | Complete |
+| RT-03   | 9     | Pending  |
+| RT-04   | 9     | Pending  |
+| RT-05   | 9     | Pending  |
+| RT-06   | 9     | Pending  |
+| RT-07   | 9     | Pending  |
+| TEST-01 | 10    | Pending  |
+| TEST-02 | 10    | Pending  |
+| TEST-03 | 10    | Pending  |
+| TEST-04 | 10    | Pending  |
+| TEST-05 | 10    | Pending  |
 
-**Total:** 10/10 requirements mapped. No orphans.
-*(RT-03–RT-07 movidos para seed — Notifications System depriorizado em 2026-04-24)*
+**Total:** 20/20 requirements mapped. No orphans.
 
 ---
 

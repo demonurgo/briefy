@@ -1,5 +1,16 @@
 # Briefy
 
+## Current Milestone: v1.3 — Notifications + Test Coverage
+
+**Goal:** Entregar o sistema completo de notificações in-app em tempo real (RT-03–07) e uma suíte de testes automatizados que garanta a estabilidade do produto.
+
+**Target features:**
+- Push Notifications: notificação ao ser atribuído ou ter status de demand alterado (RT-03, RT-04)
+- Notification Bell: badge em tempo real + dropdown com histórico e mark-as-read (RT-05, RT-06, RT-07)
+- Automated Tests: feature tests PHP para auth, orgs, demands, AI chat e notificações (TEST-01–05)
+
+---
+
 ## ✅ v1.2 Real-time + Polish — SHIPPED 2026-04-24
 
 **Goal:** Adicionar colaboração em tempo real via Laravel Reverb, sistema de notificações in-app, criação de multi-org para usuários existentes, e consolidar dívida técnica do v1.1.
@@ -57,6 +68,15 @@ Agency teams can create, track, and complete client demands efficiently, with AI
 - ✓ TypeScript strict: zero errors, auth.organization shape correct (POLISH-02)
 - ✓ AI chat conversation picker — all conversations readable and writable (POLISH-03)
 - ✓ Mobile-responsive layout + PWA installable on iOS/Android (MOB-01–04)
+
+### Active (v1.3)
+
+- [ ] In-app notification when demand is assigned to user (RT-03)
+- [ ] In-app notification when demand status changes (RT-04)
+- [ ] Notification bell badge updates in real-time via WebSocket (RT-05)
+- [ ] Notification dropdown with timestamps and demand context (RT-06)
+- [ ] Mark individual or all notifications as read (RT-07)
+- [ ] Feature tests: auth, orgs, demands, AI chat, notifications (TEST-01–05)
 
 ### Out of Scope
 
