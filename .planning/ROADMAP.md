@@ -36,7 +36,7 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 ### v1.2 — Real-time + Polish
 
-- [ ] **Phase 6: Real-time Infrastructure** — Live Kanban status updates and live comments via Reverb WebSocket
+- [x] **Phase 6: Real-time Infrastructure** — Live Kanban status updates and live comments via Reverb WebSocket
 - [ ] **Phase 7: Notifications System** — In-app notification delivery, bell badge, dropdown, and mark-read
 - [ ] **Phase 8: Multi-Org + Polish** — New org creation from /settings, SSE consolidation, TypeScript fixes, AI conversation picker
 
@@ -56,9 +56,9 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 **Plans:** 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Evento DemandCommentCreated (backend RT-02) + stubs de teste Wave 0
-- [ ] 06-02-PLAN.md — Debounce na subscription RT-01 em Index.tsx
-- [ ] 06-03-PLAN.md — Subscription RT-02 em DemandDetailModal (frontend)
+- [x] 06-01-PLAN.md — Evento DemandCommentCreated (backend RT-02) + stubs de teste Wave 0
+- [x] 06-02-PLAN.md — Debounce na subscription RT-01 em Index.tsx
+- [x] 06-03-PLAN.md — Subscription RT-02 em DemandDetailModal (frontend)
 
 ### Phase 7: Notifications System
 **Goal:** Users are alerted in-app when demands are assigned to them or change status, with a persistent notification center in the header.
@@ -90,8 +90,8 @@ Plans:
 
 | REQ-ID    | Phase | Status  |
 |-----------|-------|---------|
-| RT-01     | 6     | Planned |
-| RT-02     | 6     | Planned |
+| RT-01     | 6     | Complete |
+| RT-02     | 6     | Complete |
 | RT-03     | 7     | Pending |
 | RT-04     | 7     | Pending |
 | RT-05     | 7     | Pending |
@@ -115,7 +115,7 @@ Plans:
 | 3. AI Integration | v1.1 | 13/13 | Complete | 2026-04-24 |
 | 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-24 |
 | 5. Dashboard + Onboarding | v1.1 | 5/5 | Complete | 2026-04-24 |
-| 6. Real-time Infrastructure | v1.2 | 0/3 | Planned | - |
+| 6. Real-time Infrastructure | v1.2 | 3/3 | Complete | 2026-04-24 |
 | 7. Notifications System | v1.2 | 0/? | Not started | - |
 | 8. Multi-Org + Polish | v1.2 | 0/? | Not started | - |
 
@@ -142,4 +142,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-24 — Phase 6 planned (3 plans, RT-01 + RT-02)*
+*Last updated: 2026-04-24 — Phase 6 complete (3/3 plans, RT-01 + RT-02 delivered)*

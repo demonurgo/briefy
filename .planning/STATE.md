@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Real-time + Polish
-status: planning
-stopped_at: Phase 6 context gathered
+status: phase_complete
+stopped_at: Phase 6 complete — Phase 7 ready to plan
 last_updated: "2026-04-24T00:00:00Z"
-last_activity: 2026-04-24 — Roadmap created for v1.2 (Phases 6–8)
+last_activity: 2026-04-24 — Phase 6 executed (3/3 plans, RT-01 + RT-02 delivered)
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -25,15 +25,15 @@ See: .planning/PROJECT.md (updated 2026-04-24)
 
 ## Current Position
 
-Phase: 6 (Real-time Infrastructure) — Context ready
-Plan: —
-Status: Roadmap created — ready to plan Phase 6
-Last activity: 2026-04-24 — Roadmap written for v1.2 (Phases 6–8)
+Phase: 6 (Real-time Infrastructure) — Complete
+Next: Phase 7 (Notifications System) — ready to plan
+Status: Phase 6 complete — 3/3 plans delivered, RT-01 + RT-02 verified
+Last activity: 2026-04-24 — Phase 6 executed (DemandCommentCreated event, debounce RT-01, subscription RT-02)
 
 ```
-v1.2 Progress: [          ] 0%
-Phases: 0/3 complete
-Plans:  0/? complete
+v1.2 Progress: [====      ] 33%
+Phases: 1/3 complete
+Plans:  3/3 complete (Phase 6)
 ```
 
 ## Accumulated Context
@@ -47,6 +47,8 @@ Plans:  0/? complete
 - BYOK: dontFlash in bootstrap/app.php (Laravel 11+)
 - SSE: useAiStream for POST delta-frame; GET SSE stays on native EventSource (consolidate in Phase 8)
 - organization_user pivot with role enum — established multi-org pattern
+- RT channel: private-organization.{orgId} — shared between RT-01 (Kanban) and RT-02 (comments); use stopListening (not leave) in modal cleanup
+- Echo subscription pattern: useEffect with [orgId, demand.id] deps + stopListening cleanup confirmed for DemandDetailModal
 
 ### Known Issues (to resolve in v1.2)
 
@@ -71,5 +73,5 @@ Plans:  0/? complete
 ## Session Continuity
 
 Last session: 2026-04-24
-Stopped at: v1.2 roadmap created (Phases 6–8, 11 requirements mapped)
-Resume: `/gsd-plan-phase 6` to plan Phase 6 (Real-time Infrastructure)
+Stopped at: Phase 6 complete — RT-01 debounce + RT-02 backend + RT-02 frontend delivered
+Resume: `/gsd-discuss-phase 7` to discuss Phase 7 (Notifications System) before planning
