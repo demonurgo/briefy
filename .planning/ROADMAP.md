@@ -70,8 +70,13 @@ Plans:
   2. The Kanban board, demand modal, and dashboard are usable and visually polished on mobile.
   3. The app can be added to the home screen on iOS Safari and Android Chrome with a proper icon and splash screen.
   4. Core pages load and are navigable when the device is offline or on a slow connection (service worker caches shell).
-**Plans:** TBD
+**Plans:** 3 plans
 **UI hint:** yes
+
+Plans:
+- [ ] 07-01-PLAN.md — AppLayout overflow-x-hidden + KanbanBoard scroll isolation + manifest.json icon split
+- [ ] 07-02-PLAN.md — DemandDetailModal full-screen mobile + slide animation + swipe-to-close
+- [ ] 07-03-PLAN.md — Verify app.blade.php PWA tags + Dashboard responsive grids + human UAT checkpoint
 
 ### Phase 8: Multi-Org + Polish
 **Goal:** Existing users can create additional organizations from /settings, and the known technical debt from v1.1 is fully resolved.
@@ -116,7 +121,7 @@ Plans:
 | 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-24 |
 | 5. Dashboard + Onboarding | v1.1 | 5/5 | Complete | 2026-04-24 |
 | 6. Real-time Infrastructure | v1.2 | 3/3 | Complete | 2026-04-24 |
-| 7. Mobile + PWA | v1.2 | 0/? | Not started | - |
+| 7. Mobile + PWA | v1.2 | 0/3 | Not started | - |
 | 8. Multi-Org + Polish | v1.2 | 0/? | Not started | - |
 
 ---
@@ -143,3 +148,4 @@ Plans:
 
 *Roadmap created: 2026-04-22*
 *Last updated: 2026-04-24 — Phase 7 substituída: Notifications → Mobile + PWA*
+*Phase 7 planned: 2026-04-24 — 3 plans created*
