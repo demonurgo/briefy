@@ -68,6 +68,8 @@ export default function ChatTab({ demand }: ChatTabProps) {
   const [error, setError] = useState<string | null>(null);
   // Optimistic user message — shown immediately after send, cleared after reload brings server data.
   const [optimisticUserMsg, setOptimisticUserMsg] = useState<string | null>(null);
+  // pendingReload: stream done but typewriter still animating — reload waits for it to finish.
+  const [pendingReload, setPendingReload] = useState(false);
 
   // Conversation picker state
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -103,17 +105,22 @@ export default function ChatTab({ demand }: ChatTabProps) {
   const stream = useAiStream({
     url: conv ? route('demands.chat.stream', [demand.id, conv.id]) : '',
     method: 'POST',
-    onDone: () => {
-      router.reload({
-        only: ['selectedDemand'],
-        onSuccess: () => setOptimisticUserMsg(null),
-      });
-    },
+    onDone: () => setPendingReload(true),
     onError: (m) => setError(m),
   });
 
   // Drive the assistant typing animation.
   const streamingText = useTypewriter({ target: stream.buffer, charsPerFrame: 2 });
+
+  // Fire reload only after typewriter finishes animating — avoids mid-animation cutoff.
+  useEffect(() => {
+    if (!pendingReload || streamingText !== stream.buffer || !stream.buffer) return;
+    setPendingReload(false);
+    router.reload({
+      only: ['selectedDemand'],
+      onSuccess: () => setOptimisticUserMsg(null),
+    });
+  }, [pendingReload, streamingText, stream.buffer]);
 
   // ─── Auto-scroll ─────────────────────────────────────────────────────────────
 
@@ -198,7 +205,8 @@ export default function ChatTab({ demand }: ChatTabProps) {
     });
   };
 
-  const isStreaming = stream.state === 'streaming';
+  // Keep streaming bubble visible while typewriter finishes (pendingReload = stream done, typewriter catching up).
+  const isStreaming = stream.state === 'streaming' || pendingReload;
 
   // ─── Conversation label helper ────────────────────────────────────────────────
 
