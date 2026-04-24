@@ -20,7 +20,7 @@ class TeamRoleTest extends TestCase
         $collab->organizations()->attach($org->id, ['role' => 'collaborator', 'joined_at' => now()]);
 
         $this->actingAs($admin);
-        $response = $this->patch(route('team.updateRole', $collab->id), ['role' => 'admin']);
+        $response = $this->from(route('settings.index'))->patch(route('team.updateRole', $collab->id), ['role' => 'admin']);
         $response->assertRedirectContains('/settings');
 
         $this->assertDatabaseHas('organization_user', [

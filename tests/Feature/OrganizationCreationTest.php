@@ -60,8 +60,7 @@ class OrganizationCreationTest extends TestCase
             'slug' => 'already-taken',
         ]);
 
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['slug']);
+        $response->assertSessionHasErrors(['slug']);
     }
 
     public function test_store_requires_authentication(): void
@@ -91,7 +90,6 @@ class OrganizationCreationTest extends TestCase
             'slug' => 'sem-nome',
         ]);
 
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['name']);
+        $response->assertSessionHasErrors(['name']);
     }
 }
