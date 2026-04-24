@@ -26,7 +26,7 @@ class InvitationControllerTest extends TestCase
         [$org, $admin] = $this->makeAdminUser();
         $this->actingAs($admin);
 
-        $response = $this->post(route('team.invite'), [
+        $response = $this->from(route('settings.index'))->post(route('team.invite'), [
             'email' => 'newuser@example.com',
             'role' => 'collaborator',
         ]);
@@ -76,7 +76,7 @@ class InvitationControllerTest extends TestCase
         ]);
         $this->actingAs($admin);
 
-        $response = $this->delete(route('team.invitation.cancel', $invite->id));
+        $response = $this->from(route('settings.index'))->delete(route('team.invitation.cancel', $invite->id));
 
         $response->assertRedirectContains('/settings');
         $this->assertDatabaseMissing('invitations', ['id' => $invite->id]);

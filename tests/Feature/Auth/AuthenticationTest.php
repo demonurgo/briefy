@@ -17,7 +17,7 @@ class AuthenticationTest extends TestCase
     public function test_users_can_authenticate_and_last_login_is_updated(): void
     {
         $org = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $org->id, 'last_login_at' => null]);
+        $user = User::factory()->create(['current_organization_id' => $org->id, 'last_login_at' => null]);
         $this->post('/login', ['email' => $user->email, 'password' => 'password']);
         $this->assertAuthenticated();
         $this->assertNotNull($user->fresh()->last_login_at);
@@ -26,7 +26,7 @@ class AuthenticationTest extends TestCase
     public function test_users_cannot_authenticate_with_invalid_password(): void
     {
         $org = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $org->id]);
+        $user = User::factory()->create(['current_organization_id' => $org->id]);
         $this->post('/login', ['email' => $user->email, 'password' => 'wrong-password']);
         $this->assertGuest();
     }
@@ -40,7 +40,7 @@ class AuthenticationTest extends TestCase
     public function test_users_can_logout(): void
     {
         $org = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $org->id]);
+        $user = User::factory()->create(['current_organization_id' => $org->id]);
         $this->actingAs($user)->post('/logout');
         $this->assertGuest();
     }

@@ -37,7 +37,7 @@ class TeamRosterTest extends TestCase
         $collab->organizations()->attach($org->id, ['role' => 'collaborator', 'joined_at' => now()]);
 
         $this->actingAs($admin);
-        $response = $this->delete(route('team.remove', $collab->id));
+        $response = $this->from(route('settings.index'))->delete(route('team.remove', $collab->id));
 
         $response->assertRedirectContains('/settings');
         $this->assertDatabaseMissing('organization_user', [
