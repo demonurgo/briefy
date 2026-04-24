@@ -69,13 +69,16 @@ Agency teams can create, track, and complete client demands efficiently, with AI
 - ✓ AI chat conversation picker — all conversations readable and writable (POLISH-03)
 - ✓ Mobile-responsive layout + PWA installable on iOS/Android (MOB-01–04)
 
+### Validated in v1.3 — Phase 9
+
+- ✓ In-app notification when demand is assigned to user — DemandAssigned event via Reverb (RT-03)
+- ✓ In-app notification when demand status changes — DemandStatusChanged event, dedup creator===assignee (RT-04)
+- ✓ Notification bell badge updates in real-time via Echo subscription, no polling (RT-05)
+- ✓ Notification dropdown with demand title, event type, timestamps (RT-06)
+- ✓ Mark individual or all notifications as read — local state update, no reload (RT-07)
+
 ### Active (v1.3)
 
-- [ ] In-app notification when demand is assigned to user (RT-03)
-- [ ] In-app notification when demand status changes (RT-04)
-- [ ] Notification bell badge updates in real-time via WebSocket (RT-05)
-- [ ] Notification dropdown with timestamps and demand context (RT-06)
-- [ ] Mark individual or all notifications as read (RT-07)
 - [ ] Feature tests: auth, orgs, demands, AI chat, notifications (TEST-01–05)
 
 ### Out of Scope
