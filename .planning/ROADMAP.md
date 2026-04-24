@@ -36,7 +36,7 @@
 
 - [x] **Phase 3: AI Integration** — Brief generation, AI chat, streaming responses, client memory, monthly planning generation
 - [ ] **Phase 4: Real-time Collaboration** — Live kanban updates, live comments, in-app notifications with unread bell
-- [ ] **Phase 5: Dashboard + Onboarding** — Metrics charts, activity feed, workload views, guided first-use flow
+- [x] **Phase 5: Dashboard + Onboarding** — Metrics charts, activity feed, workload views, guided first-use flow
 
 ### Progress
 
@@ -44,7 +44,7 @@
 |-------|----------------|--------|-----------|
 | 3. AI Integration | 13/13 | Complete | 2026-04-22 |
 | 4. Real-time Collaboration | 0/? | Not started | - |
-| 5. Dashboard + Onboarding | 0/? | Not started | - |
+| 5. Dashboard + Onboarding | 5/5 | Complete | 2026-04-24 |
 
 </details>
 
@@ -59,7 +59,7 @@
 
 - [x] **Phase 3: AI Integration** — Brief generation, AI chat, streaming responses, client memory, monthly planning generation
 - [x] **Phase 4: Team Management** — Invite members by email, roles (admin/member), team roster, user profiles with avatar
-- [ ] **Phase 5: Dashboard + Onboarding** — Metrics charts, activity feed, workload views, guided first-use flow
+- [x] **Phase 5: Dashboard + Onboarding** — Metrics charts, activity feed, workload views, guided first-use flow
 
 ### Progress
 
@@ -141,10 +141,10 @@ Plans:
 **Plans:** 5 plans
 Plans:
 - [x] 05-00-PLAN.md — Wave 0: migrations (activity_logs + priority) + migrate + recharts install + test scaffolds RED
-- [ ] 05-01-PLAN.md — DashboardController completo + ActivityLog model + preferences route fix (BLOCKER-02)
-- [ ] 05-02-PLAN.md — DemandObserver + ClientObserver + AppServiceProvider (activity logging)
-- [ ] 05-03-PLAN.md — Componentes React: DashboardStatusCard, DashboardSectionCard, ActivityFeed, OnboardingChecklist
-- [ ] 05-04-PLAN.md — Dashboard.tsx completo (view pessoal + view gerencial + charts Recharts)
+- [x] 05-01-PLAN.md — DashboardController completo + ActivityLog model + preferences route fix (BLOCKER-02)
+- [x] 05-02-PLAN.md — DemandObserver + ClientObserver + AppServiceProvider (activity logging)
+- [x] 05-03-PLAN.md — Componentes React: DashboardStatusCard, DashboardSectionCard, ActivityFeed, OnboardingChecklist
+- [x] 05-04-PLAN.md — Dashboard.tsx completo (view pessoal + view gerencial + charts Recharts)
 **UI hint:** yes
 
 ---
@@ -185,7 +185,7 @@ Plans:
 
 ---
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-23 — Phase 5 planned with 5 plans (Wave 0 + 4 feature plans in 2 waves)*
+*Last updated: 2026-04-24 — Phase 5 (Dashboard + Onboarding) complete — v1.1 milestone fully shipped (5/5 phases)*
 
 ## Backlog
 
