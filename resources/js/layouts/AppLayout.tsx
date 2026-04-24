@@ -134,7 +134,7 @@ export default function AppLayout({ children, title, actions }: Props) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f9fafb] dark:bg-[#0b0f14]" style={{ minHeight: '540px', minWidth: '360px' }}>
+    <div className="flex min-h-screen overflow-x-hidden bg-[#f9fafb] dark:bg-[#0b0f14]" style={{ minHeight: '540px', minWidth: '360px' }}>
       <Sidebar collapsed={!sidebarOpen} onToggle={() => setSidebarOpen(v => !v)} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -150,7 +150,7 @@ export default function AppLayout({ children, title, actions }: Props) {
             <div ref={bellRef} className="relative">
               <button
                 onClick={openBell}
-                className="relative flex h-8 w-8 items-center justify-center rounded-[8px] text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#111827] dark:hover:bg-[#1f2937] dark:hover:text-[#f9fafb]"
+                className="relative flex h-8 w-8 min-h-[44px] min-w-[44px] items-center justify-center rounded-[8px] text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#111827] dark:hover:bg-[#1f2937] dark:hover:text-[#f9fafb]"
                 aria-label="Notificações"
               >
                 <Bell size={18} />
