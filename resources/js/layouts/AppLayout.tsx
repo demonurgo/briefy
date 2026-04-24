@@ -19,6 +19,14 @@ interface Notification {
   created_at: string;
 }
 
+interface NotificationCreatedEvent {
+  user_id: number;         // snake_case — matches PHP event constructor (D-06)
+  organization_id: number;
+  title: string;
+  body: string;
+  data: Record<string, unknown>;
+}
+
 interface Props extends PropsWithChildren {
   title?: string;
   actions?: React.ReactNode;
@@ -26,13 +34,13 @@ interface Props extends PropsWithChildren {
 
 export default function AppLayout({ children, title, actions }: Props) {
   const { auth, unread_notifications } = usePage<PageProps>().props;
+  const [unreadCount, setUnreadCount] = useState(unread_notifications);
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     try { return localStorage.getItem('sidebar') !== 'closed'; } catch { return true; }
   });
   const [bellOpen, setBellOpen] = useState(false);
   const [notes, setNotes] = useState<Notification[]>([]);
   const bellRef = useRef<HTMLDivElement>(null);
-  const prevUnread = useRef(unread_notifications);
   const [orgSwitcherOpen, setOrgSwitcherOpen] = useState(false);
   const orgSwitcherRef = useRef<HTMLDivElement>(null);
   const [createOrgOpen, setCreateOrgOpen] = useState(false);
@@ -52,19 +60,27 @@ export default function AppLayout({ children, title, actions }: Props) {
     } catch { /* AudioContext not available */ }
   };
 
-  // Poll for new notifications every 30s
+  // Real-time notification badge via Echo (replaces 30s polling — D-10)
   useEffect(() => {
-    const interval = setInterval(() => {
-      router.reload({ only: ['unread_notifications'] });
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    const orgId = auth.organization?.id;
+    if (!orgId || !window.Echo) return;
 
-  // Play sound when unread count increases
-  useEffect(() => {
-    if (unread_notifications > prevUnread.current) playNotificationSound();
-    prevUnread.current = unread_notifications;
-  }, [unread_notifications]);
+    const channel = window.Echo.private(`organization.${orgId}`);
+
+    channel.listen('.notification.created', (event: NotificationCreatedEvent) => {
+      // D-07: only process notifications addressed to the current user
+      if (event.user_id !== auth.user.id) return;
+
+      setUnreadCount(prev => prev + 1);
+      playNotificationSound();
+    });
+
+    return () => {
+      // CRITICAL: stopListening, NOT window.Echo.leave()
+      // leave() destroys the shared channel — kills RT-01 Kanban updates in Index.tsx
+      channel.stopListening('.notification.created');
+    };
+  }, [auth.organization?.id]);
 
   useEffect(() => {
     try { localStorage.setItem('sidebar', sidebarOpen ? 'open' : 'closed'); } catch {}
@@ -126,17 +142,19 @@ export default function AppLayout({ children, title, actions }: Props) {
     const csrf = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
     await fetch(route('notifications.read-all'), { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf } });
     setNotes(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString() })));
-    router.reload({ only: ['unread_notifications'] });
+    setUnreadCount(0);
   };
 
   const handleNoteClick = async (note: Notification) => {
     if (!note.read_at) {
       const csrf = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
       await fetch(route('notifications.read', note.id), { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf } });
-      router.reload({ only: ['unread_notifications'] });
+      setUnreadCount(prev => Math.max(0, prev - 1));
     }
     setBellOpen(false);
-    if (note.data?.demand_id) router.visit(route('planejamento.index'));
+    if (note.data?.demand_id) {
+      router.visit(route('demands.index', { demand: note.data.demand_id }));
+    }
   };
 
   return (
@@ -160,9 +178,9 @@ export default function AppLayout({ children, title, actions }: Props) {
                 aria-label="Notificações"
               >
                 <Bell size={18} />
-                {unread_notifications > 0 && (
+                {unreadCount > 0 && (
                   <span className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    {unread_notifications > 9 ? '9+' : unread_notifications}
+                    {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
