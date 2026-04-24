@@ -29,7 +29,7 @@ class AiChatControllerTest extends TestCase
     {
         parent::setUp();
         $this->org    = Organization::factory()->create();
-        $this->user   = User::factory()->create(['organization_id' => $this->org->id]);
+        $this->user   = User::factory()->create(['current_organization_id' => $this->org->id]);
         $this->client = Client::factory()->create(['organization_id' => $this->org->id]);
         $this->demand = Demand::factory()->create([
             'organization_id' => $this->org->id,
@@ -200,7 +200,7 @@ class AiChatControllerTest extends TestCase
     public function test_cross_org_conversation_returns_403(): void
     {
         $otherOrg  = Organization::factory()->create();
-        $otherUser = User::factory()->create(['organization_id' => $otherOrg->id]);
+        $otherUser = User::factory()->create(['current_organization_id' => $otherOrg->id]);
 
         $conv = AiConversation::create([
             'organization_id' => $this->org->id,

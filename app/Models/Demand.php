@@ -14,7 +14,7 @@ class Demand extends Model
     protected $fillable = [
         'organization_id', 'client_id', 'type', 'title', 'description',
         'objective', 'tone', 'channel', 'deadline', 'status', 'priority',
-        'recurrence_day', 'ai_analysis', 'created_by', 'assigned_to',
+        'recurrence_day', 'ai_analysis', 'created_by', 'assigned_to', 'archived_at',
     ];
 
     protected $casts = [
