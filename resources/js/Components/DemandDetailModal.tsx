@@ -243,6 +243,12 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
           }
         }}
       >
+        {/* Swipe-down-to-close handle — mobile only */}
+        <div
+          className="md:hidden absolute top-2 left-1/2 -translate-x-1/2 h-1 w-8 rounded-full bg-[#374151] dark:bg-[#d1d5db] shrink-0 z-10"
+          aria-label="Arrastar para fechar"
+          role="presentation"
+        />
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between gap-4 border-b border-[#e5e7eb] bg-white px-6 py-4 dark:border-[#1f2937] dark:bg-[#111827]">
           <div className="min-w-0 flex-1">
