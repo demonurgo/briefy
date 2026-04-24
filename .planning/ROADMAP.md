@@ -186,3 +186,21 @@ Plans:
 ---
 *Roadmap created: 2026-04-22*
 *Last updated: 2026-04-23 — Phase 5 planned with 5 plans (Wave 0 + 4 feature plans in 2 waves)*
+
+## Backlog
+
+### Phase 999.1: Dashboard async status cards (deep research + monthly planning) (BACKLOG)
+
+**Goal:** Show in-progress async operations as status cards on the admin dashboard — progress bar, completion/error state, click-to-navigate, auto-hide after viewed. Only visible to admin/owner. Real-time updates via Reverb (Phase 4 infrastructure).
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+**Notes:**
+- Backend: DashboardController returns active ClientResearchSession + MonthlyPlan jobs scoped to org
+- Frontend: 2 new cards in admin overview — progress bar via polling (router.reload) or Reverb broadcast
+- Notification: fire existing notification event on job completion/failure
+- Cards disappear from dashboard after clicked or via preferences flag
+- Only admin/owner sees these cards (same isAdminOrOwner() gate)
