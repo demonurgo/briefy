@@ -74,4 +74,4 @@ Plans:  3/3 complete (Phase 6)
 
 Last session: 2026-04-24
 Stopped at: Phase 6 complete — RT-01 debounce + RT-02 backend + RT-02 frontend delivered
-Resume: `/gsd-discuss-phase 7` to discuss Phase 7 (Notifications System) before planning
+Resume: `/gsd-plan-phase 7` to plan Phase 7 (Mobile + PWA — CONTEXT.md already present)
