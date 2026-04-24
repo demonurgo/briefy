@@ -3,7 +3,7 @@ import { formatDate } from '@/utils/date';
 import { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, List, Loader2, Search } from 'lucide-react';
+import { LayoutGrid, List, Loader2, Plus, Search, X } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
 import { KanbanBoard } from '@/Components/KanbanBoard';
 import { StatusBadge } from '@/Components/StatusBadge';
@@ -47,6 +47,19 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
   const [view, setView] = useState<'kanban' | 'list'>('kanban');
   const [search, setSearch] = useState(filters.search ?? '');
   const [loadingDemandId, setLoadingDemandId] = useState<number | null>(null);
+  const [showClientPicker, setShowClientPicker] = useState(false);
+  const [pickedClientId, setPickedClientId] = useState<string>('');
+
+  const handleNewDemand = () => {
+    if (filters.client_id) {
+      router.visit(route('clients.demands.create', filters.client_id));
+    } else if (clients.length === 1) {
+      router.visit(route('clients.demands.create', clients[0].id));
+    } else {
+      setPickedClientId(clients[0]?.id ? String(clients[0].id) : '');
+      setShowClientPicker(true);
+    }
+  };
 
   // When navigating from client profile "Nova demanda", redirect to create page preserving client filter
   useEffect(() => {
@@ -118,21 +131,56 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
           {STATUSES.map(s => <option key={s} value={s}>{t(`demand.statuses.${s}`)}</option>)}
         </select>
 
-        <div className="ml-auto flex items-center overflow-hidden rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937]">
+        <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center overflow-hidden rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937]">
+            <button
+              onClick={() => setView('kanban')}
+              className={`px-3 py-1.5 transition-colors ${view === 'kanban' ? 'bg-[#7c3aed] text-white' : 'text-[#6b7280] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]'}`}
+            >
+              <LayoutGrid size={15} />
+            </button>
+            <button
+              onClick={() => setView('list')}
+              className={`px-3 py-1.5 transition-colors ${view === 'list' ? 'bg-[#7c3aed] text-white' : 'text-[#6b7280] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]'}`}
+            >
+              <List size={15} />
+            </button>
+          </div>
+
           <button
-            onClick={() => setView('kanban')}
-            className={`px-3 py-1.5 transition-colors ${view === 'kanban' ? 'bg-[#7c3aed] text-white' : 'text-[#6b7280] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]'}`}
+            onClick={handleNewDemand}
+            className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#6d28d9] transition-colors"
           >
-            <LayoutGrid size={15} />
-          </button>
-          <button
-            onClick={() => setView('list')}
-            className={`px-3 py-1.5 transition-colors ${view === 'list' ? 'bg-[#7c3aed] text-white' : 'text-[#6b7280] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]'}`}
-          >
-            <List size={15} />
+            <Plus size={15} aria-hidden="true" />
+            Nova demanda
           </button>
         </div>
       </div>
+
+      {/* Client picker — aparece quando há múltiplos clientes e nenhum está filtrado */}
+      {showClientPicker && (
+        <div className="mb-4 flex items-center gap-3 rounded-[10px] border border-[#a78bfa]/30 bg-[#7c3aed]/5 dark:bg-[#7c3aed]/10 px-4 py-3">
+          <span className="text-sm text-[#6b7280] shrink-0">Para qual cliente?</span>
+          <select
+            value={pickedClientId}
+            onChange={e => setPickedClientId(e.target.value)}
+            className="flex-1 rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm focus:border-[#7c3aed] focus:outline-none dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
+            autoFocus
+          >
+            {clients.map(c => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+          </select>
+          <button
+            onClick={() => { if (pickedClientId) router.visit(route('clients.demands.create', pickedClientId)); }}
+            disabled={!pickedClientId}
+            className="rounded-[8px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:opacity-50 transition-colors"
+          >
+            Continuar
+          </button>
+          <button onClick={() => setShowClientPicker(false)} className="p-1 text-[#9ca3af] hover:text-[#374151] dark:hover:text-[#d1d5db] transition-colors" aria-label="Cancelar">
+            <X size={15} />
+          </button>
+        </div>
+      )}
 
       {demands.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
