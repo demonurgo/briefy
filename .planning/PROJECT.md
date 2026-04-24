@@ -1,5 +1,17 @@
 # Briefy
 
+## Current Milestone: v1.2 Real-time + Polish
+
+**Goal:** Adicionar colaboração em tempo real via Laravel Reverb, sistema de notificações in-app, criação de multi-org para usuários existentes, e consolidar dívida técnica do v1.1.
+
+**Target features:**
+- Real-time Kanban: live status updates via WebSocket (RT-01)
+- Real-time Comments: novos comentários aparecem no demand detail (RT-02)
+- Notificações in-app: assignments + mudanças de status (RT-03/RT-04)
+- Notification Bell: sino com contador não-lido e dropdown (RT-05)
+- Multi-org creation: UI em /settings para criar nova org para usuários existentes
+- Polish técnico: SSE consolidation (useAiStream + EventSource), TypeScript strict fixes, conversation picker AI chat
+
 ## What This Is
 
 Briefy is a B2B SaaS platform for marketing agencies and freelancers to manage client demands using integrated artificial intelligence. Agencies create organizations, invite team members, manage clients, and track creative demands through a Kanban-style workflow — with AI acting as an assistant, not a replacement. Team members have role-based access (owner/admin/member/collaborator), and admins can monitor workload and activity via a dashboard with charts and activity feed.
@@ -44,6 +56,9 @@ Agency teams can create, track, and complete client demands efficiently, with AI
 - [ ] In-app notifications for assignments and status changes (RT-03, RT-04)
 - [ ] Notification bell with unread count and dropdown (RT-05)
 - [ ] Multi-org creation UI in /settings for existing users
+- [ ] Consolidate SSE dual-pattern (useAiStream + EventSource) (POLISH-01)
+- [ ] Fix TypeScript strict errors: auth.organization shape mismatch (POLISH-02)
+- [ ] Conversation picker dropdown for AI Chat (POLISH-03)
 
 ### Out of Scope
 
@@ -110,4 +125,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after v1.1 milestone — AI + Team + Dashboard fully shipped*
+*Last updated: 2026-04-24 — v1.2 milestone started: Real-time + Polish*
