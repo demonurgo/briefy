@@ -38,8 +38,25 @@ class HandleInertiaRequests extends Middleware
             $user->load('organizations');
         }
 
+        // Build the full organization payload once — shared between auth.user.organization and auth.organization.
+        $orgPayload = ($user && $user->currentOrganization) ? array_merge(
+            $user->currentOrganization->only(['id', 'name', 'slug', 'logo']),
+            [
+                'has_anthropic_key'              => $user->currentOrganization->hasAnthropicKey(),
+                'anthropic_api_key_mask'         => $user->currentOrganization->anthropic_api_key_mask,
+                'key_valid'                      => (bool) ($user->currentOrganization->anthropic_key_valid ?? false),
+                'managed_agents_enabled'         => (bool) ($user->currentOrganization->anthropic_managed_agents_ok ?? false),
+                'last_key_check_at'              => optional($user->currentOrganization->anthropic_key_checked_at)->toIso8601String(),
+                'client_research_agent_id'       => $user->currentOrganization->client_research_agent_id,
+                'client_research_environment_id' => $user->currentOrganization->client_research_environment_id,
+            ]
+        ) : null;
+
         return array_merge(parent::share($request), [
             'auth' => [
+                // auth.organization — top-level, matches PageProps TypeScript type.
+                // Components that need AI fields (ChatTab, Settings) read from here.
+                'organization' => $orgPayload,
                 'user' => $user ? [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -48,18 +65,7 @@ class HandleInertiaRequests extends Middleware
                     'role' => $user->getCurrentRoleAttribute(),
                     'preferences' => $user->preferences,
                     'current_organization_id' => $user->current_organization_id,
-                    'organization' => $user->currentOrganization ? array_merge(
-                        $user->currentOrganization->only(['id', 'name', 'slug', 'logo']),
-                        [
-                            'has_anthropic_key'                 => $user->currentOrganization->hasAnthropicKey(),
-                            'anthropic_api_key_mask'            => $user->currentOrganization->anthropic_api_key_mask,
-                            'key_valid'                         => (bool) ($user->currentOrganization->anthropic_key_valid ?? false),
-                            'managed_agents_enabled'            => (bool) ($user->currentOrganization->anthropic_managed_agents_ok ?? false),
-                            'last_key_check_at'                 => optional($user->currentOrganization->anthropic_key_checked_at)->toIso8601String(),
-                            'client_research_agent_id'          => $user->currentOrganization->client_research_agent_id,
-                            'client_research_environment_id'    => $user->currentOrganization->client_research_environment_id,
-                        ]
-                    ) : null,
+                    'organization' => $orgPayload,
                     'organizations' => $user->organizations->map(fn ($o) => [
                         'id'   => $o->id,
                         'name' => $o->name,

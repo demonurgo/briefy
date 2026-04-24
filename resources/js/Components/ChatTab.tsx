@@ -171,7 +171,7 @@ export default function ChatTab({ demand }: ChatTabProps) {
 
   const sendMessage = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !hasKey || !isLatest || stream.state === 'streaming') return;
+    if (!input.trim() || !hasKey || stream.state === 'streaming') return;
 
     setError(null);
 
@@ -267,12 +267,6 @@ export default function ChatTab({ demand }: ChatTabProps) {
         </div>
       )}
 
-      {/* Read-only indicator for non-latest conversations */}
-      {!isLatest && (
-        <div className="flex items-center justify-center border-b border-[#e5e7eb] bg-[#f9fafb] px-4 py-1.5 text-xs text-[#9ca3af] dark:border-[#1f2937] dark:bg-[#111827]">
-          {t('ai.chat.readOnly', 'Somente leitura — selecione a conversa mais recente para enviar mensagens')}
-        </div>
-      )}
 
       {/* Messages scroll area */}
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-4 no-scrollbar">
@@ -360,13 +354,13 @@ export default function ChatTab({ demand }: ChatTabProps) {
             }
           }}
           placeholder={t('ai.chat.placeholder')}
-          disabled={!hasKey || !isLatest}
+          disabled={!hasKey}
           rows={1}
           className="min-h-[44px] max-h-[160px] flex-1 resize-none rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]"
         />
         <button
           type="submit"
-          disabled={!input.trim() || isStreaming || !hasKey || !isLatest}
+          disabled={!input.trim() || isStreaming || !hasKey}
           aria-label={t('demands.send') ?? 'Enviar'}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#7c3aed] text-white hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40"
         >
