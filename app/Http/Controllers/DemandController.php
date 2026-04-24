@@ -89,7 +89,7 @@ class DemandController extends Controller
             'created_by'      => auth()->id(),
         ]);
 
-        return redirect()->route('demands.show', $demand)
+        return redirect()->route('demands.index', ['demand' => $demand->id])
             ->with('success', __('app.demand_created'));
     }
 
