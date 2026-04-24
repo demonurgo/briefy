@@ -53,7 +53,12 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
   2. When User A posts a comment on a demand, User B who has the same demand modal open sees the comment appear live in the thread.
   3. Both events flow through the Reverb `private-organization.{org_id}` channel; no polling or manual reload is needed for either update.
   4. Existing drag-and-drop and optimistic update behavior on the Kanban board is unaffected by the broadcast layer.
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Evento DemandCommentCreated (backend RT-02) + stubs de teste Wave 0
+- [ ] 06-02-PLAN.md — Debounce na subscription RT-01 em Index.tsx
+- [ ] 06-03-PLAN.md — Subscription RT-02 em DemandDetailModal (frontend)
 
 ### Phase 7: Notifications System
 **Goal:** Users are alerted in-app when demands are assigned to them or change status, with a persistent notification center in the header.
@@ -85,8 +90,8 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 | REQ-ID    | Phase | Status  |
 |-----------|-------|---------|
-| RT-01     | 6     | Pending |
-| RT-02     | 6     | Pending |
+| RT-01     | 6     | Planned |
+| RT-02     | 6     | Planned |
 | RT-03     | 7     | Pending |
 | RT-04     | 7     | Pending |
 | RT-05     | 7     | Pending |
@@ -110,7 +115,7 @@ See full details: `.planning/milestones/v1.1-ROADMAP.md`
 | 3. AI Integration | v1.1 | 13/13 | Complete | 2026-04-24 |
 | 4. Team Management | v1.1 | 8/8 | Complete | 2026-04-24 |
 | 5. Dashboard + Onboarding | v1.1 | 5/5 | Complete | 2026-04-24 |
-| 6. Real-time Infrastructure | v1.2 | 0/? | Not started | - |
+| 6. Real-time Infrastructure | v1.2 | 0/3 | Planned | - |
 | 7. Notifications System | v1.2 | 0/? | Not started | - |
 | 8. Multi-Org + Polish | v1.2 | 0/? | Not started | - |
 
@@ -137,4 +142,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-04-22*
-*Last updated: 2026-04-24 — v1.2 roadmap defined (Phases 6–8)*
+*Last updated: 2026-04-24 — Phase 6 planned (3 plans, RT-01 + RT-02)*
