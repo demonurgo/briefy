@@ -1,7 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { router, usePage, useForm } from '@inertiajs/react';
-import { Bell, ChevronDown, Check, Plus } from 'lucide-react';
+import { Bell, ChevronDown, Check, Plus, LogOut } from 'lucide-react';
 import { BottomNav } from '@/Components/BottomNav';
 import { Sidebar } from '@/Components/Sidebar';
 import { ThemeToggle } from '@/Components/ThemeToggle';
@@ -252,6 +252,20 @@ export default function AppLayout({ children, title, actions }: Props) {
                       >
                         <Plus size={14} />
                         Criar nova organização
+                      </button>
+                    </div>
+
+                    <div className="border-t border-[#e5e7eb] dark:border-[#1f2937] mt-1 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOrgSwitcherOpen(false);
+                          router.post(route('logout'));
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#374151] dark:text-[#9ca3af] dark:hover:bg-[#1f2937] dark:hover:text-[#f9fafb] transition-colors"
+                      >
+                        <LogOut size={14} />
+                        Sair
                       </button>
                     </div>
                   </div>

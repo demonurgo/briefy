@@ -107,7 +107,11 @@ export default function SettingsIndex({ members, pending_invites, organization, 
   const { t } = useTranslation();
   const { auth } = usePage<SettingsPageProps>().props;
   const user = auth.user;
-  const userOrg = auth.organization as SettingsOrganization;
+  const userOrg: SettingsOrganization = (auth.organization as SettingsOrganization | null | undefined) ?? {
+    id: 0, name: '', slug: '', has_anthropic_key: false, anthropic_api_key_mask: null,
+    key_valid: false, managed_agents_enabled: false, last_key_check_at: null,
+    client_research_agent_id: null, client_research_environment_id: null,
+  };
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
