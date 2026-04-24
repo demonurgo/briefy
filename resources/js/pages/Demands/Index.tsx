@@ -8,6 +8,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { KanbanBoard } from '@/Components/KanbanBoard';
 import { StatusBadge } from '@/Components/StatusBadge';
 import { DemandDetailModal } from '@/Components/DemandDetailModal';
+import { DemandCreateModal } from '@/Components/DemandCreateModal';
 import emptyLight from '@/assets/empty-state-light.svg';
 import emptyDark from '@/assets/empty-state-dark.svg';
 
@@ -49,12 +50,19 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
   const [loadingDemandId, setLoadingDemandId] = useState<number | null>(null);
   const [showClientPicker, setShowClientPicker] = useState(false);
   const [pickedClientId, setPickedClientId] = useState<string>('');
+  const [createClient, setCreateClient] = useState<{ id: number; name: string } | null>(null);
+
+  const openCreateModal = (clientId: number) => {
+    const client = clients.find(c => c.id === clientId) ?? null;
+    setShowClientPicker(false);
+    setCreateClient(client);
+  };
 
   const handleNewDemand = () => {
     if (filters.client_id) {
-      router.visit(route('clients.demands.create', filters.client_id));
+      openCreateModal(Number(filters.client_id));
     } else if (clients.length === 1) {
-      router.visit(route('clients.demands.create', clients[0].id));
+      openCreateModal(clients[0].id);
     } else {
       setPickedClientId(clients[0]?.id ? String(clients[0].id) : '');
       setShowClientPicker(true);
@@ -170,7 +178,7 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
             {clients.map(c => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
           </select>
           <button
-            onClick={() => { if (pickedClientId) router.visit(route('clients.demands.create', pickedClientId)); }}
+            onClick={() => { if (pickedClientId) openCreateModal(Number(pickedClientId)); }}
             disabled={!pickedClientId}
             className="rounded-[8px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:opacity-50 transition-colors"
           >
@@ -235,6 +243,18 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
       )}
       {selectedDemand && (
         <DemandDetailModal demand={selectedDemand} isAdmin={isAdmin} teamMembers={teamMembers} onClose={closeDemand} />
+      )}
+
+      {createClient && (
+        <DemandCreateModal
+          client={createClient}
+          teamMembers={teamMembers}
+          onClose={() => setCreateClient(null)}
+          onSuccess={() => {
+            setCreateClient(null);
+            router.reload({ only: ['demands'] });
+          }}
+        />
       )}
     </AppLayout>
   );
