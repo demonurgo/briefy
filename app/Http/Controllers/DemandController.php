@@ -2,6 +2,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 namespace App\Http\Controllers;
 
+use App\Events\DemandCommentCreated;
 use App\Http\Requests\StoreDemandRequest;
 use App\Http\Requests\UpdateDemandRequest;
 use App\Models\Client;
@@ -195,12 +196,29 @@ class DemandController extends Controller
         $this->authorizeDemand($demand);
         $request->validate(['body' => 'required|string|max:5000']);
 
-        DemandComment::create([
+        $comment = DemandComment::create([
             'demand_id' => $demand->id,
             'user_id'   => auth()->id(),
             'body'      => $request->body,
             'source'    => 'user',
         ]);
+
+        // Carregar relação user ANTES do dispatch — create() não carrega relações
+        $comment->load('user');
+
+        DemandCommentCreated::dispatch(
+            $demand->organization_id,
+            $demand->id,
+            [
+                'id'         => $comment->id,
+                'body'       => $comment->body,
+                'user'       => [
+                    'id'   => $comment->user->id,
+                    'name' => $comment->user->name,
+                ],
+                'created_at' => $comment->created_at->toJSON(),
+            ]
+        );
 
         return back()->with('success', __('app.comment_added'));
     }
