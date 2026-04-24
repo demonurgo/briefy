@@ -1,5 +1,5 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -341,9 +341,10 @@ function PersonalView({ personal }: { personal: PersonalData }) {
           ) : (
             <div>
               {personal.focusDemands.map((d) => (
-                <div
+                <Link
                   key={d.id}
-                  className="flex items-center gap-3 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0"
+                  href={`/demands?demand=${d.id}`}
+                  className="flex items-center gap-3 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0 hover:bg-[#f9fafb] dark:hover:bg-[#0d1117] rounded transition-colors"
                 >
                   <PriorityBadge priority={d.priority} />
                   <span className="text-sm text-[#111827] dark:text-[#f9fafb] truncate flex-1">
@@ -358,7 +359,7 @@ function PersonalView({ personal }: { personal: PersonalData }) {
                   >
                     {d.deadline ?? 'Sem prazo'}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -443,7 +444,7 @@ function PersonalView({ personal }: { personal: PersonalData }) {
               </thead>
               <tbody>
                 {filteredDemands.map((d) => (
-                  <tr key={d.id} className="hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors">
+                  <tr key={d.id} onClick={() => router.visit(`/demands?demand=${d.id}`)} className="hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors cursor-pointer">
                     <td className="py-2 pr-2 text-[#111827] dark:text-[#f9fafb] truncate max-w-[140px]">{d.title}</td>
                     <td className="py-2 pr-2"><StatusBadge status={d.status} /></td>
                     <td className="py-2 pr-2"><PriorityBadge priority={d.priority} /></td>
@@ -463,13 +464,17 @@ function PersonalView({ personal }: { personal: PersonalData }) {
           ) : (
             <div>
               {personal.blockers.map((b) => (
-                <div key={b.id} className="flex items-start gap-2 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0">
+                <Link
+                  key={b.id}
+                  href={`/demands?demand=${b.id}`}
+                  className="flex items-start gap-2 py-2.5 border-b border-[#e5e7eb] dark:border-[#1f2937] last:border-0 hover:bg-[#f9fafb] dark:hover:bg-[#0d1117] rounded transition-colors"
+                >
                   <AlertCircle size={14} className="text-[#f59e0b] mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-medium text-[#111827] dark:text-[#f9fafb]">{b.title}</p>
                     <p className="text-xs text-[#9ca3af]">Desde {b.since}</p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -751,6 +756,21 @@ export default function Dashboard({
     },
     []
   );
+
+  // Auto-refresh a cada 30s (pausa quando aba está em background)
+  useEffect(() => {
+    const tick = () => {
+      if (!document.hidden) {
+        router.reload({
+          only: isAdmin && view === 'overview'
+            ? ['personal', 'overview', 'activityFeed']
+            : ['personal', 'activityFeed'],
+        });
+      }
+    };
+    const id = setInterval(tick, 30_000);
+    return () => clearInterval(id);
+  }, [isAdmin, view]);
 
   const greeting = `Olá, ${auth?.user?.name?.split(' ')[0] ?? 'você'}!`;
   const subtitle =
