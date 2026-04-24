@@ -1,29 +1,42 @@
 # Briefy
 
-B2B SaaS para agências de marketing — gerencie clientes, demandas e gere briefs acelerados por IA.
+**B2B SaaS for marketing agencies.** Manage clients, track content demands, generate AI-assisted briefs, and collaborate in real time — all in one place.
 
-**License:** AGPL-3.0-or-later. See [LICENSE](./LICENSE).
-
-**Stack:** PHP 8.4, Laravel 13, Inertia.js v3, React 19, TypeScript, PostgreSQL 17, Anthropic Claude API (BYOK), Laravel Reverb
+**License:** AGPL-3.0-or-later · **Stack:** Laravel 13 · React 19 · Inertia.js · TypeScript · PostgreSQL · Anthropic Claude (BYOK) · Laravel Reverb
 
 ---
 
-## BYOK — Bring Your Own Key
+## Features
 
-Briefy é publicado como open source sob AGPL-3.0. Cada deploy fornece sua própria chave da API Anthropic por organização.
-
-1. Crie sua conta em https://console.anthropic.com
-2. Faça o deploy do Briefy (ou rode localmente)
-3. Faça login como admin da organização
-4. Acesse `/settings/ai`, cole sua chave `sk-ant-...`, clique em "Testar chave" e depois "Salvar"
-
-Sem uma chave configurada, as funcionalidades de IA (geração de brief, chat, planejamento mensal, pesquisa de cliente) ficam desativadas graciosamente — a interface renderiza os botões mas exibe um tooltip orientando o usuário a configurar a chave.
-
-As chaves são armazenadas criptografadas no banco de dados via `encrypted` cast do Laravel (AES-256-CBC via `APP_KEY`). Nunca são logadas, nunca retornadas pela API JSON, e apenas os últimos 4 caracteres são exibidos após salvar (`sk-ant-...XXXX`).
+- **Client management** — client profiles, contact info, important dates, and per-client monthly post quota
+- **Demand board** — Kanban + list view for content demands with drag-and-drop status transitions
+- **AI brief generation** — Claude generates structured content briefs from demand context; inline editing supported
+- **AI chat per demand** — multi-turn conversation per demand with full history and conversation picker
+- **Monthly planning** — AI generates a full monthly content calendar per client; suggestions can be individually accepted, rejected, or bulk-converted into demands
+- **Real-time collaboration** — live Kanban status updates and live comments via WebSocket (Laravel Reverb)
+- **In-app notifications** — bell dropdown with real-time badge updates; mark individual or all as read
+- **Team management** — invite members by email, role-based access (owner / admin / collaborator), multi-org support
+- **BYOK** — each organization provides its own Anthropic API key; stored AES-256-CBC encrypted, never logged or returned in API responses
+- **Themes** — light / dark mode per user preference
+- **i18n** — pt-BR and English
 
 ---
 
-## Pré-requisitos
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | PHP 8.4, Laravel 13 |
+| Frontend | React 19, TypeScript, Inertia.js v3, Tailwind CSS v4 |
+| Database | PostgreSQL 17 |
+| Real-time | Laravel Reverb (WebSocket) |
+| AI | Anthropic Claude API (claude-opus-4-7 / claude-sonnet-4-6) |
+| Queue | Laravel sync (local) / configurable for Redis |
+| Auth | Laravel Breeze |
+
+---
+
+## Requirements
 
 - PHP 8.4+
 - Composer
@@ -32,86 +45,88 @@ As chaves são armazenadas criptografadas no banco de dados via `encrypted` cast
 
 ---
 
-## Setup inicial
+## Local Setup
 
 ```bash
+# 1. Clone and install dependencies
+git clone https://github.com/demonurgo/briefy.git
+cd briefy
 composer install
 npm install
+
+# 2. Environment
 cp .env.example .env
 php artisan key:generate
+
+# 3. Database — create and migrate
+createdb briefy
 php artisan migrate
+
+# 4. Start the dev servers
+php artisan serve          # Terminal 1 — PHP server at http://localhost:8000
+npm run dev                # Terminal 2 — Vite (frontend assets)
 ```
 
----
+Open [http://localhost:8000](http://localhost:8000) and register your first account.
 
-## Rodar o projeto
+### Real-time (optional)
+
+To enable live Kanban updates and live comments, start the Reverb WebSocket server:
 
 ```bash
-# Terminal 1 — servidor PHP
-php artisan serve
-
-# Terminal 2 — assets frontend (Vite)
-npm run dev
+php artisan reverb:start   # Terminal 3
 ```
-
-Acesse: http://localhost:8000
 
 ---
 
-## PostgreSQL — Controle do serviço
+## BYOK — Bring Your Own Anthropic Key
 
-O PostgreSQL roda como serviço do Windows. Para economizar RAM quando não estiver desenvolvendo:
+AI features (brief generation, chat, monthly planning, client research) are disabled by default until an Anthropic API key is configured per organization.
 
-**Parar o serviço:**
-```powershell
-net stop postgresql-x64-17
-```
+1. Create an account at [console.anthropic.com](https://console.anthropic.com)
+2. Log in to Briefy as an org admin
+3. Go to **Settings → AI**, paste your `sk-ant-...` key, click **Test key**, then **Save**
 
-**Iniciar o serviço:**
-```powershell
-net start postgresql-x64-17
-```
-
-**Ver status:**
-```powershell
-Get-Service -Name "postgresql*"
-```
-
-> Para mudar para início manual (não iniciar automaticamente com o Windows):
-> ```powershell
-> Set-Service -Name "postgresql-x64-17" -StartupType Manual
-> ```
-> Depois disso, inicie manualmente antes de rodar o projeto com `net start postgresql-x64-17`.
+Without a key, AI buttons remain visible but show a tooltip directing the user to configure one. Keys are stored encrypted (AES-256-CBC via `APP_KEY`) and only the last 4 characters are displayed after saving.
 
 ---
 
-## Testes
+## Running Tests
 
 ```bash
-# Criar banco de testes (apenas na primeira vez)
-psql -U postgres -c "CREATE DATABASE briefy_test;"
+# Create the test database (first time only)
+createdb briefy_test
+php artisan migrate --env=testing
 
-# Rodar todos os testes
+# Run the full suite (146 tests)
 php artisan test
 
-# Rodar com verbose
-php artisan test --verbose
+# Run a specific class
+php artisan test --filter=DemandLifecycleTest
+php artisan test --filter=NotificationDeliveryTest
+```
+
+See [TESTING.md](./TESTING.md) for the full environment setup and coverage map.
+
+---
+
+## Database
+
+```bash
+php artisan migrate           # Run pending migrations
+php artisan migrate:fresh     # Drop all tables and re-migrate
+php artisan migrate:status    # Show migration status
 ```
 
 ---
 
-## Banco de dados
+## Contributing
 
-```bash
-# Rodar migrations
-php artisan migrate
-
-# Resetar banco (apaga tudo e recria)
-php artisan migrate:fresh
-
-# Ver status das migrations
-php artisan migrate:status
-```
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Commit your changes following the existing commit style
+4. Run `php artisan test` — all tests must pass
+5. Open a pull request
 
 ---
 
@@ -119,6 +134,6 @@ php artisan migrate:status
 
 Copyright (c) 2026 Briefy contributors.
 
-Este programa é software livre: você pode redistribuí-lo e/ou modificá-lo sob os termos da GNU Affero General Public License conforme publicada pela Free Software Foundation, versão 3 ou (a seu critério) qualquer versão posterior. Veja [LICENSE](./LICENSE) para o texto completo.
+This program is free software: you can redistribute it and/or modify it under the terms of the **GNU Affero General Public License** as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](./LICENSE) for the full text.
 
-A escolha AGPL-3.0 é deliberada: protege contra forks proprietários que rodam o software como serviço sem contribuir as melhorias de volta para a comunidade.
+The AGPL-3.0 license is a deliberate choice: it prevents proprietary forks from running this software as a service without contributing improvements back to the community.
