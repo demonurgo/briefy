@@ -2,6 +2,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 namespace App\Observers;
 
+use App\Events\DemandBoardUpdated;
 use App\Models\ActivityLog;
 use App\Models\Demand;
 
@@ -18,6 +19,8 @@ class DemandObserver
             'subject_name'    => $demand->title,
             'metadata'        => [],
         ]);
+
+        DemandBoardUpdated::dispatch($demand->organization_id, 'created');
     }
 
     public function updated(Demand $demand): void
@@ -67,6 +70,8 @@ class DemandObserver
                 'metadata'        => [],
             ]);
         }
+
+        DemandBoardUpdated::dispatch($demand->organization_id, 'updated');
     }
 
     public function deleted(Demand $demand): void
@@ -81,6 +86,8 @@ class DemandObserver
             'subject_name'    => $demand->title,
             'metadata'        => ['via' => 'trash'],
         ]);
+
+        DemandBoardUpdated::dispatch($demand->organization_id, 'deleted');
     }
 
     public function restored(Demand $demand): void
@@ -94,5 +101,7 @@ class DemandObserver
             'subject_name'    => $demand->title,
             'metadata'        => [],
         ]);
+
+        DemandBoardUpdated::dispatch($demand->organization_id, 'restored');
     }
 }

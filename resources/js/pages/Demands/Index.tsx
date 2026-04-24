@@ -1,7 +1,8 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { formatDate } from '@/utils/date';
 import { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { PageProps } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { LayoutGrid, List, Loader2, Plus, Search, X } from 'lucide-react';
 import AppLayout from '@/Layouts/AppLayout';
@@ -57,6 +58,23 @@ export default function DemandsIndex({ demands, clients, filters, selectedDemand
     setShowClientPicker(false);
     setCreateClient(client);
   };
+
+  // Real-time: recarregar demandas quando outro usuário da org fizer uma alteração
+  const { auth } = usePage<PageProps>().props;
+  const orgId = (auth?.user as { current_organization_id?: number } | undefined)?.current_organization_id;
+
+  useEffect(() => {
+    if (!orgId || !window.Echo) return;
+
+    const channel = window.Echo.private(`organization.${orgId}`);
+    channel.listen('.demand.board.updated', () => {
+      router.reload({ only: ['demands'] });
+    });
+
+    return () => {
+      window.Echo.leave(`organization.${orgId}`);
+    };
+  }, [orgId]);
 
   const handleNewDemand = () => {
     if (filters.client_id) {
