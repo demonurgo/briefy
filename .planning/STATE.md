@@ -1,105 +1,58 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: — AI + Team + Dashboard
-status: complete
-stopped_at: Phase 5 complete — Dashboard + Onboarding shipped (5/5 plans, all requirements verified)
+milestone: v1.2
+milestone_name: — Real-time + Polish
+status: planning
+stopped_at: v1.1 archived — ready for v1.2 planning
 last_updated: "2026-04-24T00:00:00Z"
-last_activity: 2026-04-24 — Phase 5 (Dashboard + Onboarding) verified and approved — v1.1 milestone fully shipped
+last_activity: 2026-04-24 — v1.1 milestone (AI + Team + Dashboard) archived and tagged
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 32
-  completed_plans: 32
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-22)
+See: .planning/PROJECT.md (updated 2026-04-24)
 
-**Core value:** Agency teams can create, track, and complete client demands efficiently, with AI accelerating brief creation.
-**Current focus:** v1.1 milestone complete — ready for v1.2 planning
+**Core value:** Agency teams can create, track, and complete client demands efficiently, with AI accelerating brief creation and reducing manual context-switching.
+**Current focus:** v1.2 planning — Real-time Collaboration + Polish
 
 ## Current Position
 
-Phase: 5 — Dashboard + Onboarding — COMPLETE
-Plan: 5/5
-Status: v1.1 fully shipped — all 5 phases complete
-Last activity: 2026-04-24 — Phase 5 approved — dashboard, onboarding, activity feed, real-time Kanban delivered
+Milestone v1.1 shipped and archived on 2026-04-24.
 
-Progress: [██████████] 100% (v1.1 complete: 5/5 phases — AI, Team, Dashboard all shipped)
+**v1.1 delivered:**
+- Phase 3: AI Integration (BYOK, brief/chat streaming, memory, monthly planning, managed agent)
+- Phase 4: Team Management (invites, roles, avatar, unified settings)
+- Phase 5: Dashboard + Onboarding (charts, activity feed, onboarding checklist)
 
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed: ~25 (phases 1-3 combined)
-- v1.0 phases: 2 phases shipped
-- v1.1 Phase 3: 13 plans in 1 session (2026-04-22)
+Progress: [██████████] 100% (v1.1 complete — ready for /gsd-new-milestone v1.2)
 
 ## Accumulated Context
 
-### Decisions
+### Decisions (carried forward to v1.2)
 
-- Phase 1–2: Inertia partial reloads (`only: [...]`) for modal actions — keep pattern for AI responses
-- Phase 2: Inline PATCH routes (no redirect) for modal edits — extend to AI actions
-- Phase 2: `useEffect` sync for KanbanBoard — reuse pattern for real-time broadcast updates (Phase 4)
-- Phase 2: Deadline `substring(0,10)` for date inputs — established convention
-- v1.1 AI: Use Anthropic PHP SDK (`anthropic-ai/sdk` on Packagist, v0.16.0) direct API calls — no Prism abstraction
-- v1.1 AI: Streaming via Laravel streaming response + React EventSource/fetch for SSE
-- v1.1 AI: `ai_memory` table already exists — load client memory before each AI call, update after
-- v1.1 BYOK: AnthropicClientInterface + AnthropicClientFactory (forOrganization) — per-org key resolution, abort 402 if no key
-- v1.1 BYOK: Tests bind AnthropicClientInterface fake via $app->instance() — no subclassing of final SDK classes (H5)
-- v1.1 Streaming: BriefStreamer accepts AnthropicClientInterface (not \Anthropic\Client) — factory returns interface
-- v1.1 Streaming: BriefStreamer is NOT final — allows anonymous test double subclasses
-- v1.1 Streaming: SSE test split pattern — assertStatus+content-type without sendContent; persistence via direct generator exhaustion
-- v1.1 Streaming: forceFill() required to write anthropic_api_key_encrypted past $fillable in tests
-- v1.1 BYOK: dontFlash lives in bootstrap/app.php (Laravel 11+) — no Handler.php in this project
-- v1.1 BYOK: MA probe uses GET /v1/agents?limit=0 — zero tokens consumed, checks HTTP status only
-- v1.1 RT: Laravel Reverb for WebSockets — `php artisan reverb:install`
-- v1.1 RT: Frontend subscribes to `private-organization.{org_id}` channel via laravel-echo + pusher-js
-- v1.1 Dashboard: Recharts or react-chartjs-2 for charts (lightweight, no heavy dependencies)
-- v1.1 Onboarding: Check for 0 clients or 0 demands; store `onboarding_dismissed` in user preferences JSON column
-- v1.1 Chat: ChatStreamer accepts AnthropicClientInterface (not \Anthropic\Client) — same BYOK factory pattern as BriefStreamer
-- v1.1 Chat: ChatStreamer is NOT final — allows anonymous test double subclasses
-- v1.1 Chat: Two-block system prompt — stable cached prefix (ephemeral) + volatile comments tail outside cache (80% cache hits on turns 2..N)
-- v1.1 Chat: User message persisted BEFORE eventStream() opens — survives client disconnect (AI-SPEC pattern b)
-- v1.1 Memory: ClientMemoryExtractor NOT final — anonymous subclass test doubles; accepts AnthropicClientInterface (BYOK pattern)
-- v1.1 Memory: 4-gate pipeline — schema, confidence ≥0.6, PII scrub (CPF/CNPJ/email/BR phone), idempotent upsert by insight_hash
-- v1.1 Memory: client_id for upsert always from $demand->client — never from tool output (T-03-62)
-- v1.1 Memory: CompactConversationJob re-checks threshold before acting (guard against double-dispatch)
-- v1.1 Memory: AiConversation.organization() BelongsTo added (was missing, needed by jobs for BYOK key resolution)
-- v1.1 Testing: pgsql-schema.sql must be non-empty for RefreshDatabase to load test DB — regenerate with php artisan schema:dump
-- v1.1 Planning: MonthlyPlanGenerator + ItemRedesigner accept AnthropicClientInterface (not \Anthropic\Client) — consistent H5 pattern
-- v1.1 Planning: MonthlyPlanSchema toolSchema() enforces minItems/maxItems=$expectedCount — two-gate validation with Laravel validator rules
-- v1.1 Planning: CostConfirmModal shared component (D-34) at resources/js/Components/CostConfirmModal.tsx — reused by Plan 11 + 12
-- v1.1 Planning: AiIcon component at resources/js/Components/AiIcon.tsx — dark/light SVG pair wrapper for all AI UI (D-15)
-- v1.1 Frontend: useAiStream covers only POST delta-frame streams; GET custom-event SSE stays on native EventSource (v1.2 consolidation backlog per WARNING 8)
-- v1.1 Frontend: AiMarkdown uses per-element className overrides on react-markdown components — no @tailwindcss/typography plugin
-- v1.1 i18n: All AI, planning, clients.monthlyPlan/badges keys added to all 3 locales in Plan 08 — no merge conflicts in downstream plans
-- v1.1 MA: ClientResearchTimelineModal uses native EventSource (not useAiStream) — GET SSE stream, no POST body (WARNING 8 exception)
-- v1.1 MA: PollClientResearchSessionJob is self-rescheduling — delays 30s while running, 60s on complete/failed
-- v1.1 Observability: SpanEmitter is silent no-op when OTEL SDK absent or OTEL_EXPORTER_OTLP_ENDPOINT unset — zero runtime overhead
-- v1.1 Dashboard widget: DashboardPlanningWidget uses localStorage key pattern `planning_reminder_dismissed:{clientId}:{YYYY-MM}` + forceUpdate(n=>n+1) for dismiss re-render
-- v1.1 Dashboard: ActivityLog placed in Wave 0 (not Wave 1) — downstream plans 05-01/05-02 depend on it; timestamps=false, user_id nullable+nullOnDelete
-- v1.1 Dashboard: recharts ^3.8.1 chosen (resolved from "Recharts or react-chartjs-2" decision) — installed in Wave 0
+- Laravel Reverb installed — use for v1.2 RT features (private-organization.{org_id} channel)
+- AnthropicClientInterface pattern — keep for all new AI services
+- Inertia partial reloads `only: [...]` for modal actions
+- `useEffect` sync for KanbanBoard — extend for RT broadcast updates
+- BYOK: dontFlash in bootstrap/app.php (Laravel 11+)
+- SSE: useAiStream for POST delta-frame; GET SSE stays on native EventSource (consolidate in v1.2)
+- organization_user pivot with role enum — established multi-org pattern
 
-### Pending Todos
+### Known Issues (carry into v1.2)
 
-- Configure Anthropic API key in `.env` (ANTHROPIC_API_KEY) for dev/test fallback (forTesting())
-- anthropic-ai/sdk ^0.16.0 confirmed installed in vendor/ (Wave 0)
-- Run `php artisan reverb:install` before starting Phase 4
-- Run `php artisan migrate` to apply all 6 Phase 3 migrations to dev DB
+- TypeScript strict errors: auth.organization shape mismatch across several components
+- AiIcon size enum doesn't include 11/14 — minor, several call sites use non-enumerated sizes
+- SSE dual-pattern (useAiStream + EventSource) — consolidation deferred to v1.2
 
-### Blockers/Concerns
-
-- Anthropic API key must be available in environment for AI calls to work
-- Laravel Reverb dev server must run alongside `php artisan serve` in development
-
-## Deferred Items
+### Deferred Items
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
@@ -108,16 +61,15 @@ Progress: [██████████] 100% (v1.1 complete: 5/5 phases — A
 | Portal | Client-facing login | Deferred | v1.0 |
 | AI | Suggest status transitions from comments | Deferred v2 | v1.1 planning |
 | AI | Summarize comments into digest | Deferred v2 | v1.1 planning |
-| AI | Multi-turn session history per demand | Deferred v2 | v1.1 planning |
 | Real-time | Live cursor/presence on Kanban | Deferred v2 | v1.1 planning |
 | Real-time | Demand locking during edit | Deferred v2 | v1.1 planning |
-| AI Chat | Conversation picker dropdown (older conversations) | Deferred v1.2 | Phase 3 (FLAG 11/D-13) |
-| SSE | Consolidate useAiStream + EventSource into unified hook | Deferred v1.2 | Phase 3 (WARNING 8) |
-| MA | 03-12b — [backlog item] | Deferred v1.2 | Phase 3 |
+| AI Chat | Conversation picker dropdown | Deferred v1.2 | Phase 3 (FLAG 11/D-13) |
+| SSE | Consolidate useAiStream + EventSource | Deferred v1.2 | Phase 3 (WARNING 8) |
+| MA | 03-12b backlog item | Deferred v1.2 | Phase 3 |
+| Settings | Multi-org creation UI for existing users | Deferred v1.2 | Phase 5 UAT |
 
 ## Session Continuity
 
-Last session: 2026-04-23
-Stopped at: Phase 5 Plan 00 complete — activity_logs migration, priority column, ActivityLog model, recharts, 10 RED tests
-Resume file: None
-Next: Execute Phase 5 Plan 01 — DashboardController completo + preferences route fix (BLOCKER-02)
+Last session: 2026-04-24
+Stopped at: v1.1 milestone archived
+Resume: `/gsd-new-milestone` to start v1.2
