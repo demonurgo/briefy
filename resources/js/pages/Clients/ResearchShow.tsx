@@ -1,8 +1,8 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, Brain, CheckCircle2, Clock, Loader2, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import AppLayout from '@/Layouts/AppLayout';
 import { AiMarkdown } from '@/Components/AiMarkdown';
 
@@ -36,13 +36,6 @@ interface Props {
   insights: Insight[];
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  tone:         'Tom de voz',
-  patterns:     'Padrões de conteúdo',
-  preferences:  'Preferências',
-  avoid:        'Evitar',
-  terminology:  'Terminologia',
-};
 
 const CATEGORY_COLORS: Record<string, string> = {
   tone:        'bg-[#e9d5ff] text-[#7c3aed]',
@@ -66,6 +59,7 @@ function ConfidenceBar({ value }: { value: number }) {
 }
 
 export default function ResearchShow({ client, session, insights }: Props) {
+  const { t } = useTranslation();
   // 'idle' from MA means waiting for input — only treat as running if local DB says running/queued
   const isRunning = ['queued', 'running'].includes(session.status);
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -82,6 +76,14 @@ export default function ResearchShow({ client, session, insights }: Props) {
     return () => clearInterval(id);
   }, [isRunning]);
 
+  const CATEGORY_LABELS: Record<string, string> = {
+    tone:         t('memory.categories.tone'),
+    patterns:     t('memory.categories.patterns'),
+    preferences:  t('memory.categories.preferences'),
+    avoid:        t('memory.categories.avoid'),
+    terminology:  t('memory.categories.terminology'),
+  };
+
   const grouped = Object.entries(CATEGORY_LABELS).map(([cat, label]) => ({
     cat, label,
     items: insights.filter(i => i.category === cat),
@@ -95,7 +97,7 @@ export default function ResearchShow({ client, session, insights }: Props) {
 
   return (
     <AppLayout>
-      <Head title={`Pesquisa — ${client.name}`} />
+      <Head title={t('research.title', { name: client.name })} />
       <div className="mx-auto max-w-4xl">
 
         {/* Header */}
@@ -108,29 +110,29 @@ export default function ResearchShow({ client, session, insights }: Props) {
           </button>
           <div>
             <h1 className="text-lg font-semibold text-[#111827] dark:text-[#f9fafb]">
-              Deep Research — {client.name}
+              {t('research.title', { name: client.name })}
             </h1>
             <p className="text-xs text-[#9ca3af]">
               {session.started_at
-                ? `Iniciado em ${new Date(session.started_at).toLocaleString('pt-BR')}`
-                : 'Aguardando início'}
-              {session.completed_at && ` · Concluído em ${new Date(session.completed_at).toLocaleString('pt-BR')}`}
+                ? t('research.startedAt', { date: new Date(session.started_at).toLocaleString() })
+                : t('research.waitingStart')}
+              {session.completed_at && ` · ${t('research.completedAt', { date: new Date(session.completed_at).toLocaleString() })}`}
             </p>
           </div>
           <div className="ml-auto">
             {isRunning ? (
               <span className="inline-flex items-center gap-2 rounded-full bg-[#7c3aed]/10 px-3 py-1.5 text-sm font-medium text-[#7c3aed]">
                 <Loader2 size={14} className="animate-spin" />
-                {session.progress_summary ?? 'Pesquisando...'}
+                {session.progress_summary ?? t('research.searching')}
               </span>
             ) : session.status === 'completed' ? (
               <span className="inline-flex items-center gap-2 rounded-full bg-[#d1fae5] px-3 py-1.5 text-sm font-medium text-[#065f46]">
                 <CheckCircle2 size={14} />
-                Concluída
+                {t('research.statusCompleted')}
               </span>
             ) : (
               <span className="inline-flex items-center gap-2 rounded-full bg-[#fee2e2] px-3 py-1.5 text-sm font-medium text-[#dc2626]">
-                Falhou
+                {t('research.statusFailed')}
               </span>
             )}
           </div>
@@ -140,8 +142,8 @@ export default function ResearchShow({ client, session, insights }: Props) {
         {isRunning && (
           <div className="mb-6 rounded-[14px] border border-[#7c3aed]/20 bg-[#7c3aed]/5 p-6 text-center">
             <Loader2 size={32} className="mx-auto mb-3 animate-spin text-[#7c3aed]" />
-            <p className="text-sm font-medium text-[#7c3aed]">{session.progress_summary ?? 'O agente está pesquisando o cliente...'}</p>
-            <p className="mt-1 text-xs text-[#9ca3af]">Esta página atualiza automaticamente a cada 10 segundos</p>
+            <p className="text-sm font-medium text-[#7c3aed]">{session.progress_summary ?? t('research.searching')}</p>
+            <p className="mt-1 text-xs text-[#9ca3af]">{t('research.autoRefresh')}</p>
             <div className="mt-4">
               <button
                 onClick={handleCancel}
@@ -153,7 +155,7 @@ export default function ResearchShow({ client, session, insights }: Props) {
                 }`}
               >
                 <XCircle size={13} />
-                {confirmCancel ? 'Confirmar cancelamento' : 'Cancelar pesquisa'}
+                {confirmCancel ? t('research.confirmCancel') : t('research.cancelResearch')}
               </button>
             </div>
           </div>
@@ -165,7 +167,7 @@ export default function ResearchShow({ client, session, insights }: Props) {
             <div className="mb-4 flex items-center gap-2">
               <Brain size={18} className="text-[#7c3aed]" />
               <h2 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb]">
-                Insights salvos na memória do cliente
+                {t('research.savedInsights')}
               </h2>
               <span className="rounded-full bg-[#f3f4f6] px-2 py-0.5 text-xs text-[#6b7280] dark:bg-[#1f2937]">
                 {insights.length}
@@ -189,7 +191,7 @@ export default function ResearchShow({ client, session, insights }: Props) {
                           <ConfidenceBar value={ins.confidence} />
                           {ins.status === 'suggested' && (
                             <span className="rounded-full bg-[#fef3c7] px-1.5 py-0.5 text-[10px] font-medium text-[#92400e]">
-                              sugerido
+                              {t('research.suggested')}
                             </span>
                           )}
                         </div>
@@ -208,18 +210,18 @@ export default function ResearchShow({ client, session, insights }: Props) {
             <div className="mb-4 flex items-center gap-2">
               <Clock size={16} className="text-[#9ca3af]" />
               <h2 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb]">
-                Relatório completo da pesquisa
+                {t('research.fullReport')}
               </h2>
               <span className="text-xs text-[#9ca3af]">
-                {session.full_report.total_raw} insights brutos · {session.full_report.total_saved} salvos após filtros
+                {t('research.reportStats', { raw: session.full_report.total_raw, saved: session.full_report.total_saved })}
               </span>
             </div>
 
             <div className="rounded-[12px] border border-[#e5e7eb] bg-white dark:border-[#1f2937] dark:bg-[#111827]">
               <div className="border-b border-[#e5e7eb] px-5 py-3 dark:border-[#1f2937]">
                 <p className="text-xs text-[#9ca3af]">
-                  Gerado em {new Date(session.full_report.generated_at).toLocaleString('pt-BR')}
-                  {' · '}Inclui todos os insights, incluindo os filtrados por baixa confiança ou PII
+                  {t('research.generatedAt', { date: new Date(session.full_report.generated_at).toLocaleString() })}
+                  {' · '}{t('research.reportNote')}
                 </p>
               </div>
               <div className="divide-y divide-[#f3f4f6] dark:divide-[#1f2937]">
@@ -236,7 +238,7 @@ export default function ResearchShow({ client, session, insights }: Props) {
                             <ConfidenceBar value={ins.confidence} />
                             <p className={`flex-1 text-sm ${saved ? 'text-[#374151] dark:text-[#d1d5db]' : 'text-[#9ca3af]'}`}>
                               {ins.insight}
-                              {!saved && <span className="ml-2 text-[11px] opacity-60">(filtrado)</span>}
+                              {!saved && <span className="ml-2 text-[11px] opacity-60">{t('research.filtered')}</span>}
                             </p>
                           </li>
                         );
@@ -254,8 +256,8 @@ export default function ResearchShow({ client, session, insights }: Props) {
           <div className="rounded-[14px] border border-[#e5e7eb] bg-white p-10 text-center dark:border-[#1f2937] dark:bg-[#111827]">
             <p className="text-sm text-[#9ca3af]">
               {session.status === 'failed'
-                ? 'A pesquisa falhou. Tente novamente na página do cliente.'
-                : 'Nenhum insight foi capturado ainda.'}
+                ? t('research.failed')
+                : t('research.noInsights')}
             </p>
           </div>
         )}

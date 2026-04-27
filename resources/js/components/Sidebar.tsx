@@ -93,7 +93,7 @@ export function Sidebar({ collapsed, onToggle }: Props) {
           onClick={e => { e.stopPropagation(); onToggle(); }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          aria-label={collapsed ? t('nav.expandMenu') : t('nav.collapseMenu')}
           className={`absolute right-0 top-1/2 z-50 -translate-y-1/2 translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full border border-[#e5e7eb] bg-[#ffffff] text-[#9ca3af] shadow-md transition-all duration-200 hover:border-[#7c3aed] hover:text-[#7c3aed] dark:border-[#1f2937] dark:bg-[#111827] ${
             showHandle ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
           }`}
@@ -156,11 +156,11 @@ export function Sidebar({ collapsed, onToggle }: Props) {
                   href="/concluidas"
                   className={linkClass('/concluidas')}
                   onClick={e => e.stopPropagation()}
-                  onMouseEnter={e => showTooltip(e, 'Concluídas')}
+                  onMouseEnter={e => showTooltip(e, t('nav.concluidas'))}
                   onMouseLeave={hideTooltip}
                 >
                   <Archive size={18} className="shrink-0" />
-                  {!collapsed && 'Concluídas'}
+                  {!collapsed && t('nav.concluidas')}
                   {!collapsed && archive_count > 0 && (
                     <span className="ml-auto rounded-full bg-[#f3f4f6] px-1.5 py-0.5 text-[10px] font-medium text-[#6b7280] dark:bg-[#1f2937] dark:text-[#9ca3af]">
                       {archive_count}
@@ -174,11 +174,11 @@ export function Sidebar({ collapsed, onToggle }: Props) {
               href="/lixeira"
               className={linkClass('/lixeira')}
               onClick={e => e.stopPropagation()}
-              onMouseEnter={e => showTooltip(e, 'Lixeira')}
+              onMouseEnter={e => showTooltip(e, t('nav.trash'))}
               onMouseLeave={hideTooltip}
             >
               <Trash2 size={18} className="shrink-0" />
-              {!collapsed && 'Lixeira'}
+              {!collapsed && t('nav.trash')}
             </Link>
           </div>
         </div>

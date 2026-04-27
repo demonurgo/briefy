@@ -5,7 +5,11 @@
     "demands": "Demandas",
     "planning": "Planejamento",
     "settings": "Configurações",
-    "more": "Mais"
+    "more": "Mais",
+    "concluidas": "Concluídas",
+    "trash": "Lixeira",
+    "expandMenu": "Expandir menu",
+    "collapseMenu": "Recolher menu"
   },
   "common": {
     "save": "Salvar",
@@ -23,6 +27,8 @@
     "dismiss": "Fechar",
     "continue": "Continuar",
     "saving": "Salvando...",
+    "sending": "Enviando...",
+    "creating": "Criando...",
     "costConfirm": {
       "prefix": "Essa operação custará",
       "suffix": "Continuar?",
@@ -95,6 +101,15 @@
     "filterPlaceholder": "Selecione um cliente",
     "noQuotaWarning": "Configure o plano mensal do cliente para gerar o planejamento.",
     "convertError": "Não foi possível converter este item em demanda. Tente novamente.",
+    "detailsTab": "Detalhes",
+    "redesignTab": "✨ Redesenhar",
+    "assigneePlaceholder": "Responsável (opcional)",
+    "confirmReject": "Confirmar rejeição",
+    "redesigning": "Redesenhando...",
+    "applyRedesignBtn": "Aplicar redesign",
+    "redesignHint": "Descreva o que deve mudar — tom, tema, canal, abordagem. A IA vai reescrever o item.",
+    "redesignEmptyError": "Descreva o que deseja mudar.",
+    "converted": "✓ Convertida",
     "empty": {
       "noClientSelected": {
         "heading": "Selecione um cliente para ver seus planejamentos",
@@ -126,6 +141,11 @@
       "in_review": "Em revisão",
       "approved": "Aprovado"
     },
+    "priorities": {
+      "high": "Alta",
+      "medium": "Média",
+      "low": "Baixa"
+    },
     "types": {
       "demand": "Demanda",
       "planning": "Planejamento"
@@ -137,7 +157,27 @@
     "register": "Criar conta",
     "email": "E-mail",
     "password": "Senha",
-    "name": "Nome"
+    "name": "Nome",
+    "signingIn": "Entrando...",
+    "creatingAccount": "Criando conta...",
+    "createAccount": "Criar conta",
+    "confirming": "Confirmando...",
+    "savingPassword": "Salvando...",
+    "sendResetLink": "Enviar link de recuperação",
+    "resendVerification": "Reenviar e-mail de verificação",
+    "forgotPasswordTitle": "Recuperar senha",
+    "forgotPasswordHint": "Informe seu e-mail e enviaremos um link para redefinir sua senha.",
+    "secureArea": "Área segura",
+    "confirmPasswordHint": "Confirme sua senha para continuar.",
+    "verifyEmailTitle": "Verifique seu e-mail",
+    "verifyEmailHint": "Enviamos um link de verificação para o seu e-mail. Clique no link para ativar sua conta.",
+    "verificationSent": "Um novo link de verificação foi enviado para o seu e-mail.",
+    "newPassword": "Nova senha",
+    "confirmNewPassword": "Confirmar nova senha",
+    "newPasswordPlaceholder": "Mínimo 8 caracteres",
+    "repeatPassword": "Repita a senha",
+    "createNewPasswordHint": "Crie uma nova senha para sua conta.",
+    "resetPasswordTitle": "Redefinir senha"
   },
   "clients": {
     "title": "Clientes",
@@ -186,7 +226,24 @@
       "confirmTitle": "Iniciar Deep Research",
       "confirmBody": "A pesquisa leva aproximadamente {{minutes}} minutos e consome créditos da sua chave Anthropic. Deseja continuar?",
       "confirmCta": "Iniciar pesquisa"
-    }
+    },
+    "sessionStatus": {
+      "completed": "Concluída",
+      "failed": "Falhou",
+      "terminated": "Cancelada",
+      "running": "Em andamento"
+    },
+    "newResearch": "Nova pesquisa",
+    "noResearch": "Nenhuma pesquisa realizada ainda.",
+    "viewBoard": "Ver quadro",
+    "importantDates": "Datas Importantes",
+    "datesHint": "Inseridas automaticamente no planejamento do mês",
+    "noDates": "Nenhuma data adicionada ainda.",
+    "addImportantDate": "Adicionar data importante",
+    "dateDescriptionPlaceholder": "Descrição",
+    "dateExamplePlaceholder": "Ex: Aniversário da empresa",
+    "activeDemandsCount": "{{count}} demanda ativa",
+    "activeDemandsCount_other": "{{count}} demandas ativas"
   },
   "settings": {
     "ai": {
@@ -214,7 +271,30 @@
         "envIdLabel": "Environment ID (opcional)"
       },
       "changeKey": "Trocar chave"
-    }
+    },
+    "saveProfile": "Salvar perfil",
+    "saveOrg": "Salvar organização",
+    "orgName": "Nome da organização",
+    "orgAdminOnly": "Apenas admins podem alterar as configurações da organização.",
+    "organization": "Organização",
+    "team": "Equipe",
+    "inviteMember": "Convidar membro",
+    "sendInvite": "Enviar convite",
+    "pendingInvites": "Convites pendentes",
+    "sentAt": "Enviado em {{date}}",
+    "cancelInvite": "Cancelar convite",
+    "members": "Membros",
+    "roles": {
+      "collaborator": "Colaborador",
+      "admin": "Admin",
+      "owner": "Proprietário"
+    },
+    "noMembers": "Nenhum membro ainda. Convide alguém para começar.",
+    "promoteToAdmin": "Promover a Admin",
+    "demoteToCollaborator": "Rebaixar para Colaborador",
+    "removeMember": "Remover membro",
+    "removeMemberConfirm": "Tem certeza que deseja remover {{name}} da organização? Esta ação não pode ser desfeita.",
+    "removeMemberAria": "Remover {{name}} da organização"
   },
   "demands": {
     "title": "Demandas",
@@ -239,6 +319,7 @@
     "addComment": "Adicionar comentário",
     "addFile": "Adicionar arquivo",
     "confirmDelete": "Tem certeza que deseja excluir esta demanda?",
+    "confirmDeleteBtn": "Confirmar exclusão",
     "noDeadline": "Sem prazo",
     "linkUrl": "URL do link",
     "fileName": "Nome do arquivo",
@@ -246,10 +327,169 @@
     "addLink": "Adicionar link",
     "writeComment": "Escreva um comentário...",
     "send": "Enviar",
+    "saveAndClose": "Salvar e fechar",
+    "unsavedChanges": "Salvar mudanças?",
+    "selectPlaceholder": "Selecione...",
+    "none": "Nenhum",
+    "uploadingFiles": "Enviando arquivos...",
     "tabs": {
       "comments": "Comentários",
       "files": "Arquivos",
       "brief": "Brief"
     }
+  },
+  "memory": {
+    "activeTab": "Memória ativa",
+    "suggestionsTab": "Sugestões",
+    "emptyActive": "Nenhuma memória ativa ainda.",
+    "emptyActiveHint": "A memória é populada pelo Chat IA e pela pesquisa automática do cliente.",
+    "emptySuggested": "Nenhuma sugestão pendente.",
+    "suggestionsHint": "Esses insights têm confiança baixa (<60%) e precisam da sua revisão antes de serem aplicados.",
+    "confidence": "confiança",
+    "approve": "Aprovar",
+    "dismiss": "Descartar",
+    "categories": {
+      "tone": "Tom",
+      "patterns": "Padrões",
+      "preferences": "Preferências",
+      "avoid": "Evitar",
+      "terminology": "Terminologia"
+    }
+  },
+  "kanban": {
+    "dropHere": "Soltar aqui",
+    "trash": "Lixeira",
+    "archive": "Arquivar"
+  },
+  "activity": {
+    "title": "Atividade recente",
+    "empty": "Nenhuma atividade recente.",
+    "ariaLabel": "Feed de atividade recente",
+    "verbs": {
+      "moved": "moveu \"{{subject}}\" para {{status}}",
+      "created": "criou \"{{subject}}\"",
+      "commented": "comentou em \"{{subject}}\"",
+      "assigned": "atribuiu \"{{subject}}\"",
+      "trashed": "moveu \"{{subject}}\" para a lixeira",
+      "archived": "arquivou \"{{subject}}\"",
+      "restored": "restaurou \"{{subject}}\"",
+      "addedClient": "adicionou o cliente \"{{subject}}\"",
+      "invited": "convidou {{subject}}",
+      "acted": "agiu em \"{{subject}}\""
+    }
+  },
+  "onboarding": {
+    "title": "Primeiros passos",
+    "dismiss": "Dispensar guia de início",
+    "start": "Começar →",
+    "steps": {
+      "setupAi": {
+        "label": "Configurar chave de IA",
+        "description": "Adicione sua chave Anthropic para ativar geração de brief, chat e planejamento mensal."
+      },
+      "addClient": {
+        "label": "Adicionar um cliente"
+      },
+      "createDemand": {
+        "label": "Criar a primeira demanda"
+      }
+    }
+  },
+  "dashboard": {
+    "personalView": "Visão pessoal",
+    "overviewView": "Visão geral",
+    "ariaViewToggle": "Alternar visualização do dashboard",
+    "completedChartAria": "Gráfico: Concluídas por dia da semana",
+    "statusCards": {
+      "overdue": "Atrasadas",
+      "inProgress": "Em andamento",
+      "awaitingReturn": "Aguardando retorno",
+      "inReview": "Em revisão",
+      "completed": "Concluídas",
+      "completedThisWeek": "Concluídas esta semana",
+      "blockers": "Bloqueios / Aguardando"
+    },
+    "demandTabs": {
+      "all": "Todas",
+      "inProgress": "Em andamento",
+      "overdue": "Atrasadas",
+      "completed": "Concluídas"
+    },
+    "teamPerf": {
+      "completed": "Concluídas",
+      "inProgress": "Em andamento"
+    },
+    "sections": {
+      "focusNow": "Seu foco agora",
+      "yourProgress": "Seu progresso",
+      "myDemands": "Minhas demandas",
+      "overview": "Panorama geral",
+      "demandsByPriority": "Demandas por prioridade",
+      "demandsOverTime": "Demanda ao longo do tempo",
+      "latestDemands": "Últimas demandas",
+      "teamPerformance": "Desempenho da equipe",
+      "teamWorkload": "Workload da equipe",
+      "clientActivity": "Atividade por cliente"
+    },
+    "greeting": "Olá, {{name}}!",
+    "subtitlePersonal": "Aqui está o que precisa da sua atenção hoje.",
+    "subtitleOverview": "Aqui está o resumo das suas demandas hoje.",
+    "noUrgentDemands": "Nenhuma demanda urgente. Bom trabalho!",
+    "noDemandFilter": "Nenhuma demanda neste filtro.",
+    "noBlockers": "Nenhuma demanda aguardando retorno.",
+    "blockerSince": "Desde {{date}}",
+    "newDemand": "Nova demanda",
+    "viewAll": "Ver todas →",
+    "chartCreated": "Criadas",
+    "chartCompleted": "Concluídas",
+    "chartDemands": "Demandas",
+    "chartPending": "Pendentes",
+    "total": "Total",
+    "active": "ativas",
+    "overdueShort": "atrasadas",
+    "completedShort": "conc.",
+    "noDeadline": "Sem prazo",
+    "dateFrom": "De:",
+    "dateTo": "Até:",
+    "progressWeek": "{{completed}} de {{total}} concluídas esta semana",
+    "tableTitle": "Título",
+    "tableStatus": "Status",
+    "tablePriority": "Prioridade",
+    "tableDeadline": "Prazo",
+    "tableClient": "Cliente",
+    "tableUpdatedAt": "Atualizado em",
+    "tableAssignee": "Responsável",
+    "ariaChartPrefix": "Gráfico: "
+  },
+  "trash": {
+    "title": "Lixeira",
+    "expiresToday": "Expira hoje",
+    "daysLeft": "{{days}}d restantes",
+    "autoDelete": "Demandas são excluídas automaticamente após 30 dias",
+    "empty": "Lixeira vazia",
+    "emptyHint": "Demandas excluídas aparecem aqui por 30 dias",
+    "restore": "Restaurar",
+    "deleteForever": "Excluir permanentemente"
+  },
+  "research": {
+    "title": "Deep Research — {{name}}",
+    "startedAt": "Iniciado em {{date}}",
+    "completedAt": "Concluído em {{date}}",
+    "waitingStart": "Aguardando início",
+    "searching": "Pesquisando...",
+    "statusCompleted": "Concluída",
+    "statusFailed": "Falhou",
+    "autoRefresh": "Esta página atualiza automaticamente a cada 10 segundos",
+    "confirmCancel": "Confirmar cancelamento",
+    "cancelResearch": "Cancelar pesquisa",
+    "savedInsights": "Insights salvos na memória do cliente",
+    "suggested": "sugerido",
+    "fullReport": "Relatório completo da pesquisa",
+    "reportStats": "{{raw}} insights brutos · {{saved}} salvos após filtros",
+    "generatedAt": "Gerado em {{date}}",
+    "reportNote": "Inclui todos os insights, incluindo os filtrados por baixa confiança ou PII",
+    "filtered": "(filtrado)",
+    "failed": "A pesquisa falhou. Tente novamente na página do cliente.",
+    "noInsights": "Nenhum insight foi capturado ainda."
   }
 }

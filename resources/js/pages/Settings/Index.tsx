@@ -71,10 +71,11 @@ type SettingsPageProps = PageProps<{ auth: { organization: SettingsOrganization 
 // ── Inline utility: RoleBadge ──────────────────────────────────────────────
 
 function RoleBadge({ role }: { role: 'owner' | 'admin' | 'collaborator' }) {
+  const { t } = useTranslation();
   const labels: Record<string, string> = {
-    owner: 'Proprietário',
-    admin: 'Admin',
-    collaborator: 'Colaborador',
+    owner: t('settings.roles.owner'),
+    admin: t('settings.roles.admin'),
+    collaborator: t('settings.roles.collaborator'),
   };
   const classes: Record<string, string> = {
     owner: 'bg-[#7c3aed]/10 text-[#7c3aed] border-[#7c3aed]/20',
@@ -417,7 +418,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                   disabled={profileForm.processing}
                   className="rounded-[8px] bg-[#7c3aed] px-5 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60"
                 >
-                  {profileForm.processing ? 'Salvando...' : 'Salvar perfil'}
+                  {profileForm.processing ? t('common.saving') : t('settings.saveProfile')}
                 </button>
               </form>
             </div>
@@ -425,10 +426,10 @@ export default function SettingsIndex({ members, pending_invites, organization, 
 
           {/* ── #organization section ─────────────────────────────────────── */}
           <section id="organization" className={SECTION_CARD}>
-            <h2 className={SECTION_HEADING}>Organização</h2>
+            <h2 className={SECTION_HEADING}>{t('settings.organization')}</h2>
             <form onSubmit={handleOrgSave} className="space-y-4">
               <div className="sm:max-w-sm">
-                <label htmlFor="org-name" className={LABEL}>Nome da organização</label>
+                <label htmlFor="org-name" className={LABEL}>{t('settings.orgName')}</label>
                 <input
                   id="org-name"
                   type="text"
@@ -440,7 +441,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                 <InputError message={orgForm.errors.name} className="mt-1" />
                 {!can_manage_team && (
                   <p className="mt-1 text-xs text-[#9ca3af]">
-                    Apenas admins podem alterar as configurações da organização.
+                    {t('settings.orgAdminOnly')}
                   </p>
                 )}
               </div>
@@ -450,7 +451,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                   disabled={orgForm.processing}
                   className="rounded-[8px] bg-[#7c3aed] px-5 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60"
                 >
-                  {orgForm.processing ? 'Salvando...' : 'Salvar organização'}
+                  {orgForm.processing ? t('common.saving') : t('settings.saveOrg')}
                 </button>
               )}
             </form>
@@ -458,7 +459,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
 
           {/* ── #team section ─────────────────────────────────────────────── */}
           <section id="team" className={SECTION_CARD}>
-            <h2 className={SECTION_HEADING}>Equipe</h2>
+            <h2 className={SECTION_HEADING}>{t('settings.team')}</h2>
 
             <div className="space-y-6">
 
@@ -466,7 +467,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
               {can_manage_team && (
                 <div>
                   <h3 className="text-xs font-semibold text-[#374151] dark:text-[#d1d5db] mb-3 uppercase tracking-wide">
-                    Convidar membro
+                    {t('settings.inviteMember')}
                   </h3>
                   <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1">
@@ -484,15 +485,15 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                       onChange={e => inviteForm.setData('role', e.target.value)}
                       className="rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] px-3.5 py-2.5 text-sm text-[#111827] dark:text-[#f9fafb] transition-colors focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:focus:border-[#a78bfa]"
                     >
-                      <option value="collaborator">Colaborador</option>
-                      <option value="admin">Admin</option>
+                      <option value="collaborator">{t('settings.roles.collaborator')}</option>
+                      <option value="admin">{t('settings.roles.admin')}</option>
                     </select>
                     <button
                       type="submit"
                       disabled={inviteForm.processing}
                       className="rounded-[8px] bg-[#7c3aed] px-4 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60 whitespace-nowrap"
                     >
-                      {inviteForm.processing ? 'Enviando...' : 'Enviar convite'}
+                      {inviteForm.processing ? t('common.sending') : t('settings.sendInvite')}
                     </button>
                   </form>
                 </div>
@@ -502,7 +503,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
               {can_manage_team && pending_invites.length > 0 && (
                 <div>
                   <h3 className="text-xs font-semibold text-[#374151] dark:text-[#d1d5db] mb-3 uppercase tracking-wide">
-                    Convites pendentes
+                    {t('settings.pendingInvites')}
                   </h3>
                   <div className="space-y-2">
                     {pending_invites.map(invite => (
@@ -512,7 +513,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                       >
                         <span className="flex-1 text-sm truncate text-[#111827] dark:text-[#f9fafb]">{invite.email}</span>
                         <RoleBadge role={invite.role} />
-                        <span className="text-xs text-[#9ca3af]">Enviado em {invite.created_at}</span>
+                        <span className="text-xs text-[#9ca3af]">{t('settings.sentAt', { date: invite.created_at })}</span>
                         <button
                           type="button"
                           onClick={() =>
@@ -522,7 +523,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                           }
                           className="text-sm text-[#7c3aed] hover:text-[#6d28d9]"
                         >
-                          Reenviar
+                          {t('common.resend')}
                         </button>
                         <button
                           type="button"
@@ -534,7 +535,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                           }
                           className="text-sm text-[#ef4444] hover:text-[#dc2626]"
                         >
-                          Cancelar convite
+                          {t('settings.cancelInvite')}
                         </button>
                       </div>
                     ))}
@@ -545,11 +546,11 @@ export default function SettingsIndex({ members, pending_invites, organization, 
               {/* C. Team roster (visible to all) */}
               <div>
                 <h3 className="text-xs font-semibold text-[#374151] dark:text-[#d1d5db] mb-3 uppercase tracking-wide">
-                  Membros
+                  {t('settings.members')}
                 </h3>
                 {members.length === 0 ? (
                   <p className="text-sm text-[#9ca3af]">
-                    Nenhum membro ainda. Convide alguém para começar.
+                    {t('settings.noMembers')}
                   </p>
                 ) : (
                   <div>
@@ -589,7 +590,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                                     }
                                     className="block w-full text-left px-4 py-2 text-sm text-[#111827] dark:text-[#f9fafb] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]"
                                   >
-                                    Promover a Admin
+                                    {t('settings.promoteToAdmin')}
                                   </button>
                                 )}
                                 {member.role !== 'collaborator' && (
@@ -603,7 +604,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                                     }
                                     className="block w-full text-left px-4 py-2 text-sm text-[#111827] dark:text-[#f9fafb] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937]"
                                   >
-                                    Rebaixar para Colaborador
+                                    {t('settings.demoteToCollaborator')}
                                   </button>
                                 )}
                               </Dropdown.Content>
@@ -613,7 +614,7 @@ export default function SettingsIndex({ members, pending_invites, organization, 
                               type="button"
                               onClick={() => setRemoveTarget(member)}
                               className="text-[#9ca3af] hover:text-[#ef4444] transition-colors"
-                              aria-label={`Remover ${member.name} da organização`}
+                              aria-label={t('settings.removeMemberAria', { name: member.name })}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -788,9 +789,9 @@ export default function SettingsIndex({ members, pending_invites, organization, 
       {/* Remove member confirmation modal */}
       <CostConfirmModal
         open={!!removeTarget}
-        title="Remover membro"
-        body={removeTarget ? `Tem certeza que deseja remover ${removeTarget.name} da organização? Esta ação não pode ser desfeita.` : undefined}
-        confirmLabel="Remover"
+        title={t('settings.removeMember')}
+        body={removeTarget ? t('settings.removeMemberConfirm', { name: removeTarget.name }) : undefined}
+        confirmLabel={t('settings.removeMember')}
         costUsd={0}
         onConfirm={() => {
           if (!removeTarget) return;

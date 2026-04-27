@@ -24,6 +24,7 @@ const STATUSES = ['todo', 'in_progress', 'awaiting_feedback', 'in_review', 'appr
 
 function TrashZone({ visible }: { visible: boolean }) {
   const { isOver, setNodeRef } = useDroppable({ id: '__trash__' });
+  const { t } = useTranslation();
   return (
     <div
       ref={setNodeRef}
@@ -36,13 +37,14 @@ function TrashZone({ visible }: { visible: boolean }) {
       }`}
     >
       <Trash2 size={26} />
-      <span>{isOver ? 'Soltar aqui' : 'Lixeira'}</span>
+      <span>{isOver ? t('kanban.dropHere') : t('kanban.trash')}</span>
     </div>
   );
 }
 
 function ArchiveZone({ visible }: { visible: boolean }) {
   const { isOver, setNodeRef } = useDroppable({ id: '__archive__' });
+  const { t } = useTranslation();
   return (
     <div
       ref={setNodeRef}
@@ -55,7 +57,7 @@ function ArchiveZone({ visible }: { visible: boolean }) {
       }`}
     >
       <Archive size={26} />
-      <span>{isOver ? 'Soltar aqui' : 'Arquivar'}</span>
+      <span>{isOver ? t('kanban.dropHere') : t('kanban.archive')}</span>
     </div>
   );
 }

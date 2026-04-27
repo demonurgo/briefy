@@ -1,6 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useState } from 'react';
 import { Link, router } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Circle, X } from 'lucide-react';
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function OnboardingChecklist({ hasClients, hasDemands, hasAnthropicKey, isAdmin, onboardingDismissed }: Props) {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
 
   const allDone = isAdmin
@@ -34,21 +36,21 @@ export function OnboardingChecklist({ hasClients, hasDemands, hasAnthropicKey, i
   const steps = [
     ...(isAdmin ? [{
       id: 'setup-ai',
-      label: 'Configurar chave de IA',
-      description: 'Adicione sua chave Anthropic para ativar geração de brief, chat e planejamento mensal.',
+      label: t('onboarding.steps.setupAi.label'),
+      description: t('onboarding.steps.setupAi.description'),
       href: '/settings/ai',
       complete: hasAnthropicKey,
     }] : []),
     {
       id: 'add-client',
-      label: 'Adicionar um cliente',
+      label: t('onboarding.steps.addClient.label'),
       description: undefined,
       href: '/clients/create',
       complete: hasClients,
     },
     {
       id: 'create-demand',
-      label: 'Criar a primeira demanda',
+      label: t('onboarding.steps.createDemand.label'),
       description: undefined,
       href: '/demands?create=1',
       complete: hasDemands,
@@ -62,13 +64,13 @@ export function OnboardingChecklist({ hasClients, hasDemands, hasAnthropicKey, i
         <div className="flex items-center gap-2">
           <CheckCircle size={20} className="text-[#7c3aed] dark:text-[#a78bfa]" aria-hidden="true" />
           <span className="text-sm font-semibold text-[#7c3aed] dark:text-[#a78bfa]">
-            Primeiros passos
+            {t('onboarding.title')}
           </span>
         </div>
         <button
           onClick={handleDismiss}
           className="p-1 rounded text-[#9ca3af] hover:text-[#374151] dark:hover:text-[#d1d5db] transition-colors"
-          aria-label="Dispensar guia de início"
+          aria-label={t('onboarding.dismiss')}
           type="button"
         >
           <X size={14} />
@@ -102,7 +104,7 @@ export function OnboardingChecklist({ hasClients, hasDemands, hasAnthropicKey, i
                   className="text-xs font-medium text-[#7c3aed] hover:underline"
                   aria-label={`${step.label} — abrir`}
                 >
-                  Começar →
+                  {t('onboarding.start')}
                 </Link>
               </div>
             )}

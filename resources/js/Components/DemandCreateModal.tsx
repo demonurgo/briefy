@@ -1,6 +1,7 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import { useEffect, useRef, useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { Link2, Paperclip, Trash2, X } from 'lucide-react';
 import { DemandForm } from '@/Components/DemandForm';
 
@@ -25,6 +26,7 @@ interface Props {
 const inputClass = 'w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-2 text-sm placeholder-[#9ca3af] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]';
 
 export function DemandCreateModal({ client, teamMembers, onClose, onSuccess }: Props) {
+  const { t } = useTranslation();
   const { data, setData, post, processing, errors, reset } = useForm({
     title: '',
     description: '',
@@ -146,7 +148,7 @@ export function DemandCreateModal({ client, teamMembers, onClose, onSuccess }: P
             processing={processing || uploading}
             setData={setData}
             onSubmit={submit}
-            submitLabel={uploading ? 'Enviando arquivos...' : pendingFiles.length > 0 ? `Criar demanda + ${pendingFiles.length} arquivo${pendingFiles.length > 1 ? 's' : ''}` : 'Criar demanda'}
+            submitLabel={uploading ? t('demands.uploadingFiles') : pendingFiles.length > 0 ? `${t('demands.new')} + ${pendingFiles.length}` : t('demands.new')}
             onCancel={onClose}
             teamMembers={teamMembers}
           />

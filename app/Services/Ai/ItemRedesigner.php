@@ -28,6 +28,7 @@ class ItemRedesigner
             '{{feedback}}'            => $feedback,
             '{{client_memory_short}}' => $memory,
         ]);
+        $system = LanguageInstruction::append($system);
 
         $model  = (string) config('services.anthropic.model_cheap');
         $orgId  = (int) ($client?->organization_id ?? 0);

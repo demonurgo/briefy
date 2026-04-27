@@ -32,6 +32,7 @@ class MonthlyPlanGenerator
             '{{year}}'               => (string) $year,
             '{{month:02d}}'          => sprintf('%02d', $month),
         ]);
+        $system = LanguageInstruction::append($system);
 
         $model   = (string) config('services.anthropic.model_complex');
         $orgId   = (int) $client->organization_id;

@@ -21,13 +21,6 @@ interface Props {
   readOnly?: boolean;
 }
 
-const CATEGORY_LABELS: Record<MemoryEntry['category'], string> = {
-  tone: 'Tom',
-  patterns: 'Padrões',
-  preferences: 'Preferências',
-  avoid: 'Evitar',
-  terminology: 'Terminologia',
-};
 
 const CATEGORY_COLORS: Record<MemoryEntry['category'], string> = {
   tone:        'bg-[#7c3aed]/10 text-[#7c3aed]',
@@ -48,6 +41,14 @@ const CATEGORY_COLORS: Record<MemoryEntry['category'], string> = {
 export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'active' | 'suggested'>('active');
+
+  const CATEGORY_LABELS: Record<MemoryEntry['category'], string> = {
+    tone: t('memory.categories.tone'),
+    patterns: t('memory.categories.patterns'),
+    preferences: t('memory.categories.preferences'),
+    avoid: t('memory.categories.avoid'),
+    terminology: t('memory.categories.terminology'),
+  };
   // Optimistic removal: IDs that have been acted on but not yet refreshed by Inertia.
   const [actedIds, setActedIds] = useState<Set<number>>(new Set());
 
@@ -85,7 +86,7 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
               : 'text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]'
           }`}
         >
-          Memória ativa
+          {t('memory.activeTab')}
           {activeEntries.length > 0 && (
             <span className="ml-1.5 rounded-full bg-[#7c3aed]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#7c3aed]">
               {activeEntries.length}
@@ -100,7 +101,7 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
               : 'text-[#6b7280] hover:text-[#111827] dark:hover:text-[#f9fafb]'
           }`}
         >
-          Sugestões
+          {t('memory.suggestionsTab')}
           {suggestedCount > 0 && (
             <span className="ml-1.5 rounded-full bg-[#f59e0b]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#b45309]">
               {suggestedCount}
@@ -115,10 +116,8 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
           {activeEntries.length === 0 ? (
             <div className="flex flex-col items-center py-8 text-center">
               <Brain size={32} className="mb-3 opacity-40 text-[#6b7280] dark:text-[#9ca3af]" />
-              <p className="text-sm text-[#6b7280]">Nenhuma memória ativa ainda.</p>
-              <p className="mt-1 text-xs text-[#9ca3af]">
-                A memória é populada pelo Chat IA e pela pesquisa automática do cliente.
-              </p>
+              <p className="text-sm text-[#6b7280]">{t('memory.emptyActive')}</p>
+              <p className="mt-1 text-xs text-[#9ca3af]">{t('memory.emptyActiveHint')}</p>
             </div>
           ) : (
             activeEntries.map(entry => (
@@ -133,7 +132,7 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
                   <p className="text-sm text-[#111827] dark:text-[#f9fafb]">{entry.insight}</p>
                 </div>
                 <p className="mt-1 text-[10px] text-[#9ca3af]">
-                  confiança: {Math.round(entry.confidence * 100)}% · {entry.source}
+                  {t('memory.confidence')}: {Math.round(entry.confidence * 100)}% · {entry.source}
                 </p>
               </div>
             ))
@@ -146,12 +145,12 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
         <div className="space-y-2">
           {suggestedEntries.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-[#6b7280]">Nenhuma sugestão pendente.</p>
+              <p className="text-sm text-[#6b7280]">{t('memory.emptySuggested')}</p>
             </div>
           ) : (
             <>
               <p className="mb-3 text-xs text-[#6b7280]">
-                Esses insights têm confiança baixa (&lt;60%) e precisam da sua revisão antes de serem aplicados.
+                {t('memory.suggestionsHint')}
               </p>
               {suggestedEntries.map(entry => (
                 <div
@@ -167,7 +166,7 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
                   {/* Confidence chip */}
                   <div className="mt-1 flex items-center justify-between gap-2">
                     <span className="rounded-full bg-[#f59e0b]/10 px-2 py-0.5 text-[10px] font-medium text-[#b45309]">
-                      confiança: {entry.confidence.toFixed(2)}
+                      {t('memory.confidence')}: {entry.confidence.toFixed(2)}
                     </span>
                     {!readOnly && (
                       <div className="flex gap-1.5">
@@ -175,13 +174,13 @@ export function ClientAiMemoryPanel({ entries, readOnly = false }: Props) {
                           onClick={() => handleApprove(entry)}
                           className="rounded-[6px] border border-[#10b981] px-2 py-0.5 text-[10px] font-medium text-[#10b981] hover:bg-[#10b981]/10 transition-colors"
                         >
-                          Aprovar
+                          {t('memory.approve')}
                         </button>
                         <button
                           onClick={() => handleDismiss(entry)}
                           className="rounded-[6px] border border-red-400 px-2 py-0.5 text-[10px] font-medium text-red-400 hover:bg-red-400/10 transition-colors"
                         >
-                          Descartar
+                          {t('memory.dismiss')}
                         </button>
                       </div>
                     )}

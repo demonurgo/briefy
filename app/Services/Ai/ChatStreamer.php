@@ -5,6 +5,7 @@ namespace App\Services\Ai;
 use App\Jobs\CompactConversationJob;
 use App\Jobs\ExtractClientMemoryJob;
 use App\Models\AiConversation;
+use App\Services\Ai\LanguageInstruction;
 use App\Services\Ai\Telemetry\SpanEmitter;
 use Generator;
 use Illuminate\Http\StreamedEvent;
@@ -37,7 +38,7 @@ class ChatStreamer
 
         abort_unless($demand, 422, 'Chat conversation has no associated demand');
 
-        $system = $this->prompts->chatSystem($demand);
+        $system = LanguageInstruction::append($this->prompts->chatSystem($demand));
 
         // Build the turns array from existing history (the user message was already persisted by the controller).
         $history = $conversation->messages()

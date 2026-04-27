@@ -9,8 +9,6 @@ import { AiIcon } from '@/Components/AiIcon';
 import { CostConfirmModal } from '@/Components/CostConfirmModal';
 import type { PageProps } from '@/types';
 
-const MONTHS_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 interface Demand { id: number; title: string; status: string; deadline: string | null; type: string; }
 interface Session { id: number; status: string; started_at: string | null; completed_at: string | null; progress_summary: string | null; }
@@ -25,12 +23,6 @@ function SessionStatusIcon({ status }: { status: string }) {
   if (status === 'completed') return <CheckCircle2 size={13} className="text-[#10b981] shrink-0" />;
   if (status === 'failed' || status === 'terminated') return <XCircle size={13} className="text-red-400 shrink-0" />;
   return <Loader2 size={13} className="animate-spin text-[#7c3aed] shrink-0" />;
-}
-function sessionLabel(status: string) {
-  if (status === 'completed') return 'Concluída';
-  if (status === 'failed') return 'Falhou';
-  if (status === 'terminated') return 'Cancelada';
-  return 'Em andamento';
 }
 
 const inputCls = 'rounded-[8px] border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm text-[#111827] placeholder-[#9ca3af] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb]';
@@ -78,6 +70,13 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
   const [addingNew, setAddingNew] = useState(false);
   const [newDate, setNewDate] = useState<ImportantDate>({ label: '', month: 1, day: 1 });
   const [savingDates, setSavingDates] = useState(false);
+
+  const MONTHS_FULL = Array.from({ length: 12 }, (_, i) =>
+    new Intl.DateTimeFormat(undefined, { month: 'long' }).format(new Date(2000, i, 1))
+  );
+  const MONTHS_SHORT = Array.from({ length: 12 }, (_, i) =>
+    new Intl.DateTimeFormat(undefined, { month: 'short' }).format(new Date(2000, i, 1))
+  );
 
   const persistDates = async (next: ImportantDate[]) => {
     setSavingDates(true);
@@ -196,12 +195,12 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                   className="ml-auto inline-flex items-center gap-1 rounded-[6px] border border-[#e5e7eb] dark:border-[#1f2937] px-2 py-1 text-[11px] text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <AiIcon size={11} />
-                  Nova pesquisa
+                  {t('clients.newResearch')}
                 </button>
               )}
             </div>
             {sessions.length === 0 ? (
-              <p className="px-4 py-4 text-xs text-[#9ca3af]">Nenhuma pesquisa realizada ainda.</p>
+              <p className="px-4 py-4 text-xs text-[#9ca3af]">{t('clients.noResearch')}</p>
             ) : (
               <ul className="divide-y divide-[#f3f4f6] dark:divide-[#1f2937]">
                 {sessions.slice(0, 5).map(s => (
@@ -209,10 +208,10 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                     <Link href={route('clients.research.show', [client.id, s.id])} className="flex flex-1 items-center gap-2 min-w-0">
                       <SessionStatusIcon status={s.status} />
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-[#111827] dark:text-[#f9fafb]">{sessionLabel(s.status)}</p>
+                        <p className="text-xs font-medium text-[#111827] dark:text-[#f9fafb]">{t('clients.sessionStatus.' + s.status, { defaultValue: s.status })}</p>
                         <p className="text-[11px] text-[#9ca3af]">
                           {(s.completed_at || s.started_at)
-                            ? new Date(s.completed_at ?? s.started_at!).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+                            ? new Date(s.completed_at ?? s.started_at!).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
                             : '—'}
                         </p>
                       </div>
@@ -243,7 +242,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
               <div>
                 <p className="font-semibold text-[#111827] dark:text-[#f9fafb]">{t('nav.demands')}</p>
                 <p className="text-xs text-[#9ca3af] mt-0.5">
-                  {demands.length} demanda{demands.length !== 1 ? 's' : ''} ativa{demands.length !== 1 ? 's' : ''}
+                  {t('clients.activeDemandsCount', { count: demands.length })}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -259,7 +258,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                   className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors"
                 >
                   <ClipboardList size={14} />
-                  Ver quadro
+                  {t('clients.viewBoard')}
                 </Link>
               </div>
             </div>
@@ -269,28 +268,28 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
           <div className="rounded-[12px] bg-white shadow-sm dark:bg-[#111827]">
             <div className="flex items-center gap-2 border-b border-[#e5e7eb] px-5 py-3.5 dark:border-[#1f2937]">
               <Calendar size={15} className="text-[#f59e0b]" />
-              <h3 className="text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">Datas Importantes</h3>
-              <span className="ml-auto text-xs text-[#9ca3af]">Inseridas automaticamente no planejamento do mês</span>
+              <h3 className="text-sm font-semibold text-[#111827] dark:text-[#f9fafb]">{t('clients.importantDates')}</h3>
+              <span className="ml-auto text-xs text-[#9ca3af]">{t('clients.datesHint')}</span>
             </div>
 
             {/* Date rows */}
             <div className="divide-y divide-[#f3f4f6] dark:divide-[#1f2937]">
               {sorted.length === 0 && !addingNew && (
-                <p className="px-5 py-4 text-sm text-[#9ca3af]">Nenhuma data adicionada ainda.</p>
+                <p className="px-5 py-4 text-sm text-[#9ca3af]">{t('clients.noDates')}</p>
               )}
               {sorted.map((d, i) => {
                 const origIdx = dates.findIndex(x => x.label === d.label && x.month === d.month && x.day === d.day);
                 return isAdmin && editingIdx === origIdx ? (
                   <div key={i} className="flex items-center gap-2 px-5 py-3">
                     <input value={editBuf.label} onChange={e => setEditBuf(b => ({ ...b, label: e.target.value }))}
-                      placeholder="Descrição" className={`${inputCls} flex-1`} autoFocus />
+                      placeholder={t('clients.dateDescriptionPlaceholder')} className={`${inputCls} flex-1`} autoFocus />
                     <select value={editBuf.month} onChange={e => setEditBuf(b => ({ ...b, month: Number(e.target.value) }))} className={`${inputCls} w-28`}>
                       {MONTHS_FULL.map((m, mi) => <option key={mi+1} value={mi+1}>{m}</option>)}
                     </select>
                     <input type="number" min={1} max={31} value={editBuf.day}
                       onChange={e => setEditBuf(b => ({ ...b, day: Number(e.target.value) }))}
                       placeholder="Dia" className={`${inputCls} w-16`} />
-                    <button onClick={saveEdit} disabled={savingDates} className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60">Salvar</button>
+                    <button onClick={saveEdit} disabled={savingDates} className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60">{t('common.save')}</button>
                     <button onClick={() => setEditingIdx(null)} className="rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-xs text-[#6b7280] dark:border-[#1f2937]">{t('common.cancel')}</button>
                   </div>
                 ) : (
@@ -315,14 +314,14 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
               {isAdmin && (addingNew ? (
                 <div className="flex items-center gap-2 px-5 py-3">
                   <input value={newDate.label} onChange={e => setNewDate(b => ({ ...b, label: e.target.value }))}
-                    placeholder="Ex: Aniversário da empresa" className={`${inputCls} flex-1`} autoFocus />
+                    placeholder={t('clients.dateExamplePlaceholder')} className={`${inputCls} flex-1`} autoFocus />
                   <select value={newDate.month} onChange={e => setNewDate(b => ({ ...b, month: Number(e.target.value) }))} className={`${inputCls} w-28`}>
                     {MONTHS_FULL.map((m, mi) => <option key={mi+1} value={mi+1}>{m}</option>)}
                   </select>
                   <input type="number" min={1} max={31} value={newDate.day}
                     onChange={e => setNewDate(b => ({ ...b, day: Number(e.target.value) }))}
                     placeholder="Dia" className={`${inputCls} w-16`} />
-                  <button onClick={saveNew} disabled={savingDates || !newDate.label.trim()} className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60">Adicionar</button>
+                  <button onClick={saveNew} disabled={savingDates || !newDate.label.trim()} className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#6d28d9] disabled:opacity-60">{t('common.create')}</button>
                   <button onClick={() => setAddingNew(false)} className="rounded-[8px] border border-[#e5e7eb] px-3 py-1.5 text-xs text-[#6b7280] dark:border-[#1f2937]">{t('common.cancel')}</button>
                 </div>
               ) : (
@@ -330,7 +329,7 @@ export default function ClientsShow({ client, demands, sessions = [] }: { client
                   <button onClick={() => setAddingNew(true)}
                     className="inline-flex items-center gap-1.5 rounded-[8px] border border-dashed border-[#d1d5db] px-3 py-1.5 text-xs text-[#6b7280] hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors dark:border-[#374151]">
                     <Plus size={13} />
-                    Adicionar data importante
+                    {t('clients.addImportantDate')}
                   </button>
                 </div>
               ))}

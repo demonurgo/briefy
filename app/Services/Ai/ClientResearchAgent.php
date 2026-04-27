@@ -4,6 +4,7 @@ namespace App\Services\Ai;
 
 use App\Models\Client as ClientModel;
 use App\Models\ClientResearchSession;
+use App\Services\Ai\LanguageInstruction;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -71,7 +72,7 @@ final class ClientResearchAgent
                     [
                         'type'    => 'user.message',
                         'content' => [
-                            ['type' => 'text', 'text' => $this->prompts->userMessage($client)],
+                            ['type' => 'text', 'text' => $this->prompts->userMessage($client) . "\n\n" . LanguageInstruction::forCurrentUser()],
                         ],
                     ],
                 ],

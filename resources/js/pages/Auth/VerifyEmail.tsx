@@ -1,9 +1,11 @@
 // (c) 2026 Briefy contributors — AGPL-3.0
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { FormEventHandler } from 'react';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { t } = useTranslation();
     const { post, processing } = useForm({});
 
     const submit: FormEventHandler = (e) => {
@@ -34,7 +36,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     disabled={processing}
                     className="w-full rounded-[8px] bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {processing ? 'Enviando...' : 'Reenviar e-mail de verificação'}
+                    {processing ? t('common.sending') : t('auth.resendVerification')}
                 </button>
 
                 <div className="mt-4 text-center">

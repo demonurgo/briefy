@@ -3,6 +3,7 @@
 namespace App\Services\Ai;
 
 use App\Models\Demand;
+use App\Services\Ai\LanguageInstruction;
 use App\Services\Ai\Telemetry\SpanEmitter;
 use Generator;
 use Illuminate\Http\StreamedEvent;
@@ -26,6 +27,7 @@ class BriefStreamer
         @set_time_limit(0);
 
         [$system, $userMessage] = $this->prompts->build($demand);
+        $system = LanguageInstruction::append($system);
 
         $buffer          = '';
         $streamStartedAt = microtime(true);

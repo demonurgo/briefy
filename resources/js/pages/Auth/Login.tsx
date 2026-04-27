@@ -3,6 +3,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Login({
     status,
@@ -11,6 +12,7 @@ export default function Login({
     status?: string;
     canResetPassword: boolean;
 }) {
+    const { t } = useTranslation();
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -114,7 +116,7 @@ export default function Login({
                     disabled={processing}
                     className="mt-6 w-full rounded-[8px] bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {processing ? 'Entrando...' : 'Entrar'}
+                    {processing ? t('auth.signingIn') : t('auth.login')}
                 </button>
 
                 <p className="mt-5 text-center text-sm text-[#6b7280]">

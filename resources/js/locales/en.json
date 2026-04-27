@@ -5,7 +5,11 @@
     "demands": "Demands",
     "planning": "Planning",
     "settings": "Settings",
-    "more": "More"
+    "more": "More",
+    "concluidas": "Completed",
+    "trash": "Trash",
+    "expandMenu": "Expand menu",
+    "collapseMenu": "Collapse menu"
   },
   "common": {
     "save": "Save",
@@ -23,6 +27,8 @@
     "dismiss": "Dismiss",
     "continue": "Continue",
     "saving": "Saving...",
+    "sending": "Sending...",
+    "creating": "Creating...",
     "costConfirm": {
       "prefix": "This operation will cost approximately",
       "suffix": "Continue?",
@@ -95,6 +101,15 @@
     "filterPlaceholder": "Select a client",
     "noQuotaWarning": "Configure the client's monthly plan to generate planning.",
     "convertError": "Could not convert this item to a demand. Please try again.",
+    "detailsTab": "Details",
+    "redesignTab": "✨ Redesign",
+    "assigneePlaceholder": "Assignee (optional)",
+    "confirmReject": "Confirm rejection",
+    "redesigning": "Redesigning...",
+    "applyRedesignBtn": "Apply redesign",
+    "redesignHint": "Describe what should change — tone, theme, channel, approach. AI will rewrite the item.",
+    "redesignEmptyError": "Describe what you want to change.",
+    "converted": "✓ Converted",
     "empty": {
       "noClientSelected": {
         "heading": "Select a client to view their planning",
@@ -126,6 +141,11 @@
       "in_review": "In review",
       "approved": "Approved"
     },
+    "priorities": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
     "types": {
       "demand": "Demand",
       "planning": "Planning"
@@ -137,7 +157,27 @@
     "register": "Create account",
     "email": "Email",
     "password": "Password",
-    "name": "Name"
+    "name": "Name",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "createAccount": "Create account",
+    "confirming": "Confirming...",
+    "savingPassword": "Saving...",
+    "sendResetLink": "Send recovery link",
+    "resendVerification": "Resend verification email",
+    "forgotPasswordTitle": "Recover password",
+    "forgotPasswordHint": "Enter your email and we'll send a link to reset your password.",
+    "secureArea": "Secure area",
+    "confirmPasswordHint": "Confirm your password to continue.",
+    "verifyEmailTitle": "Verify your email",
+    "verifyEmailHint": "We sent a verification link to your email. Click the link to activate your account.",
+    "verificationSent": "A new verification link was sent to your email.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "newPasswordPlaceholder": "Minimum 8 characters",
+    "repeatPassword": "Repeat password",
+    "createNewPasswordHint": "Create a new password for your account.",
+    "resetPasswordTitle": "Reset password"
   },
   "clients": {
     "title": "Clients",
@@ -186,7 +226,24 @@
       "confirmTitle": "Start Deep Research",
       "confirmBody": "Research takes approximately {{minutes}} minutes and consumes credits from your Anthropic key. Continue?",
       "confirmCta": "Start research"
-    }
+    },
+    "sessionStatus": {
+      "completed": "Completed",
+      "failed": "Failed",
+      "terminated": "Cancelled",
+      "running": "In progress"
+    },
+    "newResearch": "New research",
+    "noResearch": "No research done yet.",
+    "viewBoard": "View board",
+    "importantDates": "Important Dates",
+    "datesHint": "Automatically included in the monthly plan",
+    "noDates": "No dates added yet.",
+    "addImportantDate": "Add important date",
+    "dateDescriptionPlaceholder": "Description",
+    "dateExamplePlaceholder": "E.g.: Company anniversary",
+    "activeDemandsCount": "{{count}} active demand",
+    "activeDemandsCount_other": "{{count}} active demands"
   },
   "settings": {
     "ai": {
@@ -214,7 +271,30 @@
         "envIdLabel": "Environment ID (optional)"
       },
       "changeKey": "Change key"
-    }
+    },
+    "saveProfile": "Save profile",
+    "saveOrg": "Save organization",
+    "orgName": "Organization name",
+    "orgAdminOnly": "Only admins can change organization settings.",
+    "organization": "Organization",
+    "team": "Team",
+    "inviteMember": "Invite member",
+    "sendInvite": "Send invite",
+    "pendingInvites": "Pending invites",
+    "sentAt": "Sent on {{date}}",
+    "cancelInvite": "Cancel invite",
+    "members": "Members",
+    "roles": {
+      "collaborator": "Collaborator",
+      "admin": "Admin",
+      "owner": "Owner"
+    },
+    "noMembers": "No members yet. Invite someone to get started.",
+    "promoteToAdmin": "Promote to Admin",
+    "demoteToCollaborator": "Demote to Collaborator",
+    "removeMember": "Remove member",
+    "removeMemberConfirm": "Are you sure you want to remove {{name}} from the organization? This action cannot be undone.",
+    "removeMemberAria": "Remove {{name}} from the organization"
   },
   "demands": {
     "title": "Demands",
@@ -239,6 +319,7 @@
     "addComment": "Add comment",
     "addFile": "Add file",
     "confirmDelete": "Are you sure you want to delete this demand?",
+    "confirmDeleteBtn": "Confirm deletion",
     "noDeadline": "No deadline",
     "linkUrl": "Link URL",
     "fileName": "File name",
@@ -246,10 +327,169 @@
     "addLink": "Add link",
     "writeComment": "Write a comment...",
     "send": "Send",
+    "saveAndClose": "Save and close",
+    "unsavedChanges": "Save changes?",
+    "selectPlaceholder": "Select...",
+    "none": "None",
+    "uploadingFiles": "Uploading files...",
     "tabs": {
       "comments": "Comments",
       "files": "Files",
       "brief": "Brief"
     }
+  },
+  "memory": {
+    "activeTab": "Active memory",
+    "suggestionsTab": "Suggestions",
+    "emptyActive": "No active memory yet.",
+    "emptyActiveHint": "Memory is populated by AI Chat and automatic client research.",
+    "emptySuggested": "No pending suggestions.",
+    "suggestionsHint": "These insights have low confidence (<60%) and need your review before being applied.",
+    "confidence": "confidence",
+    "approve": "Approve",
+    "dismiss": "Discard",
+    "categories": {
+      "tone": "Tone",
+      "patterns": "Patterns",
+      "preferences": "Preferences",
+      "avoid": "Avoid",
+      "terminology": "Terminology"
+    }
+  },
+  "kanban": {
+    "dropHere": "Drop here",
+    "trash": "Trash",
+    "archive": "Archive"
+  },
+  "activity": {
+    "title": "Recent activity",
+    "empty": "No recent activity.",
+    "ariaLabel": "Recent activity feed",
+    "verbs": {
+      "moved": "moved \"{{subject}}\" to {{status}}",
+      "created": "created \"{{subject}}\"",
+      "commented": "commented on \"{{subject}}\"",
+      "assigned": "assigned \"{{subject}}\"",
+      "trashed": "moved \"{{subject}}\" to trash",
+      "archived": "archived \"{{subject}}\"",
+      "restored": "restored \"{{subject}}\"",
+      "addedClient": "added client \"{{subject}}\"",
+      "invited": "invited {{subject}}",
+      "acted": "acted on \"{{subject}}\""
+    }
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "dismiss": "Dismiss getting started guide",
+    "start": "Get started →",
+    "steps": {
+      "setupAi": {
+        "label": "Set up AI key",
+        "description": "Add your Anthropic key to enable brief generation, chat and monthly planning."
+      },
+      "addClient": {
+        "label": "Add a client"
+      },
+      "createDemand": {
+        "label": "Create the first demand"
+      }
+    }
+  },
+  "dashboard": {
+    "personalView": "Personal view",
+    "overviewView": "Overview",
+    "ariaViewToggle": "Toggle dashboard view",
+    "completedChartAria": "Chart: Completed per day of week",
+    "statusCards": {
+      "overdue": "Overdue",
+      "inProgress": "In progress",
+      "awaitingReturn": "Awaiting response",
+      "inReview": "In review",
+      "completed": "Completed",
+      "completedThisWeek": "Completed this week",
+      "blockers": "Blockers / Waiting"
+    },
+    "demandTabs": {
+      "all": "All",
+      "inProgress": "In progress",
+      "overdue": "Overdue",
+      "completed": "Completed"
+    },
+    "teamPerf": {
+      "completed": "Completed",
+      "inProgress": "In progress"
+    },
+    "sections": {
+      "focusNow": "Your focus now",
+      "yourProgress": "Your progress",
+      "myDemands": "My demands",
+      "overview": "Overview",
+      "demandsByPriority": "Demands by priority",
+      "demandsOverTime": "Demands over time",
+      "latestDemands": "Latest demands",
+      "teamPerformance": "Team performance",
+      "teamWorkload": "Team workload",
+      "clientActivity": "Activity by client"
+    },
+    "greeting": "Hello, {{name}}!",
+    "subtitlePersonal": "Here's what needs your attention today.",
+    "subtitleOverview": "Here's a summary of your demands today.",
+    "noUrgentDemands": "No urgent demands. Great work!",
+    "noDemandFilter": "No demands in this filter.",
+    "noBlockers": "No demands waiting for response.",
+    "blockerSince": "Since {{date}}",
+    "newDemand": "New demand",
+    "viewAll": "View all →",
+    "chartCreated": "Created",
+    "chartCompleted": "Completed",
+    "chartDemands": "Demands",
+    "chartPending": "Pending",
+    "total": "Total",
+    "active": "active",
+    "overdueShort": "overdue",
+    "completedShort": "done",
+    "noDeadline": "No deadline",
+    "dateFrom": "From:",
+    "dateTo": "To:",
+    "progressWeek": "{{completed}} of {{total}} completed this week",
+    "tableTitle": "Title",
+    "tableStatus": "Status",
+    "tablePriority": "Priority",
+    "tableDeadline": "Deadline",
+    "tableClient": "Client",
+    "tableUpdatedAt": "Updated at",
+    "tableAssignee": "Assignee",
+    "ariaChartPrefix": "Chart: "
+  },
+  "trash": {
+    "title": "Trash",
+    "expiresToday": "Expires today",
+    "daysLeft": "{{days}}d left",
+    "autoDelete": "Demands are automatically deleted after 30 days",
+    "empty": "Trash is empty",
+    "emptyHint": "Deleted demands appear here for 30 days",
+    "restore": "Restore",
+    "deleteForever": "Delete permanently"
+  },
+  "research": {
+    "title": "Deep Research — {{name}}",
+    "startedAt": "Started at {{date}}",
+    "completedAt": "Completed at {{date}}",
+    "waitingStart": "Waiting to start",
+    "searching": "Searching...",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed",
+    "autoRefresh": "This page auto-refreshes every 10 seconds",
+    "confirmCancel": "Confirm cancellation",
+    "cancelResearch": "Cancel research",
+    "savedInsights": "Insights saved to client memory",
+    "suggested": "suggested",
+    "fullReport": "Full research report",
+    "reportStats": "{{raw}} raw insights · {{saved}} saved after filters",
+    "generatedAt": "Generated at {{date}}",
+    "reportNote": "Includes all insights, including those filtered for low confidence or PII",
+    "filtered": "(filtered)",
+    "failed": "Research failed. Try again from the client page.",
+    "noInsights": "No insights captured yet."
   }
 }

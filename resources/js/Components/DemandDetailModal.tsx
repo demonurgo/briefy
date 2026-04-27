@@ -306,7 +306,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                 }`}
               >
                 <Trash2 size={13} />
-                {confirmDelete ? 'Confirmar exclusão' : ''}
+                {confirmDelete ? t('demands.confirmDeleteBtn') : ''}
               </button>
             )}
             <button onClick={handleClose} className="rounded-[8px] p-1.5 text-[#9ca3af] hover:bg-[#f3f4f6] hover:text-[#6b7280] transition-colors dark:hover:bg-[#1f2937]">
@@ -332,7 +332,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                   <div>
                     <label className={labelClass}>{t('demands.channel')}</label>
                     <select value={editForm.data.channel} onChange={e => editForm.setData('channel', e.target.value)} className={inputClass}>
-                      <option value="">Selecione...</option>
+                      <option value="">{t('demands.selectPlaceholder')}</option>
                       {CHANNELS.map(ch => <option key={ch} value={ch} className="capitalize">{ch}</option>)}
                     </select>
                   </div>
@@ -345,7 +345,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                 <div>
                   <label className={labelClass}>{t('demands.assignedTo')}</label>
                   <select value={editForm.data.assigned_to} onChange={e => editForm.setData('assigned_to', e.target.value)} className={inputClass}>
-                    <option value="">Nenhum</option>
+                    <option value="">{t('demands.none')}</option>
                     {teamMembers.map(m => <option key={m.id} value={String(m.id)}>{m.name}</option>)}
                   </select>
                 </div>
@@ -530,7 +530,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
         {confirmClose && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[16px] bg-black/40 backdrop-blur-sm">
             <div className="mx-4 w-full max-w-sm rounded-[14px] bg-white p-6 shadow-2xl dark:bg-[#111827]">
-              <h3 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb]">Salvar mudanças?</h3>
+              <h3 className="text-base font-semibold text-[#111827] dark:text-[#f9fafb]">{t('demands.unsavedChanges')}</h3>
               <p className="mt-1 text-sm text-[#6b7280]">Você tem alterações não salvas. Deseja salvá-las antes de fechar?</p>
               <div className="mt-5 flex gap-2">
                 <button
@@ -538,7 +538,7 @@ export function DemandDetailModal({ demand, isAdmin, teamMembers, onClose }: Pro
                   disabled={editForm.processing}
                   className="flex-1 rounded-[10px] bg-[#7c3aed] py-2 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:opacity-60"
                 >
-                  {editForm.processing ? 'Salvando...' : 'Salvar e fechar'}
+                  {editForm.processing ? t('common.saving') : t('demands.saveAndClose')}
                 </button>
                 <button
                   onClick={discardAndClose}

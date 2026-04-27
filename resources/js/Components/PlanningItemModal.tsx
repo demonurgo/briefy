@@ -64,7 +64,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
   };
 
   const handleRedesign = async () => {
-    if (!feedback.trim()) { setError('Descreva o que deseja mudar.'); return; }
+    if (!feedback.trim()) { setError(t('planning.redesignEmptyError')); return; }
     setError(null);
     setApplying(true);
     try {
@@ -106,7 +106,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
               )}
               {status === 'accepted' && (
                 <span className="rounded-full bg-[#d1fae5] px-2.5 py-0.5 text-[11px] font-semibold text-[#065f46]">
-                  ✓ Convertida
+                  {t('planning.converted')}
                 </span>
               )}
             </div>
@@ -137,7 +137,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
                     : 'border-transparent text-[#9ca3af] hover:text-[#6b7280]'
                 }`}
               >
-                {t2 === 'details' ? 'Detalhes' : '✨ Redesenhar'}
+                {t2 === 'details' ? t('planning.detailsTab') : t('planning.redesignTab')}
               </button>
             ))}
           </div>
@@ -153,9 +153,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
 
           {tab === 'redesign' && (
             <div className="space-y-3">
-              <p className="text-xs text-[#6b7280]">
-                Descreva o que deve mudar — tom, tema, canal, abordagem. A IA vai reescrever o item.
-              </p>
+              <p className="text-xs text-[#6b7280]">{t('planning.redesignHint')}</p>
               <textarea
                 value={feedback}
                 onChange={e => setFeedback(e.target.value)}
@@ -177,7 +175,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
                 onChange={e => setAssignedTo(e.target.value)}
                 className="w-full rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#0b0f14] px-3 py-2 text-sm text-[#111827] dark:text-[#f9fafb] focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20"
               >
-                <option value="">Responsável (opcional)</option>
+                <option value="">{t('planning.assigneePlaceholder')}</option>
                 {teamMembers.map(m => (
                   <option key={m.id} value={String(m.id)}>{m.name}</option>
                 ))}
@@ -190,7 +188,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
                   className="flex-1 flex items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2.5 text-sm font-semibold text-white transition-colors"
                 >
                   <Check size={15} />
-                  Converter em demanda
+                  {t('planning.convert')}
                 </button>
                 <button
                   onClick={handleReject}
@@ -200,7 +198,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
                       : 'border border-[#e5e7eb] dark:border-[#1f2937] text-[#6b7280] hover:border-red-400 hover:text-red-500'
                   }`}
                 >
-                  {confirming === 'reject' ? 'Confirmar rejeição' : 'Rejeitar'}
+                  {confirming === 'reject' ? t('planning.confirmReject') : t('planning.reject')}
                 </button>
               </div>
             ) : (
@@ -218,7 +216,7 @@ export function PlanningItemModal({ suggestion, teamMembers, onClose, onLocalUpd
                   className="flex-1 flex items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] hover:bg-[#6d28d9] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60 transition-colors"
                 >
                   {applying ? <AiIcon size={14} variant="dark" spinning /> : <RefreshCw size={14} />}
-                  {applying ? 'Redesenhando...' : 'Aplicar redesign'}
+                  {applying ? t('planning.redesigning') : t('planning.applyRedesignBtn')}
                 </button>
               </div>
             )}

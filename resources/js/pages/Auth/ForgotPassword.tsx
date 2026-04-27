@@ -3,8 +3,10 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPassword({ status }: { status?: string }) {
+    const { t } = useTranslation();
     const { data, setData, post, processing, errors } = useForm({
         email: '',
     });
@@ -57,7 +59,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     disabled={processing}
                     className="mt-6 w-full rounded-[8px] bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {processing ? 'Enviando...' : 'Enviar link de recuperação'}
+                    {processing ? t('common.sending') : t('auth.sendResetLink')}
                 </button>
             </form>
         </GuestLayout>

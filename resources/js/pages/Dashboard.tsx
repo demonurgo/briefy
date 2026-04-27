@@ -121,13 +121,6 @@ const STATUS_COLORS: Record<string, string> = {
   approved:          '#10b981',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  todo:              'A fazer',
-  in_progress:       'Em andamento',
-  awaiting_feedback: 'Aguardando',
-  in_review:         'Em revisão',
-  approved:          'Concluída',
-};
 
 const PRIORITY_COLORS: Record<string, string> = {
   high:   '#ef4444',
@@ -135,11 +128,6 @@ const PRIORITY_COLORS: Record<string, string> = {
   low:    '#9ca3af',
 };
 
-const PRIORITY_LABELS: Record<string, string> = {
-  high:   'Alta',
-  medium: 'Média',
-  low:    'Baixa',
-};
 
 const CHART_TOOLTIP_STYLE = {
   background: '#111827',
@@ -167,7 +155,7 @@ function DonutChart({
     <div
       className="relative h-[160px]"
       role="img"
-      aria-label={`Gráfico: ${ariaLabel}`}
+      aria-label={ariaLabel}
     >
       <ResponsiveContainer width="100%" height={160}>
         <PieChart>
@@ -198,14 +186,15 @@ function DonutChart({
 
 /** Badge de prioridade inline */
 function PriorityBadge({ priority }: { priority: string }) {
+  const { t } = useTranslation();
   const color = PRIORITY_COLORS[priority] ?? '#9ca3af';
-  const label = PRIORITY_LABELS[priority] ?? priority;
+  const label = t('demand.priorities.' + priority, { defaultValue: priority });
   return (
     <span
       className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium"
       style={{ color, backgroundColor: `${color}1a` }}
     >
-      {label}
+      {t('demand.priorities.' + priority, { defaultValue: priority })}
     </span>
   );
 }
@@ -218,11 +207,12 @@ function ViewToggle({
   view: 'personal' | 'overview';
   onChange: (v: 'personal' | 'overview') => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className="flex rounded-[8px] overflow-hidden border border-[#e5e7eb] dark:border-[#1f2937]"
       role="group"
-      aria-label="Alternar visualização do dashboard"
+      aria-label={t('dashboard.ariaViewToggle')}
     >
       {(['personal', 'overview'] as const).map((v) => (
         <button
@@ -235,7 +225,7 @@ function ViewToggle({
           }`}
           aria-pressed={view === v}
         >
-          {v === 'personal' ? 'Visão pessoal' : 'Visão geral'}
+          {v === 'personal' ? t('dashboard.personalView') : t('dashboard.overviewView')}
         </button>
       ))}
     </div>
@@ -246,13 +236,14 @@ function ViewToggle({
 // View Pessoal (todos os usuários — D-07 a D-11)
 // -----------------------------------------------------------------------
 function PersonalView({ personal }: { personal: PersonalData }) {
+  const { t } = useTranslation();
   const [demandTab, setDemandTab] = useState<'all' | 'in_progress' | 'overdue' | 'completed'>('all');
   const today = new Date().toISOString().substring(0, 10);
 
   // Status card config (D-07)
   const statusCards = [
     {
-      label: 'Atrasadas',
+      label: t('dashboard.statusCards.overdue'),
       count: personal.statusCounts['overdue'] ?? 0,
       delta: personal.deltaVsYesterday['overdue'] ?? null,
       deltaInverted: true, // subir = ruim
@@ -260,28 +251,28 @@ function PersonalView({ personal }: { personal: PersonalData }) {
       iconColor: '#ef4444',
     },
     {
-      label: 'Em andamento',
+      label: t('dashboard.statusCards.inProgress'),
       count: personal.statusCounts['in_progress'] ?? 0,
       delta: personal.deltaVsYesterday['in_progress'] ?? null,
       icon: Clock,
       iconColor: '#3b82f6',
     },
     {
-      label: 'Aguardando retorno',
+      label: t('dashboard.statusCards.awaitingReturn'),
       count: personal.statusCounts['awaiting_feedback'] ?? 0,
       delta: personal.deltaVsYesterday['awaiting_feedback'] ?? null,
       icon: MessageSquare,
       iconColor: '#f59e0b',
     },
     {
-      label: 'Em revisão',
+      label: t('dashboard.statusCards.inReview'),
       count: personal.statusCounts['in_review'] ?? 0,
       delta: personal.deltaVsYesterday['in_review'] ?? null,
       icon: Eye,
       iconColor: '#8b5cf6',
     },
     {
-      label: 'Concluídas',
+      label: t('dashboard.statusCards.completed'),
       count: personal.statusCounts['approved'] ?? 0,
       delta: personal.deltaVsYesterday['approved'] ?? null,
       icon: CheckCircle2,
@@ -299,7 +290,10 @@ function PersonalView({ personal }: { personal: PersonalData }) {
   }).slice(0, 5);
 
   // Bar chart: concluídas por dia (D-02)
-  const dayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const dayOrder = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(2023, 0, i + 1);
+    return new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(date);
+  });
   const completedBarData = dayOrder.map((day) => ({
     name: day,
     value: personal.completedByDay[day] ?? 0,
@@ -307,9 +301,9 @@ function PersonalView({ personal }: { personal: PersonalData }) {
 
   // Donut: progresso da semana (D-11)
   const progressDonutData = [
-    { name: 'Concluídas', value: personal.weekProgress.completed, color: '#10b981' },
+    { name: t('dashboard.chartCompleted'), value: personal.weekProgress.completed, color: '#10b981' },
     {
-      name: 'Pendentes',
+      name: t('dashboard.chartPending'),
       value: Math.max(0, personal.weekProgress.total - personal.weekProgress.completed),
       color: '#1f2937',
     },
@@ -341,10 +335,10 @@ function PersonalView({ personal }: { personal: PersonalData }) {
       {/* Region 5: 3-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Seu foco agora (D-08) */}
-        <DashboardSectionCard title="Seu foco agora">
+        <DashboardSectionCard title={t('dashboard.sections.focusNow')}>
           {personal.focusDemands.length === 0 ? (
             <p className="text-sm text-[#9ca3af] text-center py-6">
-              Nenhuma demanda urgente. Bom trabalho!
+              {t('dashboard.noUrgentDemands')}
             </p>
           ) : (
             <div>
@@ -365,7 +359,7 @@ function PersonalView({ personal }: { personal: PersonalData }) {
                         : 'text-[#9ca3af]'
                     }`}
                   >
-                    {d.deadline ?? 'Sem prazo'}
+                    {d.deadline ?? t('dashboard.noDeadline')}
                   </span>
                 </Link>
               ))}
@@ -374,29 +368,29 @@ function PersonalView({ personal }: { personal: PersonalData }) {
         </DashboardSectionCard>
 
         {/* Concluídas por dia (D-02 DASH-02 simplificado para pessoal) */}
-        <DashboardSectionCard title="Concluídas esta semana">
-          <div role="img" aria-label="Gráfico: Concluídas por dia da semana">
+        <DashboardSectionCard title={t('dashboard.statusCards.completedThisWeek')}>
+          <div role="img" aria-label={t('dashboard.completedChartAria')}>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={completedBarData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                 <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} name="Concluídas" />
+                <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} name={t('dashboard.chartCompleted')} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </DashboardSectionCard>
 
         {/* Seu progresso (D-11) */}
-        <DashboardSectionCard title="Seu progresso">
+        <DashboardSectionCard title={t('dashboard.sections.yourProgress')}>
           <DonutChart
             data={progressDonutData}
             centerLabel={progressPercent}
-            ariaLabel="Seu progresso — concluídas vs total"
+            ariaLabel={t('dashboard.sections.yourProgress')}
           />
           <p className="text-xs text-[#6b7280] text-center mt-2">
-            {personal.weekProgress.completed} de {personal.weekProgress.total} concluídas esta semana
+            {t('dashboard.progressWeek', { completed: personal.weekProgress.completed, total: personal.weekProgress.total })}
           </p>
         </DashboardSectionCard>
       </div>
@@ -405,20 +399,20 @@ function PersonalView({ personal }: { personal: PersonalData }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Minhas demandas com tabs (D-09) */}
         <DashboardSectionCard
-          title="Minhas demandas"
+          title={t('dashboard.sections.myDemands')}
           action={
-            <Link href="/demands" className="text-xs text-[#7c3aed] hover:underline font-medium" aria-label="Ver todas as demandas">
-              Ver todas →
+            <Link href="/demands" className="text-xs text-[#7c3aed] hover:underline font-medium" aria-label={t('dashboard.viewAll')}>
+              {t('dashboard.viewAll')}
             </Link>
           }
         >
           {/* Tab bar */}
           <div className="flex gap-1 mb-4 border-b border-[#e5e7eb] dark:border-[#1f2937]" role="tablist">
             {[
-              { id: 'all' as const, label: 'Todas' },
-              { id: 'in_progress' as const, label: 'Em andamento' },
-              { id: 'overdue' as const, label: 'Atrasadas' },
-              { id: 'completed' as const, label: 'Concluídas' },
+              { id: 'all' as const, label: t('dashboard.demandTabs.all') },
+              { id: 'in_progress' as const, label: t('dashboard.demandTabs.inProgress') },
+              { id: 'overdue' as const, label: t('dashboard.demandTabs.overdue') },
+              { id: 'completed' as const, label: t('dashboard.demandTabs.completed') },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -439,7 +433,7 @@ function PersonalView({ personal }: { personal: PersonalData }) {
           {/* Mobile: compact list + ver todas button */}
           <div className="md:hidden">
             {filteredDemands.length === 0 ? (
-              <p className="text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda neste filtro.</p>
+              <p className="text-sm text-[#9ca3af] text-center py-4">{t('dashboard.noDemandFilter')}</p>
             ) : (
               <div>
                 {filteredDemands.slice(0, 4).map((d) => (
@@ -461,22 +455,22 @@ function PersonalView({ personal }: { personal: PersonalData }) {
               href="/demands"
               className="mt-3 flex items-center justify-center gap-1 w-full rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] py-2.5 text-sm font-medium text-[#7c3aed] hover:bg-[#f3f4f6] dark:hover:bg-[#1f2937] transition-colors"
             >
-              Ver todas as demandas →
+              {t('dashboard.viewAll')}
             </Link>
           </div>
 
           {/* Desktop: full table */}
           {filteredDemands.length === 0 ? (
-            <p className="hidden md:block text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda neste filtro.</p>
+            <p className="hidden md:block text-sm text-[#9ca3af] text-center py-4">{t('dashboard.noDemandFilter')}</p>
           ) : (
             <table className="hidden md:table w-full text-sm">
               <thead>
                 <tr className="text-left">
-                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Título</th>
-                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Status</th>
-                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Prioridade</th>
-                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Prazo</th>
-                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Cliente</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableTitle')}</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableStatus')}</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tablePriority')}</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableDeadline')}</th>
+                  <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableClient')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -495,9 +489,9 @@ function PersonalView({ personal }: { personal: PersonalData }) {
         </DashboardSectionCard>
 
         {/* Bloqueios / Aguardando (D-10) */}
-        <DashboardSectionCard title="Bloqueios / Aguardando">
+        <DashboardSectionCard title={t('dashboard.statusCards.blockers')}>
           {personal.blockers.length === 0 ? (
-            <p className="text-sm text-[#9ca3af] text-center py-4">Nenhuma demanda aguardando retorno.</p>
+            <p className="text-sm text-[#9ca3af] text-center py-4">{t('dashboard.noBlockers')}</p>
           ) : (
             <div>
               {personal.blockers.map((b) => (
@@ -509,7 +503,7 @@ function PersonalView({ personal }: { personal: PersonalData }) {
                   <AlertCircle size={14} className="text-[#f59e0b] mt-0.5 shrink-0" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-medium text-[#111827] dark:text-[#f9fafb]">{b.title}</p>
-                    <p className="text-xs text-[#9ca3af]">Desde {b.since}</p>
+                    <p className="text-xs text-[#9ca3af]">{t('dashboard.blockerSince', { date: b.since })}</p>
                   </div>
                 </Link>
               ))}
@@ -530,20 +524,21 @@ function OverviewView({
   overview: OverviewData;
   onDateRangeChange: (start: string, end: string) => void;
 }) {
+  const { t } = useTranslation();
   const today = new Date().toISOString().substring(0, 10);
 
   // Status cards org-wide (D-14) — reusar mesma estrutura da view pessoal
   const statusCards = [
-    { label: 'Atrasadas', count: overview.overdueCount, delta: overview.deltaVsYesterday['overdue'] ?? null, deltaInverted: true, icon: AlertCircle, iconColor: '#ef4444' },
-    { label: 'Em andamento', count: overview.statusBreakdown['in_progress'] ?? 0, delta: overview.deltaVsYesterday['in_progress'] ?? null, icon: Clock, iconColor: '#3b82f6' },
-    { label: 'Aguardando retorno', count: overview.statusBreakdown['awaiting_feedback'] ?? 0, delta: overview.deltaVsYesterday['awaiting_feedback'] ?? null, icon: MessageSquare, iconColor: '#f59e0b' },
-    { label: 'Em revisão', count: overview.statusBreakdown['in_review'] ?? 0, delta: overview.deltaVsYesterday['in_review'] ?? null, icon: Eye, iconColor: '#8b5cf6' },
-    { label: 'Concluídas', count: overview.statusBreakdown['approved'] ?? 0, delta: overview.deltaVsYesterday['approved'] ?? null, icon: CheckCircle2, iconColor: '#10b981' },
+    { label: t('dashboard.statusCards.overdue'), count: overview.overdueCount, delta: overview.deltaVsYesterday['overdue'] ?? null, deltaInverted: true, icon: AlertCircle, iconColor: '#ef4444' },
+    { label: t('dashboard.statusCards.inProgress'), count: overview.statusBreakdown['in_progress'] ?? 0, delta: overview.deltaVsYesterday['in_progress'] ?? null, icon: Clock, iconColor: '#3b82f6' },
+    { label: t('dashboard.statusCards.awaitingReturn'), count: overview.statusBreakdown['awaiting_feedback'] ?? 0, delta: overview.deltaVsYesterday['awaiting_feedback'] ?? null, icon: MessageSquare, iconColor: '#f59e0b' },
+    { label: t('dashboard.statusCards.inReview'), count: overview.statusBreakdown['in_review'] ?? 0, delta: overview.deltaVsYesterday['in_review'] ?? null, icon: Eye, iconColor: '#8b5cf6' },
+    { label: t('dashboard.statusCards.completed'), count: overview.statusBreakdown['approved'] ?? 0, delta: overview.deltaVsYesterday['approved'] ?? null, icon: CheckCircle2, iconColor: '#10b981' },
   ];
 
   // Panorama geral donut (D-15)
   const statusDonutData = Object.entries(overview.statusBreakdown).map(([status, count]) => ({
-    name: STATUS_LABELS[status] ?? status,
+    name: t('demand.statuses.' + status, { defaultValue: status }),
     value: count as number,
     color: STATUS_COLORS[status] ?? '#9ca3af',
   }));
@@ -551,15 +546,15 @@ function OverviewView({
 
   // Prioridade bar chart (D-16)
   const priorityBarData = [
-    { name: 'Alta',  value: overview.priorityBreakdown['high']   ?? 0, color: '#ef4444' },
-    { name: 'Média', value: overview.priorityBreakdown['medium'] ?? 0, color: '#f59e0b' },
-    { name: 'Baixa', value: overview.priorityBreakdown['low']    ?? 0, color: '#9ca3af' },
+    { name: t('demand.priorities.high'),   value: overview.priorityBreakdown['high']   ?? 0, color: '#ef4444' },
+    { name: t('demand.priorities.medium'), value: overview.priorityBreakdown['medium'] ?? 0, color: '#f59e0b' },
+    { name: t('demand.priorities.low'),    value: overview.priorityBreakdown['low']    ?? 0, color: '#9ca3af' },
   ];
 
   // Desempenho donut (D-19)
   const perfDonutData = [
-    { name: 'Concluídas',   value: overview.teamPerformance.completed,   color: '#10b981' },
-    { name: 'Em andamento', value: overview.teamPerformance.in_progress, color: '#3b82f6' },
+    { name: t('dashboard.teamPerf.completed'),   value: overview.teamPerformance.completed,   color: '#10b981' },
+    { name: t('dashboard.teamPerf.inProgress'), value: overview.teamPerformance.in_progress, color: '#3b82f6' },
   ];
 
   // suppress unused variable
@@ -588,11 +583,11 @@ function OverviewView({
       {/* Region 3: 3-column grid — charts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Panorama geral — donut (D-15) */}
-        <DashboardSectionCard title="Panorama geral">
+        <DashboardSectionCard title={t('dashboard.sections.overview')}>
           <DonutChart
             data={statusDonutData}
             centerLabel={String(orgTotal)}
-            ariaLabel="Panorama geral — total de demandas por status"
+            ariaLabel={t('dashboard.sections.overview')}
           />
           {/* Legenda com count + % */}
           <div className="mt-3 space-y-1">
@@ -611,15 +606,15 @@ function OverviewView({
         </DashboardSectionCard>
 
         {/* Demandas por prioridade — bar chart (D-16) */}
-        <DashboardSectionCard title="Demandas por prioridade">
-          <div role="img" aria-label="Gráfico: Demandas por prioridade">
+        <DashboardSectionCard title={t('dashboard.sections.demandsByPriority')}>
+          <div role="img" aria-label={t('dashboard.ariaChartPrefix') + t('dashboard.sections.demandsByPriority')}>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={priorityBarData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
                 <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Demandas">
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} name={t('dashboard.chartDemands')}>
                   {priorityBarData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -630,8 +625,8 @@ function OverviewView({
         </DashboardSectionCard>
 
         {/* Demanda ao longo do tempo — line chart (D-17) */}
-        <DashboardSectionCard title="Demanda ao longo do tempo">
-          <div role="img" aria-label="Gráfico: Criadas vs concluídas ao longo do tempo">
+        <DashboardSectionCard title={t('dashboard.sections.demandsOverTime')}>
+          <div role="img" aria-label={t('dashboard.ariaChartPrefix') + t('dashboard.sections.demandsOverTime')}>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={overview.demandsOverTime} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
@@ -639,8 +634,8 @@ function OverviewView({
                 <YAxis tick={{ fill: '#6b7280', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <RechartsTooltip contentStyle={CHART_TOOLTIP_STYLE} />
                 <Legend wrapperStyle={{ fontSize: '12px', color: '#6b7280' }} />
-                <Line type="monotone" dataKey="created"   stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} name="Criadas" />
-                <Line type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4 }} name="Concluídas" />
+                <Line type="monotone" dataKey="created"   stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 4 }} name={t('dashboard.chartCreated')} />
+                <Line type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4 }} name={t('dashboard.chartCompleted')} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -651,7 +646,7 @@ function OverviewView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Últimas demandas (D-18) */}
         <DashboardSectionCard
-          title="Últimas demandas"
+          title={t('dashboard.sections.latestDemands')}
           action={
             <Link href="/demands" className="text-xs text-[#7c3aed] hover:underline font-medium" aria-label="Ver todas as demandas">
               Ver todas →
@@ -661,11 +656,11 @@ function OverviewView({
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left">
-                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Título</th>
-                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Status</th>
-                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Prioridade</th>
-                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Atualizado em</th>
-                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">Responsável</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableTitle')}</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableStatus')}</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tablePriority')}</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableUpdatedAt')}</th>
+                <th scope="col" className="text-xs text-[#6b7280] font-medium pb-2">{t('dashboard.tableAssignee')}</th>
               </tr>
             </thead>
             <tbody>
@@ -692,39 +687,39 @@ function OverviewView({
         </DashboardSectionCard>
 
         {/* Desempenho da equipe — donut (D-19) */}
-        <DashboardSectionCard title="Desempenho da equipe">
+        <DashboardSectionCard title={t('dashboard.sections.teamPerformance')}>
           <DonutChart
             data={perfDonutData}
             centerLabel={`${overview.teamPerformance.rate}%`}
-            ariaLabel="Desempenho da equipe — taxa de conclusão"
+            ariaLabel={t('dashboard.sections.teamPerformance')}
           />
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
             <div>
               <p className="text-lg font-bold text-[#111827] dark:text-[#f9fafb]">{overview.teamPerformance.total}</p>
-              <p className="text-xs text-[#6b7280]">Total</p>
+              <p className="text-xs text-[#6b7280]">{t('dashboard.total')}</p>
             </div>
             <div>
               <p className="text-lg font-bold text-[#10b981]">{overview.teamPerformance.completed}</p>
-              <p className="text-xs text-[#6b7280]">Concluídas</p>
+              <p className="text-xs text-[#6b7280]">{t('dashboard.teamPerf.completed')}</p>
             </div>
             <div>
               <p className="text-lg font-bold text-[#3b82f6]">{overview.teamPerformance.in_progress}</p>
-              <p className="text-xs text-[#6b7280]">Em andamento</p>
+              <p className="text-xs text-[#6b7280]">{t('dashboard.teamPerf.inProgress')}</p>
             </div>
           </div>
 
           {/* Workload da equipe (DASH-02) — tabela abaixo do donut */}
           {overview.teamWorkload.length > 0 && (
             <div className="mt-4 pt-4 border-t border-[#e5e7eb] dark:border-[#1f2937]">
-              <h4 className="text-xs font-medium text-[#6b7280] mb-3 uppercase tracking-wide">Workload da equipe</h4>
+              <h4 className="text-xs font-medium text-[#6b7280] mb-3 uppercase tracking-wide">{t('dashboard.sections.teamWorkload')}</h4>
               <div className="space-y-2">
                 {overview.teamWorkload.slice(0, 5).map((m) => (
                   <div key={m.user_id} className="flex items-center gap-2">
                     <UserAvatar name={m.name} avatar={m.avatar} size="sm" />
                     <span className="text-xs text-[#111827] dark:text-[#f9fafb] flex-1 truncate">{m.name}</span>
-                    <span className="text-xs text-[#6b7280]">{m.active} ativas</span>
+                    <span className="text-xs text-[#6b7280]">{m.active} {t('dashboard.active')}</span>
                     {m.overdue > 0 && (
-                      <span className="text-xs text-[#ef4444] font-medium">{m.overdue} atrasadas</span>
+                      <span className="text-xs text-[#ef4444] font-medium">{m.overdue} {t('dashboard.overdueShort')}</span>
                     )}
                   </div>
                 ))}
@@ -735,14 +730,14 @@ function OverviewView({
           {/* Distribuição por cliente (DASH-03) */}
           {overview.clientDistribution.length > 0 && (
             <div className="mt-4 pt-4 border-t border-[#e5e7eb] dark:border-[#1f2937]">
-              <h4 className="text-xs font-medium text-[#6b7280] mb-3 uppercase tracking-wide">Atividade por cliente</h4>
+              <h4 className="text-xs font-medium text-[#6b7280] mb-3 uppercase tracking-wide">{t('dashboard.sections.clientActivity')}</h4>
               <div className="space-y-2">
                 {overview.clientDistribution.slice(0, 5).map((c) => (
                   <div key={c.client_id} className="flex items-center justify-between text-xs">
                     <span className="text-[#111827] dark:text-[#f9fafb] truncate max-w-[140px]">{c.name}</span>
                     <div className="flex gap-3">
-                      <span className="text-[#6b7280]">{c.total} ativas</span>
-                      <span className="text-[#10b981]">{c.completed} conc.</span>
+                      <span className="text-[#6b7280]">{c.total} {t('dashboard.active')}</span>
+                      <span className="text-[#10b981]">{c.completed} {t('dashboard.completedShort')}</span>
                     </div>
                   </div>
                 ))}
@@ -821,11 +816,11 @@ export default function Dashboard({
     return () => clearInterval(id);
   }, [isAdmin, view]);
 
-  const greeting = `Olá, ${auth?.user?.name?.split(' ')[0] ?? 'você'}!`;
+  const greeting = t('dashboard.greeting', { name: auth?.user?.name?.split(' ')[0] ?? '' });
   const subtitle =
     view === 'personal'
-      ? 'Aqui está o que precisa da sua atenção hoje.'
-      : 'Aqui está o resumo das suas demandas hoje.';
+      ? t('dashboard.subtitlePersonal')
+      : t('dashboard.subtitleOverview');
 
   // Preferences para onboarding
   const prefs = (auth?.user as { preferences?: { onboarding_dismissed?: boolean } } | undefined)?.preferences;
@@ -845,7 +840,7 @@ export default function Dashboard({
             )}
             {isAdmin && view === 'overview' && (
               <div className="flex items-center gap-2" aria-label="Filtro de período">
-                <label htmlFor="date-start" className="text-xs text-[#6b7280]">De:</label>
+                <label htmlFor="date-start" className="text-xs text-[#6b7280]">{t('dashboard.dateFrom')}</label>
                 <input
                   id="date-start"
                   type="date"
@@ -854,7 +849,7 @@ export default function Dashboard({
                   className="h-9 px-3 rounded-[8px] border border-[#e5e7eb] dark:border-[#1f2937] bg-white dark:bg-[#111827] text-sm focus:ring-2 focus:ring-[#7c3aed]/20 focus:border-[#7c3aed] outline-none"
                 />
                 <span className="text-[#9ca3af]">–</span>
-                <label htmlFor="date-end" className="text-xs text-[#6b7280]">Até:</label>
+                <label htmlFor="date-end" className="text-xs text-[#6b7280]">{t('dashboard.dateTo')}</label>
                 <input
                   id="date-end"
                   type="date"
@@ -869,7 +864,7 @@ export default function Dashboard({
               className="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-semibold px-4 py-2 rounded-[8px] transition-colors"
             >
               <Plus size={16} aria-hidden="true" />
-              Nova demanda
+              {t('dashboard.newDemand')}
             </Link>
           </div>
         </div>

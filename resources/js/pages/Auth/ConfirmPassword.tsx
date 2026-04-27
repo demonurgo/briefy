@@ -3,8 +3,10 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function ConfirmPassword() {
+    const { t } = useTranslation();
     const { data, setData, post, processing, errors, reset } = useForm({
         password: '',
     });
@@ -53,7 +55,7 @@ export default function ConfirmPassword() {
                     disabled={processing}
                     className="mt-6 w-full rounded-[8px] bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {processing ? 'Confirmando...' : 'Confirmar'}
+                    {processing ? t('auth.confirming') : t('common.confirm')}
                 </button>
             </form>
         </GuestLayout>

@@ -11,6 +11,7 @@ import {
   Activity,
   type LucideIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { DashboardSectionCard } from '@/Components/DashboardSectionCard';
 
 export interface ActivityEvent {
@@ -26,64 +27,66 @@ export interface ActivityEvent {
 interface ActionConfig {
   icon: LucideIcon;
   color: string;
-  verb: (event: ActivityEvent) => string;
+  verbKey: string;
+  getExtra?: (event: ActivityEvent) => Record<string, string>;
 }
 
 const ACTION_CONFIG: Record<string, ActionConfig> = {
   'demand.status_changed': {
     icon: TrendingUp,
     color: '#3b82f6',
-    verb: (e) => {
+    verbKey: 'activity.verbs.moved',
+    getExtra: (e) => {
       const meta = e.metadata as { to?: string } | undefined;
-      return `moveu "${e.subject_name}" para ${meta?.to ?? 'novo status'}`;
+      return { subject: e.subject_name, status: meta?.to ?? '' };
     },
   },
   'demand.created': {
     icon: Plus,
     color: '#10b981',
-    verb: (e) => `criou "${e.subject_name}"`,
+    verbKey: 'activity.verbs.created',
   },
   'demand.comment_added': {
     icon: MessageCircle,
     color: '#6b7280',
-    verb: (e) => `comentou em "${e.subject_name}"`,
+    verbKey: 'activity.verbs.commented',
   },
   'demand.assigned': {
     icon: Users,
     color: '#8b5cf6',
-    verb: (e) => `atribuiu "${e.subject_name}"`,
+    verbKey: 'activity.verbs.assigned',
+  },
+  'demand.archived_trash': {
+    icon: Archive,
+    color: '#9ca3af',
+    verbKey: 'activity.verbs.trashed',
   },
   'demand.archived': {
     icon: Archive,
     color: '#9ca3af',
-    verb: (e) => {
-      const meta = e.metadata as { via?: string } | undefined;
-      return meta?.via === 'trash'
-        ? `moveu "${e.subject_name}" para a lixeira`
-        : `arquivou "${e.subject_name}"`;
-    },
+    verbKey: 'activity.verbs.archived',
   },
   'demand.restored': {
     icon: RotateCcw,
     color: '#f59e0b',
-    verb: (e) => `restaurou "${e.subject_name}"`,
+    verbKey: 'activity.verbs.restored',
   },
   'client.created': {
     icon: Building2,
     color: '#7c3aed',
-    verb: (e) => `adicionou o cliente "${e.subject_name}"`,
+    verbKey: 'activity.verbs.addedClient',
   },
   'member.invited': {
     icon: UserPlus,
     color: '#7c3aed',
-    verb: (e) => `convidou ${e.subject_name}`,
+    verbKey: 'activity.verbs.invited',
   },
 };
 
 const FALLBACK_CONFIG: ActionConfig = {
   icon: Activity,
   color: '#9ca3af',
-  verb: (e) => `agiu em "${e.subject_name}"`,
+  verbKey: 'activity.verbs.acted',
 };
 
 interface Props {
@@ -91,21 +94,36 @@ interface Props {
 }
 
 export function ActivityFeed({ events }: Props) {
+  const { t } = useTranslation();
+
+  const resolveConfig = (event: ActivityEvent): ActionConfig => {
+    if (event.action_type === 'demand.archived') {
+      const meta = event.metadata as { via?: string } | undefined;
+      return meta?.via === 'trash'
+        ? ACTION_CONFIG['demand.archived_trash']
+        : ACTION_CONFIG['demand.archived'];
+    }
+    return ACTION_CONFIG[event.action_type] ?? FALLBACK_CONFIG;
+  };
+
   return (
-    <DashboardSectionCard title="Atividade recente">
+    <DashboardSectionCard title={t('activity.title')}>
       <div
         className="max-h-80 overflow-y-auto"
         role="feed"
-        aria-label="Feed de atividade recente"
+        aria-label={t('activity.ariaLabel')}
       >
         {events.length === 0 ? (
           <p className="text-sm text-[#9ca3af] text-center py-8">
-            Nenhuma atividade recente.
+            {t('activity.empty')}
           </p>
         ) : (
           events.map((event) => {
-            const config = ACTION_CONFIG[event.action_type] ?? FALLBACK_CONFIG;
+            const config = resolveConfig(event);
             const Icon = config.icon;
+            const extra = config.getExtra
+              ? config.getExtra(event)
+              : { subject: event.subject_name };
 
             return (
               <div
@@ -126,7 +144,7 @@ export function ActivityFeed({ events }: Props) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-[#111827] dark:text-[#f9fafb]">
                     <span className="font-medium">{event.user_name}</span>{' '}
-                    {config.verb(event)}
+                    {t(config.verbKey, extra)}
                   </p>
                   <p className="text-xs text-[#9ca3af] mt-0.5">{event.created_at}</p>
                 </div>

@@ -6,7 +6,6 @@ import { Plus, Trash2 } from 'lucide-react';
 import InputError from '@/Components/InputError';
 import { AiIcon } from '@/Components/AiIcon';
 
-const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
 const CHANNELS = ['instagram', 'facebook', 'linkedin', 'tiktok', 'twitter', 'youtube', 'email', 'whatsapp', 'website'];
 
@@ -48,6 +47,9 @@ export function ClientForm({ data, errors, processing, setData, onSubmit, submit
   const { t } = useTranslation();
   const page = usePage<any>();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const MONTHS = Array.from({ length: 12 }, (_, i) =>
+    new Intl.DateTimeFormat(undefined, { month: 'short' }).format(new Date(2000, i, 1))
+  );
 
   const existingAvatarUrl = client?.avatar
     ? (client.avatar.startsWith('http') ? client.avatar : `/storage/${client.avatar}`)

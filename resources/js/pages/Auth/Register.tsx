@@ -3,6 +3,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const inputClass =
     'w-full rounded-[8px] border border-[#e5e7eb] bg-white px-3.5 py-2.5 text-sm text-[#111827] placeholder-[#9ca3af] transition-colors focus:border-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 dark:border-[#1f2937] dark:bg-[#111827] dark:text-[#f9fafb] dark:placeholder-[#6b7280] dark:focus:border-[#a78bfa] dark:focus:ring-[#a78bfa]/20';
@@ -10,6 +11,7 @@ const inputClass =
 const labelClass = 'mb-1.5 block text-sm font-medium text-[#111827] dark:text-[#f9fafb]';
 
 export default function Register() {
+    const { t } = useTranslation();
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -150,7 +152,7 @@ export default function Register() {
                     disabled={processing}
                     className="mt-6 w-full rounded-[8px] bg-[#7c3aed] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/40 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {processing ? 'Criando conta...' : 'Criar conta'}
+                    {processing ? t('auth.creatingAccount') : t('auth.createAccount')}
                 </button>
 
                 <p className="mt-5 text-center text-sm text-[#6b7280]">
